@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_home_title">设置</string>
+    <string name="settings_theme_entry_title">主题设置</string>
+    <string name="settings_theme_entry_desc">颜色、深浅与动态配色</string>
+    <string name="settings_theme_title">主题设置</string>
+    <string name="settings_theme_subtitle">选择浅色或深色主题</string>
+    <string name="settings_theme_mode">主题模式</string>
+    <string name="settings_light">浅色</string>
+    <string name="settings_dark">深色</string>
+    <string name="settings_dynamic_color">动态配色</string>
+    <string name="settings_dynamic_color_desc">使用系统动态颜色</string>
+    <string name="settings_seed_color">主题颜色</string>
+    <string name="settings_seed_hint">输入 Hex 颜色</string>
+</resources>
