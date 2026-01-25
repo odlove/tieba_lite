@@ -1,4 +1,4 @@
-package app.tiebalite.core.ui.theme
+package app.tiebalite.core.ui.theme.runtime
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -75,11 +75,6 @@ fun colorSchemeFromSeed(seedColor: Color, isDark: Boolean): androidx.compose.mat
             outlineVariant = Color(scheme.outlineVariant)
         )
     }
-}
-
-fun Color.toHexString(): String {
-    val hex = this.toArgb() and 0xFFFFFF
-    return String.format("#%06X", hex)
 }
 
 fun String.toColorOrNull(): Color? {

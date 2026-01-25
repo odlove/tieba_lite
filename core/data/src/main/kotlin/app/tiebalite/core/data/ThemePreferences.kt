@@ -1,45 +1,54 @@
 package app.tiebalite.core.data
 
 import android.content.Context
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import android.content.SharedPreferences
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
-private val Context.dataStore by preferencesDataStore(name = "theme_settings")
+class ThemePreferences(context: Context) {
+    private val preferences: SharedPreferences =
+        context.getSharedPreferences(PreferencesName, Context.MODE_PRIVATE)
+    private val themeModeKey = "theme_mode"
+    private val dynamicColorKey = "dynamic_color"
+    private val seedColorKey = "seed_color"
 
-class ThemePreferences(private val context: Context) {
-    private val themeModeKey = stringPreferencesKey("theme_mode")
-    private val dynamicColorKey = booleanPreferencesKey("dynamic_color")
-    private val seedColorKey = longPreferencesKey("seed_color")
+    val settings: Flow<ThemeSettings> = callbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == themeModeKey || key == dynamicColorKey || key == seedColorKey) {
+                trySend(readSettings())
+            }
+        }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        trySend(readSettings())
+        awaitClose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.distinctUntilChanged()
 
-    val settings: Flow<ThemeSettings> = context.dataStore.data.map { prefs ->
-        ThemeSettings(
-            themeModeName = prefs[themeModeKey] ?: DefaultThemeModeName,
-            useDynamicColor = prefs[dynamicColorKey] ?: true,
-            seedColor = prefs[seedColorKey] ?: DefaultSeedColorLong
+    fun currentSettings(): ThemeSettings = readSettings()
+
+    fun setThemeModeName(modeName: String) {
+        preferences.edit().putString(themeModeKey, modeName).apply()
+    }
+
+    fun setDynamicColor(enabled: Boolean) {
+        preferences.edit().putBoolean(dynamicColorKey, enabled).apply()
+    }
+
+    fun setSeedColor(value: Long) {
+        preferences.edit().putLong(seedColorKey, value).apply()
+    }
+
+    private fun readSettings(): ThemeSettings {
+        val themeModeName =
+            preferences.getString(themeModeKey, DefaultThemeModeName) ?: DefaultThemeModeName
+        val useDynamicColor = preferences.getBoolean(dynamicColorKey, true)
+        val seedColor = preferences.getLong(seedColorKey, DefaultSeedColorLong)
+        return ThemeSettings(
+            themeModeName = themeModeName,
+            useDynamicColor = useDynamicColor,
+            seedColor = seedColor
         )
-    }
-
-    suspend fun setThemeModeName(modeName: String) {
-        context.dataStore.edit { prefs ->
-            prefs[themeModeKey] = modeName
-        }
-    }
-
-    suspend fun setDynamicColor(enabled: Boolean) {
-        context.dataStore.edit { prefs ->
-            prefs[dynamicColorKey] = enabled
-        }
-    }
-
-    suspend fun setSeedColor(value: Long) {
-        context.dataStore.edit { prefs ->
-            prefs[seedColorKey] = value
-        }
     }
 }
 
@@ -49,5 +58,6 @@ data class ThemeSettings(
     val seedColor: Long
 )
 
+private const val PreferencesName = "theme_settings"
 private const val DefaultThemeModeName = "Light"
 private const val DefaultSeedColorLong = 0xFF0F6B5FL

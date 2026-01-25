@@ -38,6 +38,5 @@ dependencies {
     api(libs.androidx.compose.material.icons.extended)
     api(libs.androidx.core.ktx)
     api(libs.material.color.utilities)
-    api(libs.androidx.datastore.preferences)
     implementation(project(":core:data"))
 }

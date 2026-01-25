@@ -1,4 +1,4 @@
-package app.tiebalite.core.ui.theme
+package app.tiebalite.core.ui.theme.runtime
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec

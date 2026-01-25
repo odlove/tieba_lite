@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import app.tiebalite.core.ui.components.AppTopBar
-import app.tiebalite.core.ui.components.SettingsListItem
-import app.tiebalite.core.ui.theme.Spacing
+import app.tiebalite.core.ui.components.SettingsItem
+import app.tiebalite.core.ui.theme.tokens.Spacing
 
 @Composable
 fun SettingsHomeScreen(
@@ -51,16 +51,16 @@ fun SettingsHomeScreen(
             contentPadding = contentPadding
         ) {
             item {
-                SettingsListItem(
-                    title = stringResource(R.string.settings_theme_entry_title),
-                    description = stringResource(R.string.settings_theme_entry_desc),
-                    leading = {
+                SettingsItem(
+                    leadingContent = {
                         Icon(
                             imageVector = Icons.Outlined.Palette,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
                     },
+                    title = { Text(text = stringResource(R.string.settings_theme_entry_title)) },
+                    subtitle = { Text(text = stringResource(R.string.settings_theme_entry_desc)) },
                     onClick = onOpenTheme
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

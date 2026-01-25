@@ -30,9 +30,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.ui.components.AppTopBar
-import app.tiebalite.core.ui.theme.Spacing
-import app.tiebalite.core.ui.theme.ThemeMode
-import app.tiebalite.core.ui.theme.toColorOrNull
+import app.tiebalite.core.ui.theme.runtime.toColorOrNull
+import app.tiebalite.core.ui.theme.state.ThemeMode
+import app.tiebalite.core.ui.theme.tokens.Spacing
 
 @Composable
 fun ThemeSettingsScreen(

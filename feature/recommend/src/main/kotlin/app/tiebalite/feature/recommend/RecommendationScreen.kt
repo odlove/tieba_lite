@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SectionHeader
-import app.tiebalite.core.ui.theme.Spacing
+import app.tiebalite.core.ui.theme.tokens.Spacing
 
 @Composable
 fun RecommendationScreen(paddingValues: PaddingValues) {

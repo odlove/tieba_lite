@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -30,11 +29,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import app.tiebalite.core.ui.theme.DefaultSeedColorHex
-import app.tiebalite.core.ui.theme.ThemeMode
-import app.tiebalite.core.ui.theme.TiebaliteTheme
-import app.tiebalite.core.ui.theme.ThemeStateModel
-import app.tiebalite.core.ui.theme.rememberThemeState
+import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
+import app.tiebalite.core.ui.theme.state.rememberThemeState
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.feature.recommend.RecommendationScreen
@@ -42,7 +38,6 @@ import app.tiebalite.feature.settings.SettingsHomeScreen
 import app.tiebalite.feature.settings.ThemeSettingsEvent
 import app.tiebalite.feature.settings.ThemeSettingsScreen
 import app.tiebalite.feature.settings.ThemeSettingsState
-import kotlinx.coroutines.launch
 
 private enum class MainDestination(
     val route: String,
@@ -58,15 +53,8 @@ private enum class MainDestination(
 fun TiebaliteApp() {
     val context = LocalContext.current
     val themeState = rememberThemeState(context)
-    val state by themeState.state.collectAsState(
-        initial = ThemeStateModel(
-            themeMode = ThemeMode.Light,
-            useDynamicColor = true,
-            seedColorHex = DefaultSeedColorHex
-        )
-    )
+    val state by themeState.state.collectAsState(initial = themeState.currentState())
 
-    val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -79,6 +67,8 @@ fun TiebaliteApp() {
         seedColorHex = appliedState.seedColorHex
     ) {
         app.tiebalite.core.ui.system.ApplySystemBars()
+        // app.tiebalite.core.ui.system.SystemBarsBackground()
+        // app.tiebalite.core.ui.system.SystemBarsBackground(color = androidx.compose.ui.graphics.Color.Red)
 
         AppScaffold(
             showBottomBar = currentRoute?.let { route ->
@@ -132,15 +122,13 @@ fun TiebaliteApp() {
                             seedColorHex = state.seedColorHex
                         ),
                         onEvent = { event ->
-                            scope.launch {
-                                when (event) {
-                                    is ThemeSettingsEvent.SetThemeMode ->
-                                        themeState.setThemeMode(event.mode)
-                                    is ThemeSettingsEvent.SetDynamicColor ->
-                                        themeState.setDynamicColor(event.enabled)
-                                    is ThemeSettingsEvent.SetSeedColor ->
-                                        themeState.setSeedColor(event.value)
-                                }
+                            when (event) {
+                                is ThemeSettingsEvent.SetThemeMode ->
+                                    themeState.setThemeMode(event.mode)
+                                is ThemeSettingsEvent.SetDynamicColor ->
+                                    themeState.setDynamicColor(event.enabled)
+                                is ThemeSettingsEvent.SetSeedColor ->
+                                    themeState.setSeedColor(event.value)
                             }
                         },
                         onBack = { navController.popBackStack() }

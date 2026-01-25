@@ -1,6 +1,6 @@
 package app.tiebalite.feature.settings
 
-import app.tiebalite.core.ui.theme.ThemeMode
+import app.tiebalite.core.ui.theme.state.ThemeMode
 
 sealed interface ThemeSettingsEvent {
     data class SetThemeMode(val mode: ThemeMode) : ThemeSettingsEvent

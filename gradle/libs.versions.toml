@@ -31,7 +31,6 @@ lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.2"
 kotlin = "2.3.0"
 composeBom = "2026.01.00"
-datastore = "1.2.0"
 materialColorUtilities = "4.1.0"
 ktlint = "14.0.1"
 material = "1.13.0"
@@ -50,8 +49,6 @@ androidx-compose = "2026.01.00"
 androidx-navigation = "2.9.6"
 
 google-android-material = "1.13.0"
-
-androidx-datastore = "1.2.0"
 
 junit-junit = "4.13.2"
 
@@ -77,7 +74,6 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 material = { group = "com.google.android.material", name = "material", version.ref = "google-android-material" }
 material-color-utilities = { group = "com.materialkolor", name = "material-color-utilities-android", version.ref = "materialColorUtilities" }
@@ -144,7 +140,6 @@ foundation = { module = "androidx.compose.foundation:foundation" }
 
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 
-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidx-datastore" }
 
 junit-junit = { group = "junit", name = "junit", version.ref = "junit-junit" }
 

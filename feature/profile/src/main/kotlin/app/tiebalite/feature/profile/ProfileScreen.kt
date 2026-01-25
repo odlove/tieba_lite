@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SectionHeader
-import app.tiebalite.core.ui.components.SettingsListItem
-import app.tiebalite.core.ui.theme.Spacing
+import app.tiebalite.core.ui.components.SettingsItem
+import app.tiebalite.core.ui.theme.tokens.Spacing
 
 @Composable
 fun ProfileScreen(
@@ -50,8 +50,14 @@ fun ProfileScreen(
             item {
                 SectionHeader(text = "你好，欢迎回来")
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    Icon(Icons.Outlined.PersonOutline, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    Icon(
+                        Icons.Outlined.PersonOutline,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    androidx.compose.foundation.layout.Column(
+                        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                    ) {
                         Text(
                             text = "未命名用户",
                             style = MaterialTheme.typography.titleMedium,
@@ -64,36 +70,61 @@ fun ProfileScreen(
                         )
                     }
                 }
-                HorizontalDivider(modifier = Modifier.padding(top = Spacing.sm), color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(
+                    modifier = Modifier.padding(top = Spacing.sm),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
             }
 
             item {
                 SectionHeader(text = "常用入口")
-                SettingsListItem(
-                    title = "收藏",
-                    description = "12 条",
-                    leading = { Icon(Icons.Outlined.BookmarkBorder, contentDescription = null) },
+                SettingsItem(
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.BookmarkBorder,
+                            contentDescription = null
+                        )
+                    },
+                    title = { Text(text = "收藏") },
+                    subtitle = { Text(text = "12 条") },
                     onClick = {}
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                SettingsListItem(
-                    title = "历史",
-                    description = "5 天",
-                    leading = { Icon(Icons.Outlined.History, contentDescription = null) },
+                HorizontalDivider(
+                    // modifier = Modifier.padding(top = Spacing.sm),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                SettingsItem(
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.History,
+                            contentDescription = null
+                        )
+                    },
+                    title = { Text(text = "历史") },
+                    subtitle = { Text(text = "5 天") },
                     onClick = {}
                 )
-                HorizontalDivider(modifier = Modifier.padding(top = Spacing.sm), color = MaterialTheme.colorScheme.outlineVariant)
+                // HorizontalDivider(
+                //     modifier = Modifier.padding(top = Spacing.sm),
+                //     color = MaterialTheme.colorScheme.outlineVariant
+                // )
             }
 
             item {
                 SectionHeader(text = "设置")
-                SettingsListItem(
-                    title = "设置",
-                    description = "隐私、通知与更多选项",
-                    leading = { Icon(Icons.Outlined.Settings, contentDescription = null) },
+                SettingsItem(
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = null
+                        )
+                    },
+                    title = { Text(text = "设置") },
+                    subtitle = { Text(text = "隐私、通知与更多选项") },
                     onClick = onOpenSettings
                 )
             }
         }
     }
 }
+

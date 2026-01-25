@@ -1,4 +1,4 @@
-package app.tiebalite.core.ui.theme
+package app.tiebalite.core.ui.theme.state
 
 import android.content.Context
 import androidx.compose.runtime.Composable

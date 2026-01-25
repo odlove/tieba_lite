@@ -32,7 +32,6 @@ fun AppTopBar(
     navigationIcon: ImageVector? = null,
     onNavigationClick: (() -> Unit)? = null
 ) {
-    val hasNavigationIcon = navigationIcon != null && onNavigationClick != null
     val contentPadding = PaddingValues(0.dp)
     val windowInsets = TopAppBarDefaults.windowInsets
 
@@ -48,8 +47,8 @@ fun AppTopBar(
                         .layoutId("navigationIcon")
                         .padding(start = TopAppBarHorizontalPadding)
                 ) {
-                    if (hasNavigationIcon) {
-                        IconButton(onClick = onNavigationClick!!) {
+                    if (navigationIcon != null && onNavigationClick != null) {
+                        IconButton(onClick = onNavigationClick) {
                             Icon(
                                 imageVector = navigationIcon,
                                 contentDescription = null,
