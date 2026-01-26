@@ -30,7 +30,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
-import app.tiebalite.core.ui.theme.state.rememberThemeState
+import app.tiebalite.core.ui.theme.state.ThemeState
+import app.tiebalite.core.data.theme.ThemePreferences
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.feature.recommend.RecommendationScreen
@@ -52,19 +53,23 @@ private enum class MainDestination(
 @Composable
 fun TiebaliteApp() {
     val context = LocalContext.current
-    val themeState = rememberThemeState(context)
-    val state by themeState.state.collectAsState(initial = themeState.currentState())
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val themeState = androidx.compose.runtime.remember(context, scope) {
+        ThemeState(ThemePreferences(context), scope)
+    }
+    val state by themeState.state.collectAsState()
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val appliedState = state
+    val seedColorHex = String.format("#%06X", appliedState.seedColor and 0xFFFFFF)
 
     TiebaliteTheme(
         themeMode = appliedState.themeMode,
         useDynamicColor = appliedState.useDynamicColor,
-        seedColorHex = appliedState.seedColorHex
+        seedColorHex = seedColorHex
     ) {
         app.tiebalite.core.ui.system.ApplySystemBars()
         // app.tiebalite.core.ui.system.SystemBarsBackground()
@@ -119,7 +124,7 @@ fun TiebaliteApp() {
                         state = ThemeSettingsState(
                             themeMode = state.themeMode,
                             useDynamicColor = state.useDynamicColor,
-                            seedColorHex = state.seedColorHex
+                            seedColorHex = seedColorHex
                         ),
                         onEvent = { event ->
                             when (event) {
@@ -128,7 +133,14 @@ fun TiebaliteApp() {
                                 is ThemeSettingsEvent.SetDynamicColor ->
                                     themeState.setDynamicColor(event.enabled)
                                 is ThemeSettingsEvent.SetSeedColor ->
-                                    themeState.setSeedColor(event.value)
+                                    run {
+                                        val cleaned = event.value.trim().removePrefix("#")
+                                        if (cleaned.length != 6) {
+                                            null
+                                        } else {
+                                            cleaned.toLongOrNull(16)?.let { 0xFF000000 or it }
+                                        }
+                                    }?.let { themeState.setSeedColor(it) }
                             }
                         },
                         onBack = { navController.popBackStack() }

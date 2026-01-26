@@ -6,7 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import app.tiebalite.core.ui.theme.tokens.Spacing
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun SectionHeader(text: String, modifier: Modifier = Modifier) {
@@ -14,6 +14,6 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) {
         text = text,
         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier.padding(top = Spacing.sm, bottom = Spacing.xs)
+        modifier = modifier.padding(top = 10.dp, bottom = 6.dp)
     )
 }

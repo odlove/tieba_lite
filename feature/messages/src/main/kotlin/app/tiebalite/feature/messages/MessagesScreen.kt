@@ -24,16 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SectionHeader
-import app.tiebalite.core.ui.theme.tokens.Spacing
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun MessagesScreen(paddingValues: PaddingValues) {
     val layoutDirection = LocalLayoutDirection.current
     val contentPadding = PaddingValues(
-        start = paddingValues.calculateStartPadding(layoutDirection) + Spacing.lg,
-        end = paddingValues.calculateEndPadding(layoutDirection) + Spacing.lg,
-        top = Spacing.sm,
-        bottom = paddingValues.calculateBottomPadding() + Spacing.lg
+        start = paddingValues.calculateStartPadding(layoutDirection) + 24.dp,
+        end = paddingValues.calculateEndPadding(layoutDirection) + 24.dp,
+        top = 10.dp,
+        bottom = paddingValues.calculateBottomPadding() + 24.dp
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -41,7 +41,7 @@ fun MessagesScreen(paddingValues: PaddingValues) {
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = contentPadding
         ) {
             item {
@@ -77,8 +77,8 @@ private fun MessageRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Icon(
             imageVector = icon,
@@ -87,7 +87,7 @@ private fun MessageRow(
         )
         androidx.compose.foundation.layout.Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = title,

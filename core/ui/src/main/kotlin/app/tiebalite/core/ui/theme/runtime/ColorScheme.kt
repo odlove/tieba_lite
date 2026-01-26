@@ -1,5 +1,6 @@
 package app.tiebalite.core.ui.theme.runtime
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
@@ -20,6 +21,10 @@ fun colorSchemeFromSeed(seedColor: Color, isDark: Boolean): androidx.compose.mat
         DynamicScheme.Platform.PHONE
     )
 
+    return schemeToColorScheme(scheme, isDark)
+}
+
+private fun schemeToColorScheme(scheme: DynamicScheme, isDark: Boolean): ColorScheme {
     return if (isDark) {
         darkColorScheme(
             primary = Color(scheme.primary),
@@ -75,11 +80,4 @@ fun colorSchemeFromSeed(seedColor: Color, isDark: Boolean): androidx.compose.mat
             outlineVariant = Color(scheme.outlineVariant)
         )
     }
-}
-
-fun String.toColorOrNull(): Color? {
-    val cleaned = trim().removePrefix("#")
-    if (cleaned.length != 6) return null
-    val value = cleaned.toLongOrNull(16) ?: return null
-    return Color(0xFF000000 or value)
 }

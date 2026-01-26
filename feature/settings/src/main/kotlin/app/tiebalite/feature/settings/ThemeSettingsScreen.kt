@@ -26,13 +26,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.ui.components.AppTopBar
-import app.tiebalite.core.ui.theme.runtime.toColorOrNull
-import app.tiebalite.core.ui.theme.state.ThemeMode
-import app.tiebalite.core.ui.theme.tokens.Spacing
+import app.tiebalite.core.ui.theme.state.UiThemeMode
 
 @Composable
 fun ThemeSettingsScreen(
@@ -43,10 +42,10 @@ fun ThemeSettingsScreen(
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val contentPadding = PaddingValues(
-        start = paddingValues.calculateStartPadding(layoutDirection) + Spacing.lg,
-        end = paddingValues.calculateEndPadding(layoutDirection) + Spacing.lg,
-        top = Spacing.sm,
-        bottom = paddingValues.calculateBottomPadding() + Spacing.lg
+        start = paddingValues.calculateStartPadding(layoutDirection) + 24.dp,
+        end = paddingValues.calculateEndPadding(layoutDirection) + 24.dp,
+        top = 10.dp,
+        bottom = paddingValues.calculateBottomPadding() + 24.dp
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -58,25 +57,30 @@ fun ThemeSettingsScreen(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = contentPadding
         ) {
             item {
                 SectionTitle(text = stringResource(R.string.settings_theme_mode))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ModeChip(
+                        label = stringResource(R.string.settings_system),
+                        selected = state.themeMode == UiThemeMode.System,
+                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(UiThemeMode.System)) }
+                    )
                     ModeChip(
                         label = stringResource(R.string.settings_light),
-                        selected = state.themeMode == ThemeMode.Light,
-                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.Light)) }
+                        selected = state.themeMode == UiThemeMode.Light,
+                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(UiThemeMode.Light)) }
                     )
                     ModeChip(
                         label = stringResource(R.string.settings_dark),
-                        selected = state.themeMode == ThemeMode.Dark,
-                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.Dark)) }
+                        selected = state.themeMode == UiThemeMode.Dark,
+                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(UiThemeMode.Dark)) }
                     )
                 }
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = Spacing.sm),
+                    modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
             }
@@ -84,7 +88,7 @@ fun ThemeSettingsScreen(
             item {
                 SectionTitle(text = stringResource(R.string.settings_dynamic_color))
                 Row(
-                    modifier = Modifier.padding(vertical = Spacing.sm),
+                    modifier = Modifier.padding(vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
@@ -99,14 +103,14 @@ fun ThemeSettingsScreen(
                     )
                 }
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = Spacing.sm),
+                    modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
             }
 
             item {
                 SectionTitle(text = stringResource(R.string.settings_seed_color))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     ColorSwatch("#0F6B5F", state.seedColorHex, onEvent)
                     ColorSwatch("#2F6BFF", state.seedColorHex, onEvent)
                     ColorSwatch("#FF8A3D", state.seedColorHex, onEvent)
@@ -118,10 +122,10 @@ fun ThemeSettingsScreen(
                     label = { Text(text = stringResource(R.string.settings_seed_hint)) },
                     placeholder = { Text(text = "#0F6B5F") },
                     singleLine = true,
-                    modifier = Modifier.padding(top = Spacing.sm)
+                    modifier = Modifier.padding(top = 10.dp)
                 )
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = Spacing.md),
+                    modifier = Modifier.padding(top = 16.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
             }
@@ -163,16 +167,24 @@ private fun ColorSwatch(
     } else {
         MaterialTheme.colorScheme.outlineVariant
     }
+    val containerColor = run {
+        val cleaned = hex.trim().removePrefix("#")
+        if (cleaned.length != 6) {
+            null
+        } else {
+            cleaned.toLongOrNull(16)?.let { Color(0xFF000000 or it) }
+        }
+    } ?: MaterialTheme.colorScheme.surfaceVariant
 
     Card(
         shape = MaterialTheme.shapes.small,
         colors = CardDefaults.cardColors(
-            containerColor = hex.toColorOrNull() ?: MaterialTheme.colorScheme.surfaceVariant
+            containerColor = containerColor
         ),
         border = BorderStroke(1.dp, borderColor),
         modifier = Modifier.clickable { onEvent(ThemeSettingsEvent.SetSeedColor(hex)) }
     ) {
-        Column(modifier = Modifier.padding(Spacing.sm)) {
+        Column(modifier = Modifier.padding(10.dp)) {
             Text(text = " ", modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp))
         }
     }

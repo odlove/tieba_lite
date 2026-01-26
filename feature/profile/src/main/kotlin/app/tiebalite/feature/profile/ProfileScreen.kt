@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SectionHeader
 import app.tiebalite.core.ui.components.SettingsItem
-import app.tiebalite.core.ui.theme.tokens.Spacing
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun ProfileScreen(
@@ -33,10 +33,10 @@ fun ProfileScreen(
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val contentPadding = PaddingValues(
-        start = paddingValues.calculateStartPadding(layoutDirection) + Spacing.lg,
-        end = paddingValues.calculateEndPadding(layoutDirection) + Spacing.lg,
-        top = Spacing.sm,
-        bottom = paddingValues.calculateBottomPadding() + Spacing.lg
+        start = paddingValues.calculateStartPadding(layoutDirection) + 24.dp,
+        end = paddingValues.calculateEndPadding(layoutDirection) + 24.dp,
+        top = 10.dp,
+        bottom = paddingValues.calculateBottomPadding() + 24.dp
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -44,19 +44,19 @@ fun ProfileScreen(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = contentPadding
         ) {
             item {
                 SectionHeader(text = "你好，欢迎回来")
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(
                         Icons.Outlined.PersonOutline,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary
                     )
                     androidx.compose.foundation.layout.Column(
-                        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
                             text = "未命名用户",
@@ -71,7 +71,7 @@ fun ProfileScreen(
                     }
                 }
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = Spacing.sm),
+                    modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
             }
@@ -90,7 +90,7 @@ fun ProfileScreen(
                     onClick = {}
                 )
                 HorizontalDivider(
-                    // modifier = Modifier.padding(top = Spacing.sm),
+                    // modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
                 SettingsItem(
@@ -105,7 +105,7 @@ fun ProfileScreen(
                     onClick = {}
                 )
                 // HorizontalDivider(
-                //     modifier = Modifier.padding(top = Spacing.sm),
+                //     modifier = Modifier.padding(top = 10.dp),
                 //     color = MaterialTheme.colorScheme.outlineVariant
                 // )
             }

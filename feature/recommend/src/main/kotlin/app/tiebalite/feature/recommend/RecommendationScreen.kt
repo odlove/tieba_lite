@@ -27,16 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SectionHeader
-import app.tiebalite.core.ui.theme.tokens.Spacing
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun RecommendationScreen(paddingValues: PaddingValues) {
     val layoutDirection = LocalLayoutDirection.current
     val contentPadding = PaddingValues(
-        start = paddingValues.calculateStartPadding(layoutDirection) + Spacing.lg,
-        end = paddingValues.calculateEndPadding(layoutDirection) + Spacing.lg,
-        top = Spacing.sm,
-        bottom = paddingValues.calculateBottomPadding() + Spacing.lg
+        start = paddingValues.calculateStartPadding(layoutDirection) + 24.dp,
+        end = paddingValues.calculateEndPadding(layoutDirection) + 24.dp,
+        top = 10.dp,
+        bottom = paddingValues.calculateBottomPadding() + 24.dp
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -44,7 +44,7 @@ fun RecommendationScreen(paddingValues: PaddingValues) {
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = contentPadding
         ) {
             item {
@@ -68,7 +68,7 @@ fun RecommendationScreen(paddingValues: PaddingValues) {
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = Spacing.sm),
+                    modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
             }
@@ -79,13 +79,13 @@ fun RecommendationScreen(paddingValues: PaddingValues) {
                     title = "兴趣小组",
                     description = "轻松加入话题圈，结识同好。"
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     AssistPill(text = "设计")
                     AssistPill(text = "科技")
                     AssistPill(text = "生活")
                 }
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = Spacing.sm),
+                    modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
             }
@@ -115,15 +115,15 @@ private fun FeedRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary
         )
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,

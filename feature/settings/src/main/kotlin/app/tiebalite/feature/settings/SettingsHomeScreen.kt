@@ -22,7 +22,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SettingsItem
-import app.tiebalite.core.ui.theme.tokens.Spacing
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingsHomeScreen(
@@ -32,10 +32,10 @@ fun SettingsHomeScreen(
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val contentPadding = PaddingValues(
-        start = paddingValues.calculateStartPadding(layoutDirection) + Spacing.lg,
-        end = paddingValues.calculateEndPadding(layoutDirection) + Spacing.lg,
-        top = Spacing.sm,
-        bottom = paddingValues.calculateBottomPadding() + Spacing.lg
+        start = paddingValues.calculateStartPadding(layoutDirection) + 24.dp,
+        end = paddingValues.calculateEndPadding(layoutDirection) + 24.dp,
+        top = 10.dp,
+        bottom = paddingValues.calculateBottomPadding() + 24.dp
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -47,7 +47,7 @@ fun SettingsHomeScreen(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = contentPadding
         ) {
             item {

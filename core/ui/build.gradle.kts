@@ -38,5 +38,9 @@ dependencies {
     api(libs.androidx.compose.material.icons.extended)
     api(libs.androidx.core.ktx)
     api(libs.material.color.utilities)
-    implementation(project(":core:data"))
+    api(project(":core:data"))
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

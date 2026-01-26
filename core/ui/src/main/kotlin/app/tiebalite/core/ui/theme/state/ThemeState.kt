@@ -1,49 +1,48 @@
 package app.tiebalite.core.ui.theme.state
 
-import app.tiebalite.core.data.ThemePreferences
-import kotlinx.coroutines.flow.Flow
+import app.tiebalite.core.data.theme.ThemePreferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
-class ThemeState(private val preferences: ThemePreferences) {
-    val state: Flow<ThemeStateModel> = preferences.settings.map { prefs ->
-        ThemeStateModel(
-            themeMode = ThemeMode.valueOf(prefs.themeModeName),
-            useDynamicColor = prefs.useDynamicColor,
-            seedColorHex = formatSeedHex(prefs.seedColor)
+class ThemeState(
+    private val preferences: ThemePreferences,
+    scope: CoroutineScope
+) {
+    val state: StateFlow<ThemeStateModel> =
+        preferences.settings.map { prefs ->
+            ThemeStateModel(
+                themeMode = prefs.themeMode.toUiThemeMode(),
+                useDynamicColor = prefs.useDynamicColor,
+                seedColor = prefs.seedColor
+            )
+        }.stateIn(
+            scope,
+            SharingStarted.Eagerly,
+            ThemeStateModel(
+                themeMode = preferences.settings.value.themeMode.toUiThemeMode(),
+                useDynamicColor = preferences.settings.value.useDynamicColor,
+                seedColor = preferences.settings.value.seedColor
+            )
         )
-    }
 
-    fun currentState(): ThemeStateModel {
-        val settings = preferences.currentSettings()
-        return ThemeStateModel(
-            themeMode = ThemeMode.valueOf(settings.themeModeName),
-            useDynamicColor = settings.useDynamicColor,
-            seedColorHex = formatSeedHex(settings.seedColor)
-        )
-    }
-
-    fun setThemeMode(mode: ThemeMode) {
-        preferences.setThemeModeName(mode.name)
+    fun setThemeMode(mode: UiThemeMode) {
+        preferences.setThemeMode(mode.toStorageValue())
     }
 
     fun setDynamicColor(enabled: Boolean) {
         preferences.setDynamicColor(enabled)
     }
 
-    fun setSeedColor(hex: String) {
-        val color = hex.trim().removePrefix("#").toLongOrNull(16)
-        if (color != null) {
-            preferences.setSeedColor(0xFF000000 or color)
-        }
-    }
-
-    private fun formatSeedHex(seedColor: Long): String {
-        return String.format("#%06X", seedColor and 0xFFFFFF)
+    fun setSeedColor(value: Long) {
+        preferences.setSeedColor(value)
     }
 }
 
 data class ThemeStateModel(
-    val themeMode: ThemeMode,
+    val themeMode: UiThemeMode,
     val useDynamicColor: Boolean,
-    val seedColorHex: String
+    val seedColor: Long
 )
