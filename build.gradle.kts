@@ -6,3 +6,4 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.compose) apply false
     alias(libs.plugins.ktlint) apply false
 }
+
