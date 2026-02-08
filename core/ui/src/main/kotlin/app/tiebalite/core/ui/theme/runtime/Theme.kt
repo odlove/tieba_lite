@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import app.tiebalite.core.ui.theme.state.UiThemeMode
-import app.tiebalite.core.ui.theme.tokens.Typography
+import app.tiebalite.core.ui.theme.fonts.Typography
 import app.tiebalite.core.data.theme.ThemeDefaults
 
 @Composable

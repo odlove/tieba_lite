@@ -12,18 +12,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,7 +25,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.core.ui.theme.state.ThemeState
-import app.tiebalite.core.data.theme.ThemePreferences
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.feature.recommend.RecommendationScreen
@@ -39,8 +32,9 @@ import app.tiebalite.feature.settings.SettingsHomeScreen
 import app.tiebalite.feature.settings.ThemeSettingsEvent
 import app.tiebalite.feature.settings.ThemeSettingsScreen
 import app.tiebalite.feature.settings.ThemeSettingsState
+import app.tiebalite.ui.components.TiebaliteBottomBar
 
-private enum class MainDestination(
+enum class MainDestination(
     val route: String,
     val labelRes: Int,
     val icon: ImageVector
@@ -51,12 +45,7 @@ private enum class MainDestination(
 }
 
 @Composable
-fun TiebaliteApp() {
-    val context = LocalContext.current
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
-    val themeState = androidx.compose.runtime.remember(context, scope) {
-        ThemeState(ThemePreferences(context), scope)
-    }
+fun TiebaliteApp(themeState: ThemeState) {
     val state by themeState.state.collectAsState()
 
     val navController = rememberNavController()
@@ -71,10 +60,6 @@ fun TiebaliteApp() {
         useDynamicColor = appliedState.useDynamicColor,
         seedColorHex = seedColorHex
     ) {
-        app.tiebalite.core.ui.system.ApplySystemBars()
-        // app.tiebalite.core.ui.system.SystemBarsBackground()
-        // app.tiebalite.core.ui.system.SystemBarsBackground(color = androidx.compose.ui.graphics.Color.Red)
-
         AppScaffold(
             showBottomBar = currentRoute?.let { route ->
                 MainDestination.values().any { it.route == route }
@@ -161,17 +146,11 @@ private fun AppScaffold(
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
-                    MainDestination.values().forEach { destination ->
-                        val selected = currentRoute == destination.route
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = { onNavigate(destination.route) },
-                            icon = { Icon(destination.icon, contentDescription = null) },
-                            label = { Text(text = stringResource(destination.labelRes)) }
-                        )
-                    }
-                }
+                TiebaliteBottomBar(
+                    destinations = MainDestination.values(),
+                    currentRoute = currentRoute,
+                    onNavigate = onNavigate
+                )
             }
         },
         contentWindowInsets = WindowInsets.safeDrawing

@@ -1,4 +1,4 @@
-package app.tiebalite.core.ui.theme.tokens
+package app.tiebalite.core.ui.theme.fonts
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.Font
