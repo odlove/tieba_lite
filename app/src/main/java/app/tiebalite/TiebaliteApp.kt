@@ -8,16 +8,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,6 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.core.ui.theme.state.ThemeState
+import app.tiebalite.feature.explore.ExploreScreen
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.feature.recommend.RecommendationScreen
@@ -37,11 +33,28 @@ import app.tiebalite.ui.components.TiebaliteBottomBar
 enum class MainDestination(
     val route: String,
     val labelRes: Int,
-    val icon: ImageVector
+    val iconRes: Int
 ) {
-    Recommendation("recommendation", R.string.nav_recommend, Icons.Filled.Home),
-    Messages("messages", R.string.nav_messages, Icons.Filled.Mail),
-    Profile("profile", R.string.nav_profile, Icons.Filled.Person)
+    Recommendation(
+        "recommendation",
+        R.string.nav_recommend,
+        R.drawable.ic_animated_rounded_inventory_2
+    ),
+    Explore(
+        "explore",
+        R.string.nav_explore,
+        R.drawable.ic_animated_toy_fans
+    ),
+    Messages(
+        "messages",
+        R.string.nav_messages,
+        R.drawable.ic_animated_rounded_notifications
+    ),
+    Profile(
+        "profile",
+        R.string.nav_profile,
+        R.drawable.ic_animated_rounded_person
+    )
 }
 
 @Composable
@@ -86,6 +99,9 @@ fun TiebaliteApp(themeState: ThemeState) {
             ) {
                 composable(MainDestination.Recommendation.route) {
                     RecommendationScreen(paddingValues)
+                }
+                composable(MainDestination.Explore.route) {
+                    ExploreScreen(paddingValues)
                 }
                 composable(MainDestination.Messages.route) {
                     MessagesScreen(paddingValues)

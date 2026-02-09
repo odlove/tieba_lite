@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">tiebalite</string>
     <string name="nav_recommend">推荐</string>
+    <string name="nav_explore">探索</string>
     <string name="nav_messages">消息</string>
     <string name="nav_profile">我的</string>
 </resources>
