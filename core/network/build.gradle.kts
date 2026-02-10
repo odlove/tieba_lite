@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "app.tiebalite.core.data"
+    namespace = "app.tiebalite.core.network"
     compileSdk {
         version = release(36)
     }
@@ -20,9 +20,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(project(":core:network"))
-    testImplementation(libs.junit)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.robolectric)
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.okhttp)
+    implementation(libs.squareup.okhttp.logging)
+    api(project(":core:proto"))
 }

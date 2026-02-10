@@ -33,6 +33,8 @@ rootProject.name = "tiebalite"
 include(":app")
 include(":core:ui")
 include(":core:data")
+include(":core:network")
+include(":core:proto")
 include(":feature:recommend")
 include(":feature:explore")
 include(":feature:messages")

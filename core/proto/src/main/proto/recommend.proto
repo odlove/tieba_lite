@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package tiebalite.recommend;
+
+option java_multiple_files = true;
+option java_package = "app.tiebalite.core.network.proto.recommend";
+
+message PersonalizedRequestLite {
+  PersonalizedRequestDataLite data = 1;
+}
+
+message PersonalizedRequestDataLite {
+  CommonReqLite common = 1;
+  uint32 tag_code = 2;
+  uint32 need_tags = 3;
+  uint32 load_type = 4;
+  uint32 page_thread_count = 5;
+  uint32 pn = 6;
+  uint32 sug_count = 7;
+  int32 scr_w = 8;
+  int32 scr_h = 9;
+  double scr_dip = 10;
+  int32 q_type = 11;
+  uint32 need_forumlist = 22;
+  uint32 new_net_type = 23;
+  int32 pre_ad_thread_count = 26;
+  int32 new_install = 27;
+  int32 request_times = 28;
+  string invoke_source = 29;
+  AppPosInfoLite app_pos = 36;
+}
+
+message CommonReqLite {
+  int32 client_type = 1;
+  string client_version = 2;
+  string client_id = 3;
+  string phone_imei = 5;
+  string from = 6;
+  string cuid = 7;
+  int64 timestamp = 8;
+  string model = 9;
+  string bduss = 10;
+  string tbs = 11;
+  int32 net_type = 12;
+  string phone_newimei = 14;
+  string ka = 15;
+  string stoken = 30;
+  string cuid_galaxy2 = 32;
+  string cuid_gid = 33;
+  string oaid = 34;
+  string c3_aid = 35;
+  int32 scr_w = 37;
+  int32 scr_h = 38;
+  double scr_dip = 39;
+  int32 q_type = 40;
+  int32 personalized_rec_switch = 63;
+}
+
+message AppPosInfoLite {
+  string ap_mac = 1;
+  bool ap_connected = 2;
+  string coordinate_type = 3;
+  int64 addr_timestamp = 6;
+  string asp_shown_info = 7;
+}
+
+message PersonalizedResponseLite {
+  ErrorLite error = 1;
+  PersonalizedResponseDataLite data = 2;
+}
+
+message ErrorLite {
+  int32 errorno = 1;
+  string errmsg = 2;
+  string usermsg = 3;
+}
+
+message PersonalizedResponseDataLite {
+  repeated ThreadInfoLite thread_list = 2;
+  repeated ThreadPersonalizedLite thread_personalized = 7;
+}
+
+message ThreadInfoLite {
+  int64 id = 1;
+  int64 tid = 2;
+  string title = 3;
+  int32 reply_num = 4;
+  int32 view_num = 5;
+  string last_time = 6;
+  UserLite author = 18;
+  int64 fid = 27;
+  string fname = 28;
+  int64 post_id = 52;
+  int32 agree_num = 124;
+}
+
+message UserLite {
+  int64 id = 2;
+  string name = 3;
+  string name_show = 4;
+  string portrait = 5;
+}
+
+message ThreadPersonalizedLite {
+  uint64 tid = 1;
+  repeated DislikeReasonLite dislike_resource = 5;
+  string extra = 6;
+}
+
+message DislikeReasonLite {
+  string dislike_reason = 1;
+  uint32 dislike_id = 2;
+  string extra = 3;
+}
