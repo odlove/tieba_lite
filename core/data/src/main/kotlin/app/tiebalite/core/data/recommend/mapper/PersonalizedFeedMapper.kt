@@ -18,16 +18,12 @@ class PersonalizedFeedMapper {
                     .firstOrNull { it.isNotBlank() }
 
             val coverImageUrl =
-                normalizeUrl(thread.tShareImg)
-                    ?: thread.mediaList
-                        .asSequence()
-                        .mapNotNull { media ->
-                            normalizeUrl(media.originPic)
-                                ?: normalizeUrl(media.bigPic)
-                                ?: normalizeUrl(media.srcPic)
-                                ?: normalizeUrl(media.dynamicPic)
-                        }
-                        .firstOrNull()
+                thread.mediaList
+                    .asSequence()
+                    .mapNotNull { media ->
+                        normalizeUrl(media.originPic)
+                    }
+                    .firstOrNull()
             RecommendItem(
                 id = threadId.toString(),
                 title = thread.title.ifBlank { "(无标题)" },

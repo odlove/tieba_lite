@@ -8,6 +8,9 @@ class RecommendRepositoryImpl(
     private val remoteDataSource: RecommendRemoteDataSource,
     private val mapper: PersonalizedFeedMapper = PersonalizedFeedMapper(),
 ) : RecommendRepository {
-    override suspend fun loadFeed(): Result<List<RecommendItem>> =
-        remoteDataSource.loadFeed().mapCatching(mapper::map)
+    override suspend fun loadFeed(
+        loadType: RecommendLoadType,
+        page: Int,
+    ): Result<List<RecommendItem>> =
+        remoteDataSource.loadFeed(loadType = loadType, page = page).mapCatching(mapper::map)
 }

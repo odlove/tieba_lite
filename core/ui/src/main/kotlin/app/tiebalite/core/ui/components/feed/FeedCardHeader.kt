@@ -15,10 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.recommend.RecommendItem
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -84,7 +87,12 @@ private fun FeedAvatar(
     val avatarUrl = imageUrl?.trim().orEmpty()
     if (avatarUrl.isNotBlank()) {
         AsyncImage(
-            model = avatarUrl,
+            model =
+                ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(avatarUrl)
+                    .crossfade(true)
+                    .build(),
             contentDescription = null,
             modifier =
                 Modifier

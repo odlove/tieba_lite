@@ -7,15 +7,25 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -24,10 +34,13 @@ import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.feed.FeedCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(
     paddingValues: PaddingValues,
     state: ExploreUiState,
+    onRefresh: () -> Unit,
+    onLoadMore: () -> Unit,
     onRetry: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -41,19 +54,30 @@ fun ExploreScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         AppTopBar(title = "推荐")
 
-        when (state) {
-            ExploreUiState.Loading -> ExploreLoading()
-            ExploreUiState.Empty -> ExploreEmpty(onRetry = onRetry)
-            is ExploreUiState.Error ->
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = onRefresh,
+            state = rememberPullToRefreshState(),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            if (state.isInitialLoading && state.items.isEmpty()) {
+                ExploreLoading()
+            } else if (state.items.isEmpty() && state.errorMessage != null) {
                 ExploreError(
-                    message = state.message,
+                    message = state.errorMessage,
                     onRetry = onRetry,
                 )
-            is ExploreUiState.Success ->
+            } else if (state.items.isEmpty()) {
+                ExploreEmpty(onRetry = onRetry)
+            } else {
                 ExploreList(
                     items = state.items,
                     contentPadding = contentPadding,
+                    isRefreshing = state.isRefreshing,
+                    isLoadingMore = state.isLoadingMore,
+                    onLoadMore = onLoadMore,
                 )
+            }
         }
     }
 }
@@ -121,9 +145,21 @@ private fun ExploreError(
 private fun ExploreList(
     items: List<RecommendItem>,
     contentPadding: PaddingValues,
+    isRefreshing: Boolean,
+    isLoadingMore: Boolean,
+    onLoadMore: () -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    LoadMoreEffect(
+        listState = listState,
+        isRefreshing = isRefreshing,
+        isLoadingMore = isLoadingMore,
+        onLoadMore = onLoadMore,
+    )
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        state = listState,
         contentPadding = contentPadding,
     ) {
         itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
@@ -135,5 +171,42 @@ private fun ExploreList(
                 )
             }
         }
+        if (isLoadingMore) {
+            item(key = "load_more_footer") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
     }
 }
+
+@Composable
+private fun LoadMoreEffect(
+    listState: LazyListState,
+    isRefreshing: Boolean,
+    isLoadingMore: Boolean,
+    onLoadMore: () -> Unit,
+) {
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val totalItemsCount = listState.layoutInfo.totalItemsCount
+            val lastVisibleItemIndex =
+                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: return@derivedStateOf false
+            totalItemsCount > 0 && lastVisibleItemIndex >= totalItemsCount - LoadMorePrefetchDistance
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore, isRefreshing, isLoadingMore) {
+        if (shouldLoadMore && !isRefreshing && !isLoadingMore) {
+            onLoadMore()
+        }
+    }
+}
+
+private const val LoadMorePrefetchDistance = 3

@@ -12,6 +12,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.roundToInt
 
 class PersonalizedNetworkSource(
@@ -27,8 +28,8 @@ class PersonalizedNetworkSource(
         bduss: String? = null,
         stoken: String? = null,
         tbs: String? = null,
-    ): Result<PersonalizedFeedRaw> =
-        runCatching {
+    ): Result<PersonalizedFeedRaw> {
+        return try {
             val requestBytes =
                 buildRequestBody(
                     loadType = loadType,
@@ -65,11 +66,18 @@ class PersonalizedNetworkSource(
                     }
                 throw IllegalStateException("personalized api failed: $errorNo $errorMessage")
             }
-            PersonalizedFeedRaw(
-                body = responseBytes,
-                response = response,
+            Result.success(
+                PersonalizedFeedRaw(
+                    body = responseBytes,
+                    response = response,
+                ),
             )
+        } catch (cancellationException: CancellationException) {
+            throw cancellationException
+        } catch (throwable: Throwable) {
+            Result.failure(throwable)
         }
+    }
 
     private fun buildFormParts(
         stoken: String?,

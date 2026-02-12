@@ -10,9 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.recommend.RecommendItem
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 
 @Composable
 internal fun FeedCardMedia(item: RecommendItem) {
@@ -29,7 +32,12 @@ internal fun FeedCardMedia(item: RecommendItem) {
                 .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         AsyncImage(
-            model = cover,
+            model =
+                ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(cover)
+                    .crossfade(true)
+                    .build(),
             contentDescription = null,
             modifier = Modifier.fillMaxWidth().aspectRatio(1.85f),
             contentScale = ContentScale.Crop,
