@@ -47,7 +47,7 @@ fun TiebaliteBottomBar(
     Column(modifier = modifier) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         NavigationBar(
-            modifier = Modifier.height(80.dp),
+            modifier = Modifier.height(72.dp),
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp
         ) {

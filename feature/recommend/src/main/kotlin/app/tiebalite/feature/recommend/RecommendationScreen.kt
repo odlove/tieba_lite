@@ -39,7 +39,7 @@ fun RecommendationScreen(paddingValues: PaddingValues) {
         )
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppTopBar(title = "推荐")
+        AppTopBar(title = "我的吧")
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

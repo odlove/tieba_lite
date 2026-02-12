@@ -39,7 +39,7 @@ fun ExploreScreen(
         )
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppTopBar(title = "探索")
+        AppTopBar(title = "推荐")
 
         when (state) {
             ExploreUiState.Loading -> ExploreLoading()
