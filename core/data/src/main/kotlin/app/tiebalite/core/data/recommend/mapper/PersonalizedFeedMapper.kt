@@ -1,6 +1,6 @@
 package app.tiebalite.core.data.recommend.mapper
 
-import app.tiebalite.core.data.recommend.model.RecommendItem
+import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedFeedRaw
 
 class PersonalizedFeedMapper {

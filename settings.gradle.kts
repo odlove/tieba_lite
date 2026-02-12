@@ -32,6 +32,7 @@ dependencyResolutionManagement {
 rootProject.name = "tiebalite"
 include(":app")
 include(":core:ui")
+include(":core:model")
 include(":core:data")
 include(":core:network")
 include(":core:proto")

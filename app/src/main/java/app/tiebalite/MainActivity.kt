@@ -12,14 +12,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import app.tiebalite.core.data.theme.ThemePreferences
-import app.tiebalite.core.ui.theme.state.ThemeState
-import app.tiebalite.core.ui.theme.state.UiThemeMode
+import app.tiebalite.core.model.theme.ThemeMode
+import app.tiebalite.theme.ThemeState
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -29,24 +28,22 @@ class MainActivity : ComponentActivity() {
         val themeState = ThemeState(themePreferences, lifecycleScope)
         applyEdgeToEdge(
             darkTheme = when (themeState.state.value.themeMode) {
-                UiThemeMode.Dark -> true
-                UiThemeMode.Light -> false
-                UiThemeMode.System -> resources.configuration.isSystemInDarkTheme
+                ThemeMode.Dark -> true
+                ThemeMode.Light -> false
+                ThemeMode.System -> resources.configuration.isSystemInDarkTheme
             }
         )
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
-                    themeState.state.map { state ->
-                        state.themeMode
-                    },
+                    themeState.state,
                     isSystemInDarkTheme()
-                ) { themeMode, systemDarkTheme ->
-                    when (themeMode) {
-                        UiThemeMode.Dark -> true
-                        UiThemeMode.Light -> false
-                        UiThemeMode.System -> systemDarkTheme
+                ) { state, systemDarkTheme ->
+                    when (state.themeMode) {
+                        ThemeMode.Dark -> true
+                        ThemeMode.Light -> false
+                        ThemeMode.System -> systemDarkTheme
                     }
                 }
                     .distinctUntilChanged()

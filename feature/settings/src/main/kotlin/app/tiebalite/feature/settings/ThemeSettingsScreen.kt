@@ -30,8 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.theme.ThemeMode
 import app.tiebalite.core.ui.components.AppTopBar
-import app.tiebalite.core.ui.theme.state.UiThemeMode
 
 @Composable
 fun ThemeSettingsScreen(
@@ -65,18 +65,18 @@ fun ThemeSettingsScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     ModeChip(
                         label = stringResource(R.string.settings_system),
-                        selected = state.themeMode == UiThemeMode.System,
-                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(UiThemeMode.System)) }
+                        selected = state.themeMode == ThemeMode.System,
+                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.System)) }
                     )
                     ModeChip(
                         label = stringResource(R.string.settings_light),
-                        selected = state.themeMode == UiThemeMode.Light,
-                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(UiThemeMode.Light)) }
+                        selected = state.themeMode == ThemeMode.Light,
+                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.Light)) }
                     )
                     ModeChip(
                         label = stringResource(R.string.settings_dark),
-                        selected = state.themeMode == UiThemeMode.Dark,
-                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(UiThemeMode.Dark)) }
+                        selected = state.themeMode == ThemeMode.Dark,
+                        onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.Dark)) }
                     )
                 }
                 HorizontalDivider(

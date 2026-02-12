@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import app.tiebalite.core.data.recommend.model.RecommendItem
+import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.data.recommend.repository.RecommendRepository
 import app.tiebalite.core.data.recommend.repository.RecommendRepositoryFactory
 import kotlinx.coroutines.Job

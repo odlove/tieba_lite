@@ -5,7 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextOverflow
-import app.tiebalite.core.data.recommend.model.RecommendItem
+import app.tiebalite.core.model.recommend.RecommendItem
 
 @Composable
 internal fun FeedCardBody(item: RecommendItem) {

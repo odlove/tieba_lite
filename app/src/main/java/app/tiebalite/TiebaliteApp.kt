@@ -18,8 +18,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.tiebalite.theme.ThemeState
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
-import app.tiebalite.core.ui.theme.state.ThemeState
 import app.tiebalite.feature.explore.ExploreRoute
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen

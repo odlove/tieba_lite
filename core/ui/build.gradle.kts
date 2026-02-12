@@ -38,7 +38,7 @@ dependencies {
     api(libs.androidx.compose.material.icons.extended)
     api(libs.androidx.core.ktx)
     api(libs.material.color.utilities)
-    api(project(":core:data"))
+    api(project(":core:model"))
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     testImplementation(libs.junit)

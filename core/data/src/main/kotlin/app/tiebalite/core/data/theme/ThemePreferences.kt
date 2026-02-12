@@ -3,6 +3,9 @@ package app.tiebalite.core.data.theme
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import app.tiebalite.core.model.theme.ThemeDefaults
+import app.tiebalite.core.model.theme.ThemeMode
+import app.tiebalite.core.model.theme.ThemeSettings
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,9 +17,9 @@ class ThemePreferences(context: Context) {
     private val mutableSettings = MutableStateFlow(readSettings())
     val settings: StateFlow<ThemeSettings> = mutableSettings.asStateFlow()
 
-    fun setThemeMode(mode: String) {
+    fun setThemeMode(mode: ThemeMode) {
         preferences.edit {
-            putString(ThemePreferencesKeys.themeMode, mode)
+            putString(ThemePreferencesKeys.themeMode, mode.name)
         }
         mutableSettings.value = mutableSettings.value.copy(themeMode = mode)
     }
@@ -37,15 +40,16 @@ class ThemePreferences(context: Context) {
 
     private fun readSettings(): ThemeSettings {
         val defaults = ThemeDefaults.settings
-        val themeModeName =
-            preferences.getString(ThemePreferencesKeys.themeMode, defaults.themeMode)
+        val themeMode =
+            preferences.getString(ThemePreferencesKeys.themeMode, defaults.themeMode.name)
+                ?.let(::parseThemeMode)
                 ?: defaults.themeMode
         val useDynamicColor =
             preferences.getBoolean(ThemePreferencesKeys.dynamicColor, defaults.useDynamicColor)
         val seedColor =
             preferences.getLong(ThemePreferencesKeys.seedColor, defaults.seedColor)
         return ThemeSettings(
-            themeMode = themeModeName,
+            themeMode = themeMode,
             useDynamicColor = useDynamicColor,
             seedColor = seedColor
         )
@@ -53,3 +57,6 @@ class ThemePreferences(context: Context) {
 }
 
 private const val PreferencesName = "theme_settings"
+
+private fun parseThemeMode(raw: String): ThemeMode =
+    ThemeMode.entries.firstOrNull { it.name == raw } ?: ThemeMode.System

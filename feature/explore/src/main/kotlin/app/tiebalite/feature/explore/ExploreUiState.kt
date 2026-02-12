@@ -1,6 +1,6 @@
 package app.tiebalite.feature.explore
 
-import app.tiebalite.core.data.recommend.model.RecommendItem
+import app.tiebalite.core.model.recommend.RecommendItem
 
 sealed interface ExploreUiState {
     data object Loading : ExploreUiState

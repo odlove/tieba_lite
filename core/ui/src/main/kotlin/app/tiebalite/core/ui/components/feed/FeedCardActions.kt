@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import app.tiebalite.core.data.recommend.model.RecommendItem
+import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.ui.R
 
 @Composable

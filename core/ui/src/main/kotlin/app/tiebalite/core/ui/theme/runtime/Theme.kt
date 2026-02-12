@@ -9,22 +9,22 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import app.tiebalite.core.ui.theme.state.UiThemeMode
+import app.tiebalite.core.model.theme.ThemeDefaults
+import app.tiebalite.core.model.theme.ThemeMode
 import app.tiebalite.core.ui.theme.fonts.Typography
-import app.tiebalite.core.data.theme.ThemeDefaults
 
 @Composable
 fun TiebaliteTheme(
-    themeMode: UiThemeMode = UiThemeMode.System,
+    themeMode: ThemeMode = ThemeMode.System,
     useDynamicColor: Boolean = true,
     seedColorHex: String = String.format("#%06X", ThemeDefaults.settings.seedColor and 0xFFFFFF),
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
     val isDark = when (themeMode) {
-        UiThemeMode.Dark -> true
-        UiThemeMode.Light -> false
-        UiThemeMode.System -> isSystemInDarkTheme()
+        ThemeMode.Dark -> true
+        ThemeMode.Light -> false
+        ThemeMode.System -> isSystemInDarkTheme()
     }
 
     val colors = when {

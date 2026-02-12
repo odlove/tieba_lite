@@ -2,6 +2,8 @@ package app.tiebalite.core.data.theme
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import app.tiebalite.core.model.theme.ThemeDefaults
+import app.tiebalite.core.model.theme.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -46,7 +48,7 @@ class ThemePreferencesTest {
     fun missingKeysFallbackToDefaults() {
         context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
             .edit()
-            .putString(ThemePreferencesKeys.themeMode, ThemeMode.Light)
+            .putString(ThemePreferencesKeys.themeMode, ThemeMode.Light.name)
             .commit()
 
         val preferences = ThemePreferences(context)

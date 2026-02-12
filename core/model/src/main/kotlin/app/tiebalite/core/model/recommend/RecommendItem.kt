@@ -1,4 +1,4 @@
-package app.tiebalite.core.data.recommend.model
+package app.tiebalite.core.model.recommend
 
 data class RecommendItem(
     val id: String,
