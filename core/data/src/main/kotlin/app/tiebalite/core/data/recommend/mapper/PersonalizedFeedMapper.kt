@@ -11,23 +11,66 @@ class PersonalizedFeedMapper {
                 thread.author.nameShow.ifBlank {
                     thread.author.name
                 }
-            val subtitleParts =
-                buildList {
-                    if (thread.fname.isNotBlank()) {
-                        add(thread.fname)
-                    }
-                    if (authorName.isNotBlank()) {
-                        add(authorName)
-                    }
-                    if (thread.replyNum > 0) {
-                        add("回复 ${thread.replyNum}")
-                    }
-                }
+            val snippet =
+                thread.abstractItemsList
+                    .asSequence()
+                    .map { it.text.trim() }
+                    .firstOrNull { it.isNotBlank() }
+
+            val coverImageUrl =
+                normalizeUrl(thread.tShareImg)
+                    ?: thread.mediaList
+                        .asSequence()
+                        .mapNotNull { media ->
+                            normalizeUrl(media.originPic)
+                                ?: normalizeUrl(media.bigPic)
+                                ?: normalizeUrl(media.srcPic)
+                                ?: normalizeUrl(media.dynamicPic)
+                        }
+                        .firstOrNull()
             RecommendItem(
                 id = threadId.toString(),
                 title = thread.title.ifBlank { "(无标题)" },
-                subtitle = subtitleParts.joinToString(separator = " · ").ifBlank { null },
+                snippet = snippet,
+                authorName = authorName.ifBlank { null },
+                authorAvatarUrl = portraitToAvatarUrl(thread.author.portrait),
+                coverImageUrl = coverImageUrl,
+                replyCount = thread.replyNum,
+                agreeCount = thread.agreeNum,
+                shareCount = thread.shareNum,
+                lastTimeTimestampSeconds =
+                    thread.lastTimeInt
+                        .takeIf { it > 0 }
+                        ?.toLong()
+                        ?: thread.createTime
+                            .takeIf { it > 0 }
+                            ?.toLong(),
             )
+        }
+    }
+
+    private fun portraitToAvatarUrl(portrait: String): String? {
+        val value = portrait.trim()
+        if (value.isBlank()) {
+            return null
+        }
+        return if (value.startsWith("http://") || value.startsWith("https://")) {
+            value
+        } else {
+            "http://tb.himg.baidu.com/sys/portrait/item/$value"
+        }
+    }
+
+    private fun normalizeUrl(raw: String): String? {
+        val value = raw.trim()
+        if (value.isBlank()) {
+            return null
+        }
+        return when {
+            value.startsWith("http://") -> "https://${value.removePrefix("http://")}"
+            value.startsWith("https://") -> value
+            value.startsWith("//") -> "https:$value"
+            else -> value
         }
     }
 }

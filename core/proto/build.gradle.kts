@@ -7,7 +7,10 @@ plugins {
 
 protobuf {
     protoc {
-        artifact = libs.protobuf.protoc.get().toString()
+        artifact =
+            libs.protobuf.protoc
+                .get()
+                .toString()
     }
     generateProtoTasks {
         all().configureEach {

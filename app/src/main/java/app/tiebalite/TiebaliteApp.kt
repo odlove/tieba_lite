@@ -20,7 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.core.ui.theme.state.ThemeState
-import app.tiebalite.feature.explore.ExploreScreen
+import app.tiebalite.feature.explore.ExploreRoute
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.feature.recommend.RecommendationScreen
@@ -101,7 +101,7 @@ fun TiebaliteApp(themeState: ThemeState) {
                     RecommendationScreen(paddingValues)
                 }
                 composable(MainDestination.Explore.route) {
-                    ExploreScreen(paddingValues)
+                    ExploreRoute(paddingValues)
                 }
                 composable(MainDestination.Messages.route) {
                     MessagesScreen(paddingValues)

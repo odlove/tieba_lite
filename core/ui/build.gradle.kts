@@ -39,6 +39,8 @@ dependencies {
     api(libs.androidx.core.ktx)
     api(libs.material.color.utilities)
     api(project(":core:data"))
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)

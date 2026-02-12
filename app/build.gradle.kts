@@ -79,7 +79,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.activity.ktx)
     implementation(platform(libs.androidx.compose.bom))
-    implementation("androidx.compose.animation:animation-graphics")
+    implementation(libs.androidx.compose.animation.graphics)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.material)
     implementation(libs.androidx.compose.material3)

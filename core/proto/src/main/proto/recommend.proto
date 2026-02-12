@@ -77,7 +77,6 @@ message ErrorLite {
 
 message PersonalizedResponseDataLite {
   repeated ThreadInfoLite thread_list = 2;
-  repeated ThreadPersonalizedLite thread_personalized = 7;
 }
 
 message ThreadInfoLite {
@@ -85,30 +84,29 @@ message ThreadInfoLite {
   int64 tid = 2;
   string title = 3;
   int32 reply_num = 4;
-  int32 view_num = 5;
-  string last_time = 6;
+  int32 last_time_int = 7;
   UserLite author = 18;
-  int64 fid = 27;
-  string fname = 28;
-  int64 post_id = 52;
+  repeated AbstractLite abstract_items = 21;
+  repeated MediaLite media = 22;
+  int32 create_time = 45;
   int32 agree_num = 124;
+  int64 share_num = 135;
+  string t_share_img = 159;
 }
 
 message UserLite {
-  int64 id = 2;
   string name = 3;
   string name_show = 4;
   string portrait = 5;
 }
 
-message ThreadPersonalizedLite {
-  uint64 tid = 1;
-  repeated DislikeReasonLite dislike_resource = 5;
-  string extra = 6;
+message AbstractLite {
+  string text = 2;
 }
 
-message DislikeReasonLite {
-  string dislike_reason = 1;
-  uint32 dislike_id = 2;
-  string extra = 3;
+message MediaLite {
+  string big_pic = 3;
+  string src_pic = 8;
+  string origin_pic = 15;
+  string dynamic_pic = 18;
 }
