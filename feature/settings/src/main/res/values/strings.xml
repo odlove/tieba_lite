@@ -1,8 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_home_title">设置</string>
+    <string name="settings_account_entry_title">账号管理</string>
+    <string name="settings_account_entry_desc_logged_out">登录、切换或管理账号</string>
+    <string name="settings_account_entry_desc_logged_in">当前已登录，可切换或管理账号</string>
     <string name="settings_theme_entry_title">主题设置</string>
     <string name="settings_theme_entry_desc">颜色、深浅与动态配色</string>
+    <string name="settings_account_title">账号管理</string>
+    <string name="settings_web_login_entry_title">网页登录</string>
+    <string name="settings_web_login_entry_desc_logged_out">使用百度账号网页授权登录</string>
+    <string name="settings_web_login_entry_desc_logged_in">重新网页登录可切换账号</string>
+    <string name="settings_credential_login_entry_title">凭据登录</string>
+    <string name="settings_credential_login_entry_desc">手动输入 BDUSS 与 STOKEN</string>
+    <string name="settings_account_list_title">已保存账号</string>
+    <string name="settings_account_active">当前账号</string>
+    <string name="settings_account_remove">删除账号</string>
+    <string name="settings_logout_entry_title">退出当前账号</string>
+    <string name="settings_logout_entry_desc">从本机移除当前账号凭据</string>
+    <string name="settings_login_title">网页登录</string>
+    <string name="settings_login_tip">登录成功后会自动返回账号管理页面</string>
+    <string name="settings_login_success">登录成功</string>
+    <string name="settings_login_failed">未获取到登录凭据</string>
+    <string name="settings_credential_login_title">凭据登录</string>
+    <string name="settings_credential_login_tip">仅用于测试，请妥善保管凭据</string>
+    <string name="settings_credential_login_submit">保存并登录</string>
+    <string name="settings_credential_login_invalid">请输入完整的 BDUSS 与 STOKEN</string>
     <string name="settings_theme_title">主题设置</string>
     <string name="settings_theme_subtitle">选择浅色或深色主题</string>
     <string name="settings_theme_mode">主题模式</string>

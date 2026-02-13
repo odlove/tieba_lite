@@ -11,6 +11,9 @@ import androidx.core.util.Consumer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import app.tiebalite.auth.AuthState
+import app.tiebalite.core.data.auth.AuthService
+import app.tiebalite.core.data.auth.AuthStore
 import app.tiebalite.core.data.theme.ThemePreferences
 import app.tiebalite.core.model.theme.ThemeMode
 import app.tiebalite.theme.ThemeState
@@ -26,6 +29,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val themePreferences = ThemePreferences(this)
         val themeState = ThemeState(themePreferences, lifecycleScope)
+        val authStore = AuthStore.get(this)
+        val authService = AuthService(authStore)
+        val authState =
+            AuthState(
+                authStore = authStore,
+                scope = lifecycleScope,
+            )
         applyEdgeToEdge(
             darkTheme = when (themeState.state.value.themeMode) {
                 ThemeMode.Dark -> true
@@ -54,7 +64,11 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            TiebaliteApp(themeState = themeState)
+            TiebaliteApp(
+                themeState = themeState,
+                authState = authState,
+                authService = authService,
+            )
         }
     }
 

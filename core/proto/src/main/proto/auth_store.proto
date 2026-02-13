@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package tiebalite.auth;
+
+option java_multiple_files = true;
+option java_package = "app.tiebalite.core.proto.auth";
+
+message AuthStoreProto {
+  repeated AuthAccountProto accounts = 1;
+  string active_account_id = 2;
+  repeated AccountCookieProto cookies = 3;
+}
+
+message AuthAccountProto {
+  string account_id = 1;
+  string bduss = 2;
+  string stoken = 3;
+  int64 updated_at_millis = 4;
+}
+
+message AccountCookieProto {
+  string account_id = 1;
+  string raw_cookie = 2;
+}

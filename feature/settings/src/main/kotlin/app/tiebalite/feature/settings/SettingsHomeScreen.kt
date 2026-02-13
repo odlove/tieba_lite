@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,8 +28,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SettingsHomeScreen(
     paddingValues: PaddingValues,
+    isLoggedIn: Boolean,
+    onOpenAccountManage: () -> Unit,
     onOpenTheme: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val contentPadding = PaddingValues(
@@ -54,6 +57,32 @@ fun SettingsHomeScreen(
                 SettingsItem(
                     leadingContent = {
                         Icon(
+                            imageVector = Icons.Outlined.PersonOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    },
+                    title = { Text(text = stringResource(R.string.settings_account_entry_title)) },
+                    subtitle = {
+                        Text(
+                            text =
+                                stringResource(
+                                    if (isLoggedIn) {
+                                        R.string.settings_account_entry_desc_logged_in
+                                    } else {
+                                        R.string.settings_account_entry_desc_logged_out
+                                    },
+                                ),
+                        )
+                    },
+                    onClick = onOpenAccountManage,
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+            item {
+                SettingsItem(
+                    leadingContent = {
+                        Icon(
                             imageVector = Icons.Outlined.Palette,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
@@ -61,7 +90,7 @@ fun SettingsHomeScreen(
                     },
                     title = { Text(text = stringResource(R.string.settings_theme_entry_title)) },
                     subtitle = { Text(text = stringResource(R.string.settings_theme_entry_desc)) },
-                    onClick = onOpenTheme
+                    onClick = onOpenTheme,
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }

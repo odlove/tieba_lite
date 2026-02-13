@@ -21,7 +21,9 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.datastore.core)
     api(project(":core:model"))
+    implementation(project(":core:proto"))
     implementation(project(":core:network"))
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.core)

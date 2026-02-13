@@ -2,9 +2,11 @@ package app.tiebalite.feature.explore
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import app.tiebalite.core.data.auth.AuthStore
 import app.tiebalite.core.data.recommend.repository.RecommendLoadType
 import app.tiebalite.core.data.recommend.repository.RecommendRepository
 import app.tiebalite.core.data.recommend.repository.RecommendRepositoryFactory
@@ -148,8 +150,13 @@ class ExploreViewModel(
         val Factory: ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
+                    val application = checkNotNull(this[APPLICATION_KEY])
+                    val authStore = AuthStore.get(application)
                     ExploreViewModel(
-                        repository = RecommendRepositoryFactory.create(),
+                        repository =
+                            RecommendRepositoryFactory.create(
+                                sessionProvider = { authStore.currentSession() },
+                            ),
                     )
                 }
             }

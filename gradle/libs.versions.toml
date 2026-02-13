@@ -33,6 +33,7 @@ retrofit = "3.0.0"
 okhttp = "5.3.2"
 protobuf = "4.33.5"
 protobufPlugin = "0.9.6"
+dataStore = "1.1.7"
 
 [libraries]
 
@@ -69,3 +70,4 @@ squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref
 squareup-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "dataStore" }
