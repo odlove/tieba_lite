@@ -120,7 +120,6 @@ fun ThemeSettingsScreen(
                     value = state.seedColorHex,
                     onValueChange = { onEvent(ThemeSettingsEvent.SetSeedColor(it)) },
                     label = { Text(text = stringResource(R.string.settings_seed_hint)) },
-                    placeholder = { Text(text = "#0F6B5F") },
                     singleLine = true,
                     modifier = Modifier.padding(top = 10.dp)
                 )
