@@ -14,6 +14,9 @@ plugins {
     alias(libs.plugins.ktlint) apply false
 }
 
+val unifiedCompileSdkMajor = 36
+val unifiedCompileSdkMinor = 1
+
 val printLintReports =
     tasks.register("printLintReports") {
         group = "verification"
@@ -68,6 +71,12 @@ val printKtlintReports =
 subprojects {
     pluginManager.withPlugin("com.android.application") {
         extensions.configure<ApplicationExtension> {
+            compileSdk {
+                version =
+                    release(unifiedCompileSdkMajor) {
+                        minorApiLevel = unifiedCompileSdkMinor
+                    }
+            }
             lint {
                 textReport = true
                 htmlReport = true
@@ -77,6 +86,12 @@ subprojects {
 
     pluginManager.withPlugin("com.android.library") {
         extensions.configure<LibraryExtension> {
+            compileSdk {
+                version =
+                    release(unifiedCompileSdkMajor) {
+                        minorApiLevel = unifiedCompileSdkMinor
+                    }
+            }
             lint {
                 textReport = true
                 htmlReport = true

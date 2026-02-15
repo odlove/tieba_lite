@@ -6,9 +6,6 @@ plugins {
 
 android {
     namespace = "app.tiebalite.feature.profile"
-    compileSdk {
-        version = release(36)
-    }
 
     defaultConfig {
         minSdk = 24

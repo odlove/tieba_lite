@@ -12,9 +12,6 @@ kotlin {
 
 android {
     namespace = "app.tiebalite.core.ui"
-    compileSdk {
-        version = release(36)
-    }
 
     defaultConfig {
         minSdk = 26
