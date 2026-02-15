@@ -27,6 +27,7 @@ class PersonalizedFeedMapper {
             RecommendItem(
                 id = threadId.toString(),
                 title = thread.title.ifBlank { "(无标题)" },
+                forumName = thread.fname.ifBlank { null },
                 snippet = snippet,
                 authorName = authorName.ifBlank { null },
                 authorAvatarUrl = portraitToAvatarUrl(thread.author.portrait),

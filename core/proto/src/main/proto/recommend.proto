@@ -88,6 +88,7 @@ message ThreadInfoLite {
   UserLite author = 18;
   repeated AbstractLite abstract_items = 21;
   repeated MediaLite media = 22;
+  string fname = 28;
   int32 create_time = 45;
   int32 agree_num = 124;
   int64 share_num = 135;

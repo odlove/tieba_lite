@@ -29,6 +29,7 @@ import java.util.Locale
 @Composable
 internal fun FeedCardHeader(item: RecommendItem) {
     val subtitle = formatLastTime(item.lastTimeTimestampSeconds)
+    val forumName = item.forumName?.trim()?.takeIf { it.isNotEmpty() }
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -58,6 +59,15 @@ internal fun FeedCardHeader(item: RecommendItem) {
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+        forumName?.let {
+            Text(
+                text = "${it}吧",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
