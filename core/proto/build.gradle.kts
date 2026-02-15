@@ -2,7 +2,6 @@ plugins {
     `java-library`
     alias(libs.plugins.jetbrains.kotlin.jvm)
     alias(libs.plugins.protobuf)
-    alias(libs.plugins.ktlint)
 }
 
 protobuf {
