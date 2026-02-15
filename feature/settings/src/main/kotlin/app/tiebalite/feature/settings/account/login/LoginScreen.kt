@@ -40,7 +40,6 @@ fun LoginScreen(
     onLoginSuccess: (AuthSession, String) -> Unit,
 ) {
     val context = LocalContext.current
-    val loginSuccessText = stringResource(R.string.settings_login_success)
     var loading by rememberSaveable { mutableStateOf(true) }
     var consumed by rememberSaveable { mutableStateOf(false) }
     var failureShown by rememberSaveable { mutableStateOf(false) }
@@ -116,12 +115,6 @@ fun LoginScreen(
                                     return
                                 }
                                 consumed = true
-                                Toast
-                                    .makeText(
-                                        context,
-                                        loginSuccessText,
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
                                 onLoginSuccess(session, cookieStr)
                             }
 

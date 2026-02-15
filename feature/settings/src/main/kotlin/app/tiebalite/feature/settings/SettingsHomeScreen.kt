@@ -14,16 +14,19 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SettingsItem
+import app.tiebalite.feature.settings.account.SettingsAccountViewModel
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun SettingsHomeScreen(
@@ -96,4 +99,22 @@ fun SettingsHomeScreen(
             }
         }
     }
+}
+
+@Composable
+fun SettingsHomeRoute(
+    paddingValues: PaddingValues,
+    onOpenAccountManage: () -> Unit,
+    onOpenTheme: () -> Unit,
+    onBack: () -> Unit,
+    viewModel: SettingsAccountViewModel = viewModel(factory = SettingsAccountViewModel.Factory),
+) {
+    val state by viewModel.uiState.collectAsState()
+    SettingsHomeScreen(
+        paddingValues = paddingValues,
+        isLoggedIn = state.isLoggedIn,
+        onOpenAccountManage = onOpenAccountManage,
+        onOpenTheme = onOpenTheme,
+        onBack = onBack,
+    )
 }

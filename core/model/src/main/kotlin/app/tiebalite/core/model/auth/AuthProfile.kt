@@ -5,5 +5,4 @@ data class AuthProfile(
     val userName: String,
     val displayName: String,
     val avatarUrl: String,
-    val tbs: String,
 )

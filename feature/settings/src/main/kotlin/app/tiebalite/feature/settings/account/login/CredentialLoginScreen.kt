@@ -35,7 +35,6 @@ fun CredentialLoginScreen(
 ) {
     val context = LocalContext.current
     val invalidInputText = stringResource(R.string.settings_credential_login_invalid)
-    val loginSuccessText = stringResource(R.string.settings_login_success)
     var bduss by rememberSaveable { mutableStateOf("") }
     var stoken by rememberSaveable { mutableStateOf("") }
 
@@ -94,12 +93,6 @@ fun CredentialLoginScreen(
                             stoken = stoken.trim(),
                         ),
                     )
-                    Toast
-                        .makeText(
-                            context,
-                            loginSuccessText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {

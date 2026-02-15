@@ -35,6 +35,16 @@ data class SettingsAccountItem(
     val title: String,
     val subtitle: String,
     val isActive: Boolean,
+    val isSessionValid: Boolean,
+    val bduss: String,
+    val stoken: String,
+    val tbs: String?,
+    val rawCookie: String?,
+    val userId: String?,
+    val userName: String?,
+    val displayName: String?,
+    val avatarUrl: String?,
+    val updatedAtMillis: Long,
 )
 
 @Composable
@@ -44,7 +54,7 @@ fun SettingsAccountScreen(
     accounts: List<SettingsAccountItem>,
     onOpenWebLogin: () -> Unit,
     onOpenCredentialLogin: () -> Unit,
-    onSwitchAccount: (String) -> Unit,
+    onOpenAccountDetail: (String) -> Unit,
     onRemoveAccount: (String) -> Unit,
     onLogoutActive: () -> Unit,
     onBack: () -> Unit,
@@ -161,9 +171,7 @@ fun SettingsAccountScreen(
                         }
                     },
                     onClick = {
-                        if (!account.isActive) {
-                            onSwitchAccount(account.accountId)
-                        }
+                        onOpenAccountDetail(account.accountId)
                     },
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

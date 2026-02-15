@@ -12,6 +12,7 @@
 /captures
 .externalNativeBuild
 .cxx
+/.kotlin/
 local.properties
 keystore.properties
 /keystore

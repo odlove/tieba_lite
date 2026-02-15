@@ -12,15 +12,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import app.tiebalite.auth.AuthState
-import app.tiebalite.core.data.auth.AuthService
+import androidx.navigation.navArgument
 import app.tiebalite.theme.ThemeState
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.feature.explore.ExploreRoute
@@ -28,16 +27,15 @@ import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.feature.recommend.RecommendationScreen
 import app.tiebalite.feature.settings.SettingsRoutes
-import app.tiebalite.feature.settings.SettingsHomeScreen
-import app.tiebalite.feature.settings.account.SettingsAccountItem
-import app.tiebalite.feature.settings.account.SettingsAccountScreen
-import app.tiebalite.feature.settings.account.login.CredentialLoginScreen
-import app.tiebalite.feature.settings.account.login.LoginScreen
+import app.tiebalite.feature.settings.SettingsHomeRoute
+import app.tiebalite.feature.settings.account.SettingsAccountDetailRoute
+import app.tiebalite.feature.settings.account.SettingsAccountRoute
+import app.tiebalite.feature.settings.account.login.CredentialLoginRoute
+import app.tiebalite.feature.settings.account.login.LoginRoute
 import app.tiebalite.feature.settings.ThemeSettingsEvent
 import app.tiebalite.feature.settings.ThemeSettingsScreen
 import app.tiebalite.feature.settings.ThemeSettingsState
 import app.tiebalite.ui.components.TiebaliteBottomBar
-import kotlinx.coroutines.launch
 
 enum class MainDestination(
     val route: String,
@@ -69,12 +67,8 @@ enum class MainDestination(
 @Composable
 fun TiebaliteApp(
     themeState: ThemeState,
-    authState: AuthState,
-    authService: AuthService,
 ) {
     val state by themeState.state.collectAsState()
-    val auth by authState.state.collectAsState()
-    val appScope = rememberCoroutineScope()
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -128,68 +122,53 @@ fun TiebaliteApp(
                     )
                 }
                 composable(SettingsRoutes.Home) {
-                    SettingsHomeScreen(
+                    SettingsHomeRoute(
                         paddingValues = paddingValues,
-                        isLoggedIn = auth.isLoggedIn,
                         onOpenAccountManage = { navController.navigate(SettingsRoutes.Account) },
                         onOpenTheme = { navController.navigate(SettingsRoutes.Theme) },
                         onBack = { navController.popBackStack() },
                     )
                 }
                 composable(SettingsRoutes.Account) {
-                    SettingsAccountScreen(
+                    SettingsAccountRoute(
                         paddingValues = paddingValues,
-                        isLoggedIn = auth.isLoggedIn,
-                        accounts =
-                            auth.accounts.map { account ->
-                                toSettingsAccountItem(
-                                    accountId = account.accountId,
-                                    bduss = account.session.bduss,
-                                    activeAccountId = auth.activeAccount?.accountId,
-                                )
-                            },
                         onOpenWebLogin = { navController.navigate(SettingsRoutes.Login) },
                         onOpenCredentialLogin = { navController.navigate(SettingsRoutes.CredentialLogin) },
-                        onSwitchAccount = { accountId ->
-                            appScope.launch {
-                                authService.switchAccount(accountId)
-                            }
+                        onOpenAccountDetail = { accountId ->
+                            navController.navigate(SettingsRoutes.accountDetail(accountId))
                         },
-                        onRemoveAccount = { accountId ->
-                            appScope.launch {
-                                authService.removeAccount(accountId)
-                            }
-                        },
-                        onLogoutActive = {
-                            appScope.launch {
-                                authService.logoutActiveAccount()
-                            }
-                        },
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(
+                    route = SettingsRoutes.AccountDetail,
+                    arguments =
+                        listOf(
+                            navArgument(SettingsRoutes.AccountIdArg) {
+                                type = NavType.StringType
+                            },
+                        ),
+                ) { backStackEntry ->
+                    val accountId =
+                        backStackEntry.arguments
+                            ?.getString(SettingsRoutes.AccountIdArg)
+                            .orEmpty()
+                    SettingsAccountDetailRoute(
+                        paddingValues = paddingValues,
+                        accountId = accountId,
                         onBack = { navController.popBackStack() },
                     )
                 }
                 composable(SettingsRoutes.Login) {
-                    LoginScreen(
+                    LoginRoute(
                         paddingValues = paddingValues,
                         onBack = { navController.popBackStack() },
-                        onLoginSuccess = { session, rawCookie ->
-                            appScope.launch {
-                                authService.loginWithWeb(session, rawCookie)
-                            }
-                            navController.popBackStack()
-                        },
                     )
                 }
                 composable(SettingsRoutes.CredentialLogin) {
-                    CredentialLoginScreen(
+                    CredentialLoginRoute(
                         paddingValues = paddingValues,
                         onBack = { navController.popBackStack() },
-                        onLoginSuccess = { session ->
-                            appScope.launch {
-                                authService.loginWithCredential(session)
-                            }
-                            navController.popBackStack()
-                        },
                     )
                 }
                 composable(SettingsRoutes.Theme) {
@@ -224,18 +203,6 @@ fun TiebaliteApp(
         }
     }
 }
-
-private fun toSettingsAccountItem(
-    accountId: String,
-    bduss: String,
-    activeAccountId: String?,
-): SettingsAccountItem =
-    SettingsAccountItem(
-        accountId = accountId,
-        title = "账号 ${accountId.take(6)}",
-        subtitle = "BDUSS: ${bduss.take(8)}...",
-        isActive = accountId == activeAccountId,
-    )
 
 @Composable
 private fun AppScaffold(

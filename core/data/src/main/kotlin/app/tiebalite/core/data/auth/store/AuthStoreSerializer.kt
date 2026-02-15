@@ -1,4 +1,4 @@
-package app.tiebalite.core.data.auth
+package app.tiebalite.core.data.auth.store
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
@@ -7,7 +7,7 @@ import com.google.protobuf.InvalidProtocolBufferException
 import java.io.InputStream
 import java.io.OutputStream
 
-object AuthStoreSerializer : Serializer<AuthStoreProto> {
+internal object AuthStoreSerializer : Serializer<AuthStoreProto> {
     override val defaultValue: AuthStoreProto = AuthStoreProto.getDefaultInstance()
 
     override suspend fun readFrom(input: InputStream): AuthStoreProto =

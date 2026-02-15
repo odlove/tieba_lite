@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import app.tiebalite.core.data.auth.AuthStore
+import app.tiebalite.core.data.auth.di.AuthGraphProvider
 import app.tiebalite.core.data.recommend.repository.RecommendLoadType
 import app.tiebalite.core.data.recommend.repository.RecommendRepository
 import app.tiebalite.core.data.recommend.repository.RecommendRepositoryFactory
@@ -151,11 +151,15 @@ class ExploreViewModel(
             viewModelFactory {
                 initializer {
                     val application = checkNotNull(this[APPLICATION_KEY])
-                    val authStore = AuthStore.get(application)
+                    val authGraph =
+                        (application as? AuthGraphProvider)?.authGraph
+                            ?: error("Application must implement AuthGraphProvider")
+                    val authReader = authGraph.authReader
                     ExploreViewModel(
                         repository =
                             RecommendRepositoryFactory.create(
-                                sessionProvider = { authStore.currentSession() },
+                                sessionProvider = { authReader.currentSession() },
+                                tbsProvider = { authReader.currentSession()?.tbs },
                             ),
                     )
                 }

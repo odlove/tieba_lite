@@ -73,10 +73,22 @@ class TbClientLoginNetworkSource(
                     ?: throw IllegalStateException("tbclient login api missing user")
             Result.success(
                 TbClientLoginRaw(
-                    userId = user.optString("id"),
-                    userName = user.optString("name"),
-                    portrait = user.optString("portrait"),
-                    tbs = anti.optString("tbs"),
+                    errorCode = errorCode,
+                    errorMessage = root.optString("error_msg"),
+                    ctime = root.optLong("ctime").takeIf { root.has("ctime") },
+                    logId = root.optLong("logid").takeIf { root.has("logid") },
+                    serverTime = root.optString("server_time").takeIf { it.isNotBlank() },
+                    time = root.optLong("time").takeIf { root.has("time") },
+                    anti =
+                        TbClientLoginRaw.Anti(
+                            tbs = anti.optString("tbs"),
+                        ),
+                    user =
+                        TbClientLoginRaw.User(
+                            id = user.optString("id"),
+                            name = user.optString("name"),
+                            portrait = user.optString("portrait"),
+                        ),
                 ),
             )
         } catch (cancellationException: CancellationException) {
@@ -88,8 +100,22 @@ class TbClientLoginNetworkSource(
 }
 
 data class TbClientLoginRaw(
-    val userId: String,
-    val userName: String,
-    val portrait: String,
-    val tbs: String,
-)
+    val errorCode: Int,
+    val errorMessage: String?,
+    val ctime: Long?,
+    val logId: Long?,
+    val serverTime: String?,
+    val time: Long?,
+    val anti: Anti,
+    val user: User,
+) {
+    data class Anti(
+        val tbs: String,
+    )
+
+    data class User(
+        val id: String,
+        val name: String,
+        val portrait: String,
+    )
+}

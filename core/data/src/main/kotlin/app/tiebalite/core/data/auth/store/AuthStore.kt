@@ -1,9 +1,10 @@
-package app.tiebalite.core.data.auth
+package app.tiebalite.core.data.auth.store
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import app.tiebalite.core.model.auth.AuthAccount
+import app.tiebalite.core.model.auth.AuthProfile
 import app.tiebalite.core.model.auth.AuthSession
 import app.tiebalite.core.proto.auth.AccountCookieProto
 import app.tiebalite.core.proto.auth.AuthAccountProto
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
-class AuthStore private constructor(
+internal class AuthStore private constructor(
     appContext: Context,
 ) {
     private val dataScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -36,17 +37,14 @@ class AuthStore private constructor(
             },
         )
 
-    private val mutableAccounts = MutableStateFlow(emptyList<AuthAccount>())
-    private val mutableActiveAccountId = MutableStateFlow<String?>(null)
-    private val mutableCookies = MutableStateFlow(emptyMap<String, String>())
+    private val mutableState = MutableStateFlow(AuthStoreSnapshot())
 
-    val accounts: StateFlow<List<AuthAccount>> = mutableAccounts.asStateFlow()
-    val activeAccountId: StateFlow<String?> = mutableActiveAccountId.asStateFlow()
+    internal val state: StateFlow<AuthStoreSnapshot> = mutableState.asStateFlow()
 
     init {
         dataScope.launch {
             dataStore.data.collect { proto ->
-                mutableAccounts.value =
+                val accounts =
                     proto.accountsList
                         .asSequence()
                         .map { account ->
@@ -54,8 +52,8 @@ class AuthStore private constructor(
                         }.sortedByDescending { account ->
                             account.updatedAtMillis
                         }.toList()
-                mutableActiveAccountId.value = proto.activeAccountId.takeIf { it.isNotBlank() }
-                mutableCookies.value =
+                val activeAccountId = proto.activeAccountId.takeIf { it.isNotBlank() }
+                val cookies =
                     proto.cookiesList
                         .asSequence()
                         .filter { cookie ->
@@ -63,20 +61,17 @@ class AuthStore private constructor(
                         }.associate { cookie ->
                             cookie.accountId to cookie.rawCookie
                         }
+                mutableState.value =
+                    AuthStoreSnapshot(
+                        accounts = accounts,
+                        activeAccountId = activeAccountId,
+                        cookies = cookies,
+                    )
             }
         }
     }
 
-    fun currentSession(): AuthSession? = currentActiveAccount()?.session
-
-    fun currentActiveAccountId(): String? = mutableActiveAccountId.value
-
-    fun currentActiveAccount(): AuthAccount? {
-        val activeId = mutableActiveAccountId.value ?: return null
-        return mutableAccounts.value.firstOrNull { it.accountId == activeId }
-    }
-
-    suspend fun upsertAccount(
+    internal suspend fun upsertAccount(
         session: AuthSession,
         activate: Boolean = true,
     ): String {
@@ -90,14 +85,32 @@ class AuthStore private constructor(
                     UUID.randomUUID().toString()
                 }
             savedAccountId = accountId
+            val preservedAccount = current.accountsList.getOrNull(existingIndex)
+            val preservedProfile =
+                preservedAccount
+                    ?.toProfileOrNull()
+            val sessionTbs =
+                session.tbs
+                    ?.takeIf { it.isNotBlank() }
+                    ?: preservedAccount
+                        ?.tbs
+                        ?.takeIf { it.isNotBlank() }
             val updatedAccount =
                 AuthAccountProto
                     .newBuilder()
                     .setAccountId(accountId)
                     .setBduss(session.bduss)
                     .setStoken(session.stoken)
+                    .setTbs(sessionTbs.orEmpty())
                     .setUpdatedAtMillis(System.currentTimeMillis())
-                    .build()
+                    .apply {
+                        preservedProfile?.let { profile ->
+                            userId = profile.userId
+                            userName = profile.userName
+                            displayName = profile.displayName
+                            avatarUrl = profile.avatarUrl
+                        }
+                    }.build()
             val updatedAccounts =
                 current.accountsList
                     .toMutableList()
@@ -123,7 +136,7 @@ class AuthStore private constructor(
         return savedAccountId
     }
 
-    suspend fun setActiveAccount(accountId: String?): Boolean {
+    internal suspend fun setActiveAccount(accountId: String?): Boolean {
         var updated = false
         dataStore.updateData { current ->
             if (accountId.isNullOrBlank()) {
@@ -145,7 +158,7 @@ class AuthStore private constructor(
         return updated
     }
 
-    suspend fun removeAccount(accountId: String): Boolean {
+    internal suspend fun removeAccount(accountId: String): Boolean {
         var removed = false
         dataStore.updateData { current ->
             if (current.accountsList.none { it.accountId == accountId }) {
@@ -183,25 +196,11 @@ class AuthStore private constructor(
         return removed
     }
 
-    suspend fun removeActiveAccount(): Boolean {
-        val activeId = mutableActiveAccountId.value ?: return false
-        return removeAccount(activeId)
-    }
-
-    suspend fun clearActiveAccount() {
-        setActiveAccount(null)
-    }
-
-    fun cookieOf(accountId: String): String? =
-        mutableCookies.value[accountId]
+    internal fun cookieOf(accountId: String): String? =
+        mutableState.value.cookies[accountId]
             ?.takeIf { it.isNotBlank() }
 
-    fun cookieOfActiveAccount(): String? {
-        val activeId = mutableActiveAccountId.value ?: return null
-        return cookieOf(activeId)
-    }
-
-    suspend fun saveCookie(
+    internal suspend fun saveCookie(
         accountId: String,
         rawCookie: String,
     ) {
@@ -234,29 +233,53 @@ class AuthStore private constructor(
         }
     }
 
-    suspend fun removeCookie(accountId: String) {
+    internal suspend fun saveProfile(
+        accountId: String,
+        profile: AuthProfile,
+        tbs: String? = null,
+    ): Boolean {
+        var updated = false
         dataStore.updateData { current ->
-            if (current.cookiesList.none { it.accountId == accountId }) {
+            val existingIndex = current.accountsList.indexOfFirst { it.accountId == accountId }
+            if (existingIndex < 0) {
                 return@updateData current
             }
-            val updatedCookies =
-                current.cookiesList
-                    .asSequence()
-                    .filterNot { it.accountId == accountId }
-                    .toList()
+            val existing = current.accountsList[existingIndex]
+            val normalizedTbs = tbs?.takeIf { it.isNotBlank() }
+            val updatedAccount =
+                existing
+                    .toBuilder()
+                    .setUserId(profile.userId)
+                    .setUserName(profile.userName)
+                    .setDisplayName(profile.displayName)
+                    .setAvatarUrl(profile.avatarUrl)
+                    .apply {
+                        if (normalizedTbs != null) {
+                            setTbs(normalizedTbs)
+                        }
+                    }
+                    .build()
+            val updatedAccounts =
+                current.accountsList
+                    .toMutableList()
+                    .apply {
+                        set(existingIndex, updatedAccount)
+                    }
+            updated = true
             current
                 .toBuilder()
-                .clearCookies()
-                .addAllCookies(updatedCookies)
+                .clearAccounts()
+                .addAllAccounts(updatedAccounts)
                 .build()
         }
+        return updated
     }
 
     companion object {
         @Volatile
         private var instance: AuthStore? = null
 
-        fun get(context: Context): AuthStore =
+        internal fun get(context: Context): AuthStore =
             instance ?: synchronized(this) {
                 instance ?: AuthStore(context.applicationContext).also { created ->
                     instance = created
@@ -265,13 +288,17 @@ class AuthStore private constructor(
     }
 }
 
-private fun AuthAccountProto.toModel(): AuthAccount =
-    AuthAccount(
-        accountId = accountId,
-        session =
-            AuthSession(
-                bduss = bduss,
-                stoken = stoken,
-            ),
-        updatedAtMillis = updatedAtMillis,
-    )
+internal data class AuthStoreSnapshot(
+    val accounts: List<AuthAccount> = emptyList(),
+    val activeAccountId: String? = null,
+    val cookies: Map<String, String> = emptyMap(),
+) {
+    val activeAccount: AuthAccount?
+        get() =
+            activeAccountId
+                ?.let { id ->
+                    accounts.firstOrNull { account ->
+                        account.accountId == id
+                    }
+                }
+}

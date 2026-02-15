@@ -16,6 +16,11 @@ message AuthAccountProto {
   string bduss = 2;
   string stoken = 3;
   int64 updated_at_millis = 4;
+  string user_id = 5;
+  string user_name = 6;
+  string display_name = 7;
+  string avatar_url = 8;
+  string tbs = 9;
 }
 
 message AccountCookieProto {
