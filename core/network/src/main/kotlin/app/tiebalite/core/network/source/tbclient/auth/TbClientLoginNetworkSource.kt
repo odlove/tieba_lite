@@ -10,6 +10,7 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
 import retrofit2.http.POST
 import kotlin.coroutines.cancellation.CancellationException
+import org.json.JSONArray
 import org.json.JSONObject
 
 interface TbClientLoginApi {
@@ -59,6 +60,7 @@ class TbClientLoginNetworkSource(
                     stoken = stoken,
                 ).string()
             val root = JSONObject(responseText)
+            val raw = root.toRawMap()
             val errorCode = root.optString("error_code").toIntOrNull() ?: 0
             if (errorCode != 0) {
                 throw IllegalStateException(
@@ -73,6 +75,8 @@ class TbClientLoginNetworkSource(
                     ?: throw IllegalStateException("tbclient login api missing user")
             Result.success(
                 TbClientLoginRaw(
+                    body = responseText,
+                    raw = raw,
                     errorCode = errorCode,
                     errorMessage = root.optString("error_msg"),
                     ctime = root.optLong("ctime").takeIf { root.has("ctime") },
@@ -82,12 +86,14 @@ class TbClientLoginNetworkSource(
                     anti =
                         TbClientLoginRaw.Anti(
                             tbs = anti.optString("tbs"),
+                            raw = anti.toRawMap(),
                         ),
                     user =
                         TbClientLoginRaw.User(
                             id = user.optString("id"),
                             name = user.optString("name"),
                             portrait = user.optString("portrait"),
+                            raw = user.toRawMap(),
                         ),
                 ),
             )
@@ -100,6 +106,8 @@ class TbClientLoginNetworkSource(
 }
 
 data class TbClientLoginRaw(
+    val body: String,
+    val raw: Map<String, Any?>,
     val errorCode: Int,
     val errorMessage: String?,
     val ctime: Long?,
@@ -111,11 +119,33 @@ data class TbClientLoginRaw(
 ) {
     data class Anti(
         val tbs: String,
+        val raw: Map<String, Any?>,
     )
 
     data class User(
         val id: String,
         val name: String,
         val portrait: String,
+        val raw: Map<String, Any?>,
     )
 }
+
+private fun JSONObject.toRawMap(): Map<String, Any?> =
+    keys().asSequence().associateWith { key ->
+        opt(key).toRawValue()
+    }
+
+private fun JSONArray.toRawList(): List<Any?> =
+    List(length()) { index ->
+        opt(index).toRawValue()
+    }
+
+private fun Any?.toRawValue(): Any? =
+    when (this) {
+        null,
+        JSONObject.NULL,
+        -> null
+        is JSONObject -> toRawMap()
+        is JSONArray -> toRawList()
+        else -> this
+    }

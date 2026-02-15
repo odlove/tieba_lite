@@ -1,55 +1,92 @@
 syntax = "proto3";
 
-package tiebalite.recommend;
+package tiebalite.thread;
 
 option java_multiple_files = true;
-option java_package = "app.tiebalite.core.network.proto.recommend";
+option java_package = "app.tiebalite.core.network.proto.thread";
 
-message PersonalizedRequestLite {
-  PersonalizedRequestDataLite data = 1;
+message PbPageRequestLite {
+  PbPageRequestDataLite data = 1;
 }
 
-message PersonalizedRequestDataLite {
-  CommonReqLite common = 1;
-  uint32 tag_code = 2;
-  uint32 need_tags = 3;
-  uint32 load_type = 4;
-  uint32 page_thread_count = 5;
-  uint32 pn = 6;
-  uint32 sug_count = 7;
-  int32 scr_w = 8;
-  int32 scr_h = 9;
-  double scr_dip = 10;
-  int32 q_type = 11;
-  string lastids = 12;
-  int32 issdk = 13;
-  string da_idfa = 14;
-  string platform = 15;
-  string sex_tag = 17;
-  string age_tag = 18;
-  uint32 need_age_module = 19;
-  repeated string interest_tag = 20;
-  uint32 tag_changed = 21;
-  uint32 need_forumlist = 22;
-  uint32 new_net_type = 23;
-  string shoubai_cuid = 24;
-  int64 from_tid = 25;
-  int32 pre_ad_thread_count = 26;
-  int32 new_install = 27;
-  int32 request_times = 28;
-  string invoke_source = 29;
-  string ad_context_list = 30;
-  string query_eqid = 33;
-  string first_dir = 34;
-  string second_dir = 35;
-  AppPosInfoLite app_pos = 36;
-  string ad_ext_params = 37;
-  bytes app_transmit_data = 38;
-  int64 push_tid = 39;
-  int32 is_newfeed = 40;
+message PbPageRequestDataLite {
+  int32 pb_rn = 1;
+  int32 mark = 2;
+  int32 back = 3;
+  int64 kz = 4;
+  int32 lz = 5;
+  int32 r = 6;
+  int64 pid = 7;
+  int32 with_floor = 8;
+  int32 floor_rn = 9;
+  int32 weipost = 10;
+  int32 message_id = 11;
+  int32 s_model = 12;
+  int32 rn = 13;
+  int32 scr_w = 14;
+  int32 scr_h = 15;
+  double scr_dip = 16;
+  int32 q_type = 17;
+  int32 pn = 18;
+  string st_type = 19;
+  int32 thread_type = 20;
+  int32 banner = 21;
+  int32 arround = 22;
+  int32 last = 23;
+  string msg_click = 24;
+  ThreadCommonReqLite common = 25;
+  string lastids = 26;
+  string st_from = 27;
+  string st_link = 28;
+  int32 st_stat = 29;
+  int64 st_task = 30;
+  int32 issdk = 31;
+  string query_word = 32;
+  int32 is_comm_reverse = 33;
+  int32 is_jumpfloor = 34;
+  int32 jumpfloor_num = 35;
+  string da_idfa = 42;
+  string platform = 43;
+  uint64 jid = 44;
+  uint64 fid = 45;
+  string jfrom = 46;
+  string yuelaou_locate = 47;
+  string yuelaou_params = 48;
+  string obj_source = 50;
+  string obj_locate = 51;
+  string obj_param1 = 52;
+  ThreadAppPosInfoLite app_pos = 53;
+  uint32 from_smart_frs = 54;
+  string feed_nid = 55;
+  int64 forum_id = 56;
+  int32 need_repost_recommend_forum = 57;
+  ThreadAdParamLite ad_param = 58;
+  int32 need_log = 59;
+  string call_url = 60;
+  string shoubai_cuid = 61;
+  string ori_ugc_nid = 62;
+  string ori_ugc_tid = 63;
+  int32 ori_ugc_type = 65;
+  string ori_ugc_vid = 66;
+  string ad_context_list = 68;
+  string up_schema = 69;
+  int32 from_push = 71;
+  string ad_ext_params = 72;
+  int64 broadcast_id = 73;
+  int32 floor_sort_type = 74;
+  int32 source_type = 75;
+  int32 immersion_video_comment_source = 76;
+  bytes app_transmit_data = 77;
+  int32 is_fold_comment_req = 78;
+  int32 is_edit_comment_req = 79;
+  int32 request_times = 80;
+  int64 last_pid = 81;
+  int32 similar_from = 82;
+  string come_from = 83;
+  string search_query = 84;
 }
 
-message CommonReqLite {
+message ThreadCommonReqLite {
   int32 client_type = 1;
   string client_version = 2;
   string client_id = 3;
@@ -74,7 +111,7 @@ message CommonReqLite {
   string smallflow = 22;
   string sign = 23;
   string pversion = 24;
-  string os_version = 25;
+  string _os_version = 25;
   string brand = 26;
   string brand_type = 27;
   string lego_lib_version = 28;
@@ -96,7 +133,7 @@ message CommonReqLite {
   string naws_game_ver = 44;
   string idfa = 45;
   string diac = 46;
-  int64 active_timestamp = 49;
+  int64 activetimestamp = 49;
   int64 first_install_time = 50;
   int64 last_update_time = 51;
   string event_day = 53;
@@ -131,7 +168,7 @@ message CommonReqLite {
   int32 need_cam_decrypt = 82;
 }
 
-message AppPosInfoLite {
+message ThreadAppPosInfoLite {
   string ap_mac = 1;
   bool ap_connected = 2;
   string coordinate_type = 3;
@@ -149,48 +186,202 @@ message AppPosInfoLite {
   string mercator_district_name = 15;
 }
 
-message PersonalizedResponseLite {
-  ErrorLite error = 1;
-  PersonalizedResponseDataLite data = 2;
+message ThreadAdParamLite {
+  int32 load_count = 1;
+  int32 refresh_count = 2;
+  string yoga_lib_version = 3;
+  int32 is_req_ad = 4;
 }
 
-message ErrorLite {
+message PbPageResponseLite {
+  ThreadErrorLite error = 1;
+  PbPageResponseDataLite data = 2;
+}
+
+message ThreadErrorLite {
   int32 errorno = 1;
   string errmsg = 2;
   string usermsg = 3;
 }
 
-message PersonalizedResponseDataLite {
-  repeated bytes tag_list = 1;
-  repeated ThreadInfoLite thread_list = 2;
-  repeated bytes resource_list = 3;
-  repeated bytes card_forum = 4;
-  repeated bytes card_topic = 5;
-  uint32 sug_seconds = 6;
-  repeated ThreadPersonalizedLite thread_personalized = 7;
-  int32 is_new_url = 8;
-  bytes banner_list = 9;
-  bytes age_sex = 10;
-  repeated bytes interestion = 11;
-  repeated bytes card_god = 12;
-  string stat_key = 13;
-  repeated SimpleForumLite like_forums = 14;
-  int32 style_ab_tag = 15;
-  AntiLite anti = 16;
-  bytes live_answer = 17;
-  bytes float_info = 18;
-  bytes recom_post_topic = 19;
-  bytes user_follow_live = 20;
-  int32 fresh_ctrl_num = 21;
-  bytes active_center = 22;
-  bytes hot_recomforum = 23;
-  bytes favorite_panel = 24;
-  int32 show_adsense = 25;
-  bytes header_card = 26;
-  bytes page_data = 27;
-  bytes hot_card = 28;
-  bytes novel_card = 30;
-  int32 is_need_live_ununiq = 31;
+message PbPageResponseDataLite {
+  ThreadUserLite user = 1;
+  ThreadSimpleForumLite forum = 2;
+  ThreadPageInfoLite page = 3;
+  ThreadAntiLite anti = 4;
+  ThreadAddPostLite add_post = 5;
+  repeated ThreadPostLite post_list = 6;
+  int32 has_floor = 7;
+  ThreadInfoLite thread = 8;
+  bytes location = 9;
+  int32 is_new_url = 10;
+  repeated bytes post_banner = 11;
+  bytes banner_list = 12;
+  repeated ThreadUserLite user_list = 13;
+  int32 server_time = 14;
+  bytes news_info = 15;
+  repeated bytes recommend_threads = 16;
+  repeated bytes fine_banner = 17;
+  bytes twzhibo_anti = 18;
+  bytes sdk_topic_thread = 19;
+  bytes hot_post_list = 20;
+  bytes graffiti_rank_list_info = 21;
+  bytes appeal_info = 22;
+  bytes god_card = 23;
+  repeated bytes play_rank_list = 24;
+  bytes recommend_book = 25;
+  bytes ala_info = 26;
+  bytes forum_headline_img_info = 27;
+  string asp_shown_info = 28;
+  bytes guess_like = 29;
+  repeated ThreadInfoLite feed_thread_list = 30;
+  uint32 is_follow_current_channel = 31;
+  int32 switch_read_open = 32;
+  bytes feed_info = 33;
+  bytes top_agree_post_list = 34;
+  repeated ThreadSimpleForumLite repost_recommend_forum_list = 35;
+  repeated ThreadSimpleForumLite from_forum_list = 36;
+  int64 thread_freq_num = 37;
+  ThreadPostLite first_floor_post = 38;
+  ThreadSimpleForumLite display_forum = 39;
+  repeated ThreadSimpleUserLite new_agree_user = 40;
+  string partial_visible_toast = 41;
+  bytes na_guide = 42;
+  bytes follow_tip = 43;
+  string fold_tip = 44;
+  int32 exp_news_today = 45;
+  int32 exp_guide_today = 46;
+  string multi_forum_text = 47;
+  repeated bytes thread_topic = 48;
+  repeated bytes pb_sort_info = 49;
+  int32 sort_type = 50;
+  bytes manager_election = 51;
+  repeated ThreadInfoLite bjh_recommend = 52;
+  bytes business_promot_info = 53;
+  bytes promotion = 54;
+  bytes recom_ala_info = 55;
+  int32 jumptotab1 = 56;
+  string jumptotab2 = 57;
+  bytes business_account_info = 58;
+  repeated ThreadInfoLite recom_thread_info = 59;
+  bytes forum_rule = 60;
+  int32 show_adsense = 61;
+  int32 is_black_white = 62;
+  int32 is_official_forum = 63;
+  bytes floating_icon = 64;
+  int32 is_purchase = 65;
+  int32 pb_notice_type = 66;
+  string pb_notice = 67;
+  int32 has_fold_comment = 68;
+  int64 fold_comment_num = 70;
+  ThreadPostLite top_answer = 73;
+  bytes jump_link_info = 74;
+  bytes similar_content = 75;
+  bytes robot_entrance = 76;
+  repeated bytes aichat_card = 77;
+  bytes aichat_bot_card = 79;
+}
+
+message ThreadAddPostLite {
+  int32 create_time = 1;
+  string post_id = 2;
+  int32 already_count = 3;
+  int32 total_count = 4;
+  string last_addition_content = 5;
+  int32 last_addition_time = 6;
+  string warn_msg = 7;
+}
+
+message ThreadSimpleForumLite {
+  int64 id = 1;
+  string name = 2;
+  int32 is_exists = 3;
+  string avatar = 4;
+  uint32 is_liked = 5;
+  uint32 is_signed = 6;
+  string first_class = 7;
+  string second_class = 8;
+  string ext = 9;
+  uint32 level_id = 10;
+  bytes multi_forum_perm = 11;
+  int32 member_num = 12;
+  int32 post_num = 13;
+  int32 is_brand_forum = 14;
+  repeated bytes tab_info = 15;
+  string forum_toutu = 16;
+  bytes deleted_reason_info = 17;
+  int32 is_frs_mask = 18;
+  bytes theme_color = 19;
+  string recommend_tip = 20;
+  repeated string pendants = 21;
+  bytes show_info = 22;
+  bytes sprite_pb_guide = 23;
+  string scheme = 24;
+}
+
+message ThreadSimpleUserLite {
+  int64 user_id = 1;
+  int32 user_status = 2;
+  string secureemail = 3;
+  string securemobil = 4;
+  string user_name = 5;
+  string user_nickname = 6;
+  uint32 incomplete_user = 7;
+  string portrait = 8;
+  int32 agree_type = 9;
+  string ahead_url = 10;
+  string block_msg = 11;
+  int32 show_onlyme = 12;
+}
+
+message ThreadPageInfoLite {
+  int32 page_size = 1;
+  int32 offset = 2;
+  int32 current_page = 3;
+  int32 total_count = 4;
+  int32 total_page = 5;
+  int32 has_more = 6;
+  int32 has_prev = 7;
+  int32 cur_good_id = 8;
+  int32 req_num = 9;
+  int32 pnum = 10;
+  int32 tnum = 11;
+  int32 total_num = 12;
+  int32 lz_total_floor = 13;
+  int32 new_total_page = 14;
+}
+
+message ThreadAntiLite {
+  string tbs = 1;
+  int32 ifpost = 2;
+  int32 ifposta = 3;
+  int32 forbid_flag = 4;
+  string forbid_info = 5;
+  int32 block_stat = 6;
+  int32 hide_stat = 7;
+  int32 vcode_stat = 8;
+  int32 days_tofree = 9;
+  int32 has_chance = 10;
+  int32 ifvoice = 11;
+  string voice_message = 12;
+  int32 ifaddition = 13;
+  int32 need_vcode = 14;
+  string vcode_md5 = 15;
+  string vcode_pic_url = 16;
+  string user_mute = 17;
+  string ifxiaoying = 18;
+  string poll_message = 19;
+  string video_message = 20;
+  string video_local_message = 21;
+  bytes block_pop_info = 22;
+  int32 reply_private_flag = 23;
+  repeated bytes del_thread_text = 24;
+  int32 multi_delthread = 25;
+  uint32 poll_level = 26;
+  int32 can_goods = 27;
+  bool is_sexyforum = 28;
+  string teenmode_interval = 29;
+  int32 user_chat_block = 30;
 }
 
 message ThreadInfoLite {
@@ -211,11 +402,11 @@ message ThreadInfoLite {
   int32 is_voice_thread = 15;
   int32 is_activity = 16;
   int32 is_notice = 17;
-  UserLite author = 18;
-  UserLite last_replyer = 19;
+  ThreadUserLite author = 18;
+  ThreadUserLite last_replyer = 19;
   int32 comment_num = 20;
-  repeated AbstractLite abstract_items = 21;
-  repeated MediaLite media = 22;
+  repeated bytes _abstract = 21;
+  repeated bytes media = 22;
   repeated bytes voice_info = 23;
   string meizhi_pic = 24;
   repeated bytes media_num = 25;
@@ -300,8 +491,8 @@ message ThreadInfoLite {
   string ab_tag = 108;
   string recom_reason = 109;
   bytes video_ad_info = 110;
-  repeated bytes rich_title = 111;
-  repeated bytes rich_abstract = 112;
+  repeated ThreadPbContentLite rich_title = 111;
+  repeated ThreadPbContentLite rich_abstract = 112;
   bytes ala_info = 113;
   uint32 is_operate_thread = 114;
   int32 is_tbread_dispatch = 115;
@@ -314,7 +505,7 @@ message ThreadInfoLite {
   repeated bytes multiple_forum_list = 122;
   int32 is_multiforum_thread = 123;
   int32 agree_num = 124;
-  bytes top_agree_post = 125;
+  ThreadPostLite top_agree_post = 125;
   bytes agree = 126;
   int32 is_partial_visible = 127;
   int32 is_link_thread = 128;
@@ -322,7 +513,7 @@ message ThreadInfoLite {
   int64 freq_num = 130;
   int32 is_god = 131;
   bytes activity_info = 132;
-  MediaLite pic_info = 133;
+  bytes pic_info = 133;
   int32 is_story_audit = 134;
   int64 share_num = 135;
   int32 is_called = 136;
@@ -334,7 +525,7 @@ message ThreadInfoLite {
   string topic_user_name = 149;
   string topic_h5_url = 150;
   int32 is_videobiggie_recomthread = 153;
-  SimpleForumLite forum_info = 155;
+  ThreadSimpleForumLite forum_info = 155;
   string t_share_img = 159;
   bytes topic_module = 160;
   int32 is_bjh = 161;
@@ -376,7 +567,7 @@ message ThreadInfoLite {
   string target_scheme = 217;
   string convert_btn_type = 218;
   int32 is_excellent_thread = 219;
-  repeated bytes hot_post_list = 221;
+  repeated ThreadPostLite hot_post_list = 221;
   bytes robot_entrance = 222;
   bytes click_back_card = 223;
   bytes peiwan_info = 224;
@@ -388,7 +579,136 @@ message ThreadInfoLite {
   bytes business_mix = 232;
 }
 
-message UserLite {
+message ThreadPostLite {
+  uint64 id = 1;
+  string title = 2;
+  uint32 floor = 3;
+  uint32 time = 4;
+  repeated ThreadPbContentLite content = 5;
+  repeated string arr_video = 6;
+  bytes lbs_info = 7;
+  uint32 is_vote = 8;
+  uint32 is_voice = 9;
+  uint32 is_ntitle = 10;
+  uint32 is_bub = 11;
+  string vote_crypt = 12;
+  uint32 sub_post_number = 13;
+  string time_ex = 14;
+  bytes sub_post_list = 15;
+  bytes add_post_list = 16;
+  string bimg_url = 17;
+  string ios_bimg_format = 18;
+  int64 author_id = 19;
+  uint32 add_post_number = 20;
+  bytes signature = 21;
+  bytes tail_info = 22;
+  ThreadUserLite author = 23;
+  bytes zan = 24;
+  int32 storecount = 25;
+  bytes tpoint_post = 26;
+  bytes act_post = 27;
+  bytes present = 28;
+  bytes video_info = 29;
+  bytes post_zan = 30;
+  int32 is_hot_post = 31;
+  repeated bytes ext_tails = 32;
+  bytes high_together = 33;
+  bytes skin_info = 34;
+  bytes pb_deal_info = 35;
+  string lego_card = 36;
+  bytes agree = 37;
+  ThreadSimpleForumLite from_forum = 38;
+  int32 is_post_visible = 39;
+  int32 need_log = 40;
+  int32 img_num_abtest = 41;
+  bytes origin_thread_info = 42;
+  int32 is_fold = 43;
+  string fold_tip = 44;
+  int32 is_top_agree_post = 45;
+  int64 tid = 46;
+  int32 show_squared = 47;
+  int32 is_bjh = 48;
+  string quote_id = 50;
+  int32 is_wonderful_post = 51;
+  repeated bytes item_star = 52;
+  bytes item = 53;
+  bytes outer_item = 54;
+  bytes advertisement = 55;
+  int32 fold_comment_status = 56;
+  string fold_comment_apply_url = 57;
+  bytes novel_info = 58;
+  repeated bytes card_link_info = 59;
+  bytes custom_figure = 60;
+  bytes custom_state = 61;
+  bytes full_length_novel = 62;
+  string dynamic_url = 63;
+  bytes bubble_info = 64;
+  string rumor_source_img = 65;
+  bytes festival_tip_data = 66;
+  bytes novel_recom_card = 67;
+  int32 shield_icon = 68;
+  string icon_url = 69;
+  string toutiao_card_tag = 70;
+  string toutiao_card_tag_color = 71;
+  bytes call_robot_entrance = 72;
+  int32 is_bot_reply = 73;
+  string bot_reply_content = 74;
+  repeated bytes bot_reply_content_list = 75;
+  repeated bytes robot_skill = 76;
+  bytes aigc_feedback_info = 77;
+  bytes chat_content = 78;
+  bytes sprite_meme_info = 79;
+  bytes aichat_bot_comment_card = 80;
+}
+
+message ThreadPbContentLite {
+  uint32 type = 1;
+  string text = 2;
+  string link = 3;
+  string src = 4;
+  string bsize = 5;
+  string big_src = 6;
+  string big_size = 7;
+  string cdn_src = 8;
+  string big_cdn_src = 9;
+  string imgtype = 10;
+  string c = 11;
+  string voice_md5 = 12;
+  uint32 during_time = 13;
+  uint32 is_sub = 14;
+  int64 uid = 15;
+  string dynamic = 16;
+  string _static = 17;
+  uint32 width = 18;
+  uint32 height = 19;
+  string packet_name = 20;
+  string phonetype = 21;
+  uint32 is_native_app = 22;
+  bytes native_app = 23;
+  uint32 e_type = 24;
+  string origin_src = 25;
+  uint32 btn_type = 26;
+  uint32 origin_size = 27;
+  int32 count = 28;
+  bytes graffiti_info = 29;
+  bytes high_together = 30;
+  string media_subtitle = 31;
+  int32 url_type = 32;
+  bytes meme_info = 33;
+  uint32 is_long_pic = 34;
+  uint32 show_original_btn = 35;
+  string cdn_src_active = 36;
+  string topic_special_icon = 37;
+  uint64 item_id = 38;
+  string item_forum_name = 39;
+  bytes tiebaplus_info = 40;
+  bytes item = 41;
+  int64 pic_id = 42;
+  int32 link_type = 43;
+  string target_scheme = 44;
+}
+
+message ThreadUserLite {
   int32 is_login = 1;
   int64 id = 2;
   string name = 3;
@@ -417,7 +737,7 @@ message UserLite {
   string bawu_type = 26;
   string portraith = 27;
   string ip = 28;
-  string bduss = 29;
+  string BDUSS = 29;
   int32 fans_num = 30;
   int32 concern_num = 31;
   int32 sex = 32;
@@ -443,7 +763,7 @@ message UserLite {
   int32 is_guanfang = 52;
   int32 bookmark_count = 53;
   int32 bookmark_new_count = 54;
-  repeated bytes mute_user = 55;
+  repeated ThreadSimpleUserLite mute_user = 55;
   int64 friend_num = 56;
   string fans_nickname = 57;
   string bg_pic = 58;
@@ -523,118 +843,4 @@ message UserLite {
   int64 pa = 148;
   int32 enable_new_homepage = 149;
   string target_scheme = 150;
-}
-
-message AbstractLite {
-  int32 type = 1;
-  string text = 2;
-  string link = 3;
-  string src = 4;
-  string un = 5;
-  string during_time = 6;
-  string voice_md5 = 7;
-}
-
-message MediaLite {
-  int32 type = 1;
-  string small_pic = 2;
-  string big_pic = 3;
-  string water_pic = 4;
-  string vpic = 5;
-  string vsrc = 6;
-  string vhsrc = 7;
-  string src_pic = 8;
-  string text = 9;
-  uint32 width = 10;
-  uint32 height = 11;
-  string bsize = 12;
-  uint32 during_time = 13;
-  uint32 e_type = 14;
-  string origin_pic = 15;
-  uint32 origin_size = 16;
-  int64 post_id = 17;
-  string dynamic_pic = 18;
-  uint32 is_long_pic = 19;
-  uint32 show_original_btn = 20;
-  uint32 is_blocked_pic = 21;
-  double wth_mid_loc = 22;
-  double hth_mid_loc = 23;
-  string jump_url = 24;
-  string guide_text = 25;
-  int32 lottie_type = 26;
-}
-
-message SimpleForumLite {
-  int64 id = 1;
-  string name = 2;
-  int32 is_exists = 3;
-  string avatar = 4;
-  uint32 is_liked = 5;
-  uint32 is_signed = 6;
-  string first_class = 7;
-  string second_class = 8;
-  string ext = 9;
-  uint32 level_id = 10;
-  bytes multi_forum_perm = 11;
-  int32 member_num = 12;
-  int32 post_num = 13;
-  int32 is_brand_forum = 14;
-  repeated bytes tab_info = 15;
-  string forum_toutu = 16;
-  bytes deleted_reason_info = 17;
-  int32 is_frs_mask = 18;
-  bytes theme_color = 19;
-  string recommend_tip = 20;
-  repeated string pendants = 21;
-  bytes show_info = 22;
-  bytes sprite_pb_guide = 23;
-  string scheme = 24;
-}
-
-message AntiLite {
-  string tbs = 1;
-  int32 ifpost = 2;
-  int32 ifposta = 3;
-  int32 forbid_flag = 4;
-  string forbid_info = 5;
-  int32 block_stat = 6;
-  int32 hide_stat = 7;
-  int32 vcode_stat = 8;
-  int32 days_tofree = 9;
-  int32 has_chance = 10;
-  int32 ifvoice = 11;
-  string voice_message = 12;
-  int32 ifaddition = 13;
-  int32 need_vcode = 14;
-  string vcode_md5 = 15;
-  string vcode_pic_url = 16;
-  string user_mute = 17;
-  string ifxiaoying = 18;
-  string poll_message = 19;
-  string video_message = 20;
-  string video_local_message = 21;
-  bytes block_pop_info = 22;
-  int32 reply_private_flag = 23;
-  repeated bytes del_thread_text = 24;
-  int32 multi_delthread = 25;
-  uint32 poll_level = 26;
-  int32 can_goods = 27;
-  bool is_sexyforum = 28;
-  string teenmode_interval = 29;
-  int32 user_chat_block = 30;
-}
-
-message ThreadPersonalizedLite {
-  uint64 tid = 1;
-  string weight = 2;
-  string source = 3;
-  string abtest_tag = 4;
-  repeated DislikeReasonLite dislike_resource = 5;
-  string extra = 6;
-}
-
-message DislikeReasonLite {
-  string dislike_reason = 1;
-  uint32 dislike_id = 2;
-  string extra = 3;
 }

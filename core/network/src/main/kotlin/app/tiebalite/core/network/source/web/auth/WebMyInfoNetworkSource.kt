@@ -10,6 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Header
 import kotlin.coroutines.cancellation.CancellationException
+import org.json.JSONArray
 import org.json.JSONObject
 
 interface WebMyInfoApi {
@@ -51,6 +52,7 @@ class WebMyInfoNetworkSource(
         return try {
             val responseText = api.getMyInfo(cookie = cookie).string()
             val root = JSONObject(responseText)
+            val raw = root.toRawMap()
             val errorCode = root.optInt("no", 0)
             if (errorCode != 0) {
                 throw IllegalStateException(
@@ -60,16 +62,20 @@ class WebMyInfoNetworkSource(
             val data =
                 root.optJSONObject("data")
                     ?: throw IllegalStateException("web myInfo api missing data")
+            val dataRaw = data.toRawMap()
             val isLogin = data.optBoolean("is_login", true)
             if (!isLogin) {
                 throw IllegalStateException("web myInfo api returned not logged in")
             }
             Result.success(
                 WebMyInfoRaw(
+                    body = responseText,
+                    raw = raw,
                     no = errorCode,
                     error = root.optString("error").takeIf { it.isNotBlank() },
                     data =
                         WebMyInfoRaw.Data(
+                            raw = dataRaw,
                             isLogin = isLogin,
                             uid = data.optLong("uid").takeIf { data.has("uid") },
                             id = data.optLong("id").takeIf { data.has("id") },
@@ -96,11 +102,14 @@ class WebMyInfoNetworkSource(
 }
 
 data class WebMyInfoRaw(
+    val body: String,
+    val raw: Map<String, Any?>,
     val no: Int,
     val error: String?,
     val data: Data,
 ) {
     data class Data(
+        val raw: Map<String, Any?>,
         val isLogin: Boolean,
         val uid: Long?,
         val id: Long?,
@@ -117,3 +126,23 @@ data class WebMyInfoRaw(
         val intro: String,
     )
 }
+
+private fun JSONObject.toRawMap(): Map<String, Any?> =
+    keys().asSequence().associateWith { key ->
+        opt(key).toRawValue()
+    }
+
+private fun JSONArray.toRawList(): List<Any?> =
+    List(length()) { index ->
+        opt(index).toRawValue()
+    }
+
+private fun Any?.toRawValue(): Any? =
+    when (this) {
+        null,
+        JSONObject.NULL,
+        -> null
+        is JSONObject -> toRawMap()
+        is JSONArray -> toRawList()
+        else -> this
+    }

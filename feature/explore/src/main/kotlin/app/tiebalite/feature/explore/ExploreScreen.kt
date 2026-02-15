@@ -39,6 +39,7 @@ import app.tiebalite.core.ui.components.feed.FeedCard
 fun ExploreScreen(
     paddingValues: PaddingValues,
     state: ExploreUiState,
+    onOpenThread: (String) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
@@ -75,6 +76,7 @@ fun ExploreScreen(
                     contentPadding = contentPadding,
                     isRefreshing = state.isRefreshing,
                     isLoadingMore = state.isLoadingMore,
+                    onOpenThread = onOpenThread,
                     onLoadMore = onLoadMore,
                 )
             }
@@ -147,6 +149,7 @@ private fun ExploreList(
     contentPadding: PaddingValues,
     isRefreshing: Boolean,
     isLoadingMore: Boolean,
+    onOpenThread: (String) -> Unit,
     onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -163,7 +166,12 @@ private fun ExploreList(
         contentPadding = contentPadding,
     ) {
         itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
-            FeedCard(item = item)
+            FeedCard(
+                item = item,
+                onClick = {
+                    onOpenThread(item.id)
+                },
+            )
             if (index < items.lastIndex) {
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),

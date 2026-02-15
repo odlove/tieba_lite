@@ -1,5 +1,6 @@
 package app.tiebalite.core.ui.components.feed
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,9 +14,14 @@ import app.tiebalite.core.model.recommend.RecommendItem
 fun FeedCard(
     item: RecommendItem,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth().padding(16.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .optionalClickable(onClick = onClick)
+                .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         FeedCardHeader(item = item)
@@ -24,3 +30,7 @@ fun FeedCard(
         FeedCardActions(item = item)
     }
 }
+
+private fun Modifier.optionalClickable(
+    onClick: (() -> Unit)?,
+): Modifier = if (onClick == null) this else clickable(onClick = onClick)

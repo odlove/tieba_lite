@@ -89,6 +89,7 @@ dependencies {
     implementation(project(":feature:messages"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:thread"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

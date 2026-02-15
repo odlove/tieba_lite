@@ -35,6 +35,7 @@ import app.tiebalite.feature.settings.account.login.LoginRoute
 import app.tiebalite.feature.settings.ThemeSettingsEvent
 import app.tiebalite.feature.settings.ThemeSettingsScreen
 import app.tiebalite.feature.settings.ThemeSettingsState
+import app.tiebalite.feature.thread.ThreadRoute
 import app.tiebalite.ui.components.TiebaliteBottomBar
 
 enum class MainDestination(
@@ -62,6 +63,13 @@ enum class MainDestination(
         R.string.nav_profile,
         R.drawable.ic_animated_rounded_person
     )
+}
+
+private object ThreadRoutes {
+    const val ThreadIdArg = "threadId"
+    const val Thread = "thread/{$ThreadIdArg}"
+
+    fun thread(threadId: String): String = "thread/$threadId"
 }
 
 @Composable
@@ -110,7 +118,12 @@ fun TiebaliteApp(
                     RecommendationScreen(paddingValues)
                 }
                 composable(MainDestination.Explore.route) {
-                    ExploreRoute(paddingValues)
+                    ExploreRoute(
+                        paddingValues = paddingValues,
+                        onOpenThread = { threadId ->
+                            navController.navigate(ThreadRoutes.thread(threadId))
+                        },
+                    )
                 }
                 composable(MainDestination.Messages.route) {
                     MessagesScreen(paddingValues)
@@ -197,6 +210,25 @@ fun TiebaliteApp(
                             }
                         },
                         onBack = { navController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = ThreadRoutes.Thread,
+                    arguments =
+                        listOf(
+                            navArgument(ThreadRoutes.ThreadIdArg) {
+                                type = NavType.LongType
+                            },
+                        ),
+                ) { backStackEntry ->
+                    val threadId =
+                        backStackEntry.arguments
+                            ?.getLong(ThreadRoutes.ThreadIdArg)
+                            ?: return@composable
+                    ThreadRoute(
+                        paddingValues = paddingValues,
+                        threadId = threadId,
+                        onBack = { navController.popBackStack() },
                     )
                 }
             }

@@ -20,7 +20,7 @@ internal fun FeedCardBody(item: RecommendItem) {
         item.snippet?.takeIf { it.isNotBlank() }?.let { snippet ->
             Text(
                 text = snippet,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
