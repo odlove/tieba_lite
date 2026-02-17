@@ -6,5 +6,7 @@ interface ThreadRepository {
     suspend fun loadThreadPage(
         threadId: Long,
         page: Int = 1,
+        postId: Long = 0L,
+        lastPostId: Long? = null,
     ): Result<ThreadPage>
 }

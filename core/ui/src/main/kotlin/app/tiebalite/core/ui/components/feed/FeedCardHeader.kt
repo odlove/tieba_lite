@@ -24,16 +24,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.tiebalite.core.model.recommend.RecommendItem
+import app.tiebalite.core.ui.format.formatDateTime
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 internal fun FeedCardHeader(item: RecommendItem) {
-    val subtitle = formatLastTime(item.lastTimeTimestampSeconds)
+    val subtitle = formatDateTime(item.lastTimeTimestampSeconds)
     val forumName = item.forumName?.trim()?.takeIf { it.isNotEmpty() }
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -73,16 +71,6 @@ internal fun FeedCardHeader(item: RecommendItem) {
         }
     }
 }
-
-private fun formatLastTime(lastTimeSeconds: Long?): String? {
-    if (lastTimeSeconds != null && lastTimeSeconds > 0L) {
-        return formatDate(Date(lastTimeSeconds * 1000))
-    }
-    return null
-}
-
-private fun formatDate(date: Date): String =
-    SimpleDateFormat("yyyy年M月d日 HH:mm", Locale.CHINA).format(date)
 
 @Composable
 private fun FeedForumChip(

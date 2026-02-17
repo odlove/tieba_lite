@@ -1,8 +1,7 @@
 package app.tiebalite.core.model.thread
 
-data class ThreadPost(
-    val id: Long,
-    val floor: Int,
+data class ThreadFirstFloorPost(
+    val title: String,
     val authorId: Long,
     val authorName: String? = null,
     val authorLevel: Int = 0,

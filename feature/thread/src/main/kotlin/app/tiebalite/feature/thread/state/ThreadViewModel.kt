@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread
+package app.tiebalite.feature.thread.state
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -39,43 +39,117 @@ class ThreadViewModel(
         refreshInternal(initial = false)
     }
 
+    fun loadMore() {
+        val state = _uiState.value
+        if (state.isInitialLoading || state.isRefreshing || state.isLoadingMore) {
+            return
+        }
+        if (state.firstFloorPost == null && state.posts.isEmpty()) {
+            return
+        }
+
+        val loadLatestPosts = !state.hasMore
+
+        requestJob?.cancel()
+        _uiState.update {
+            it.copy(
+                isLoadingMore = true,
+                errorMessage = null,
+            )
+        }
+
+        val latestPostId =
+            state.posts
+                .maxByOrNull { post -> post.floor }
+                ?.id
+                ?: state.posts.lastOrNull()?.id
+                ?: 0L
+        val pageToLoad = if (loadLatestPosts) LATEST_POSTS_PAGE else state.currentPage + 1
+        val postId = if (loadLatestPosts) latestPostId else 0L
+        val lastPostId = if (loadLatestPosts) latestPostId else null
+
+        requestJob =
+            viewModelScope.launch {
+                repository.loadThreadPage(
+                    threadId = threadId,
+                    page = pageToLoad,
+                    postId = postId,
+                    lastPostId = lastPostId,
+                ).fold(
+                    onSuccess = { page ->
+                        _uiState.update { current ->
+                            current.copy(
+                                forumName = page.forumName,
+                                forumAvatarUrl = page.forumAvatarUrl,
+                                firstFloorPost = current.firstFloorPost ?: page.firstFloorPost,
+                                posts = (current.posts + page.posts).distinctBy { post -> post.id },
+                                isLoadingMore = false,
+                                currentPage = maxOf(current.currentPage, page.currentPage),
+                                hasMore = page.hasMore,
+                                errorMessage = null,
+                            )
+                        }
+                    },
+                    onFailure = {
+                        emitNetworkError()
+                        _uiState.update { current ->
+                            current.copy(
+                                isLoadingMore = false,
+                                errorMessage = null,
+                            )
+                        }
+                    },
+                )
+            }
+    }
+
     private fun refreshInternal(initial: Boolean) {
         requestJob?.cancel()
         _uiState.update { current ->
             current.copy(
                 isInitialLoading = initial && current.posts.isEmpty(),
                 isRefreshing = !initial,
+                isLoadingMore = false,
                 errorMessage = null,
             )
         }
 
         requestJob =
             viewModelScope.launch {
-                repository.loadThreadPage(threadId = threadId).fold(
+                repository.loadThreadPage(
+                    threadId = threadId,
+                    page = FIRST_PAGE,
+                ).fold(
                     onSuccess = { page ->
                         _uiState.update {
                             it.copy(
-                                title = page.title,
                                 forumName = page.forumName,
                                 forumAvatarUrl = page.forumAvatarUrl,
+                                firstFloorPost = page.firstFloorPost,
                                 posts = page.posts,
                                 isInitialLoading = false,
                                 isRefreshing = false,
+                                isLoadingMore = false,
+                                currentPage = page.currentPage.takeIf { value -> value > 0 } ?: FIRST_PAGE,
+                                hasMore = page.hasMore,
                                 errorMessage = null,
                             )
                         }
                     },
                     onFailure = {
-                        val hasPosts = _uiState.value.posts.isNotEmpty()
-                        if (hasPosts) {
-                            _uiEvents.tryEmit(ThreadUiEvent.ShowToast(NETWORK_ERROR_MESSAGE))
+                        val hasContent =
+                            _uiState.value.firstFloorPost != null ||
+                                _uiState.value.posts.isNotEmpty()
+                        if (hasContent) {
+                            emitNetworkError()
                         }
                         _uiState.update { current ->
                             current.copy(
                                 isInitialLoading = false,
                                 isRefreshing = false,
+                                isLoadingMore = false,
                                 errorMessage =
-                                    if (current.posts.isEmpty()) {
+                                    if (current.firstFloorPost == null && current.posts.isEmpty()) {
                                         NETWORK_ERROR_MESSAGE
                                     } else {
                                         null
@@ -87,7 +161,13 @@ class ThreadViewModel(
             }
     }
 
+    private fun emitNetworkError() {
+        _uiEvents.tryEmit(ThreadUiEvent.ShowToast(NETWORK_ERROR_MESSAGE))
+    }
+
     companion object {
+        private const val FIRST_PAGE = 1
+        private const val LATEST_POSTS_PAGE = 0
         private const val NETWORK_ERROR_MESSAGE = "网络错误"
 
         fun factory(threadId: Long): ViewModelProvider.Factory =

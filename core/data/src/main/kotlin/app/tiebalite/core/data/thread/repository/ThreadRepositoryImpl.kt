@@ -11,6 +11,13 @@ class ThreadRepositoryImpl(
     override suspend fun loadThreadPage(
         threadId: Long,
         page: Int,
+        postId: Long,
+        lastPostId: Long?,
     ): Result<ThreadPage> =
-        remoteDataSource.loadThreadPage(threadId = threadId, page = page).mapCatching(mapper::map)
+        remoteDataSource.loadThreadPage(
+            threadId = threadId,
+            page = page,
+            postId = postId,
+            lastPostId = lastPostId,
+        ).mapCatching(mapper::map)
 }

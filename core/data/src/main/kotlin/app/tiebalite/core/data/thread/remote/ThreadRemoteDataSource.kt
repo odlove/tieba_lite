@@ -12,11 +12,15 @@ class ThreadRemoteDataSource(
     suspend fun loadThreadPage(
         threadId: Long,
         page: Int,
+        postId: Long,
+        lastPostId: Long?,
     ): Result<PbPageRaw> {
         val session = sessionProvider()
         return pbPageNetworkSource.fetchPage(
             threadId = threadId,
             page = page,
+            postId = postId,
+            lastPostId = lastPostId,
             bduss = session?.bduss,
             stoken = session?.stoken,
             tbs = tbsProvider() ?: session?.tbs,

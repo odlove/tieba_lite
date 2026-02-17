@@ -9,6 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.tiebalite.feature.thread.state.ThreadUiEvent
+import app.tiebalite.feature.thread.state.ThreadViewModel
+import app.tiebalite.feature.thread.ui.screen.ThreadScreen
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -37,6 +40,7 @@ fun ThreadRoute(
         state = uiState,
         onBack = onBack,
         onRefresh = viewModel::refresh,
+        onLoadMore = viewModel::loadMore,
         onRetry = viewModel::refresh,
     )
 }
