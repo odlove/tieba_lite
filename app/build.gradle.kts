@@ -84,7 +84,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
-    implementation(project(":feature:recommend"))
+    implementation(project(":feature:myforums"))
     implementation(project(":feature:explore"))
     implementation(project(":feature:messages"))
     implementation(project(":feature:profile"))

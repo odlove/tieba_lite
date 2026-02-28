@@ -1,4 +1,4 @@
-package app.tiebalite.feature.recommend
+package app.tiebalite.feature.myforums
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import app.tiebalite.core.ui.components.AppTopBar
 
 @Composable
-fun RecommendationScreen(paddingValues: PaddingValues) {
+fun MyForumsScreen(paddingValues: PaddingValues) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppTopBar(title = "我的吧")
         Box(

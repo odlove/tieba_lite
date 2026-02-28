@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "app.tiebalite.feature.recommend"
+    namespace = "app.tiebalite.feature.myforums"
 
     defaultConfig {
         minSdk = 24

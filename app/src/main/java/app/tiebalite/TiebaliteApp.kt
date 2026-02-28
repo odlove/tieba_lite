@@ -25,7 +25,7 @@ import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.feature.explore.ExploreRoute
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
-import app.tiebalite.feature.recommend.RecommendationScreen
+import app.tiebalite.feature.myforums.MyForumsScreen
 import app.tiebalite.feature.settings.SettingsRoutes
 import app.tiebalite.feature.settings.SettingsHomeRoute
 import app.tiebalite.feature.settings.account.SettingsAccountDetailRoute
@@ -40,27 +40,22 @@ import app.tiebalite.ui.components.TiebaliteBottomBar
 
 enum class MainDestination(
     val route: String,
-    val labelRes: Int,
     val iconRes: Int
 ) {
-    Recommendation(
-        "recommendation",
-        R.string.nav_recommend,
+    MyForums(
+        "my_forums",
         R.drawable.ic_animated_rounded_inventory_2
     ),
     Explore(
         "explore",
-        R.string.nav_explore,
         R.drawable.ic_animated_toy_fans
     ),
     Messages(
         "messages",
-        R.string.nav_messages,
         R.drawable.ic_animated_rounded_notifications
     ),
     Profile(
         "profile",
-        R.string.nav_profile,
         R.drawable.ic_animated_rounded_person
     )
 }
@@ -107,15 +102,15 @@ fun TiebaliteApp(
         ) { paddingValues ->
             NavHost(
                 navController = navController,
-                startDestination = MainDestination.Recommendation.route,
+                startDestination = MainDestination.Explore.route,
                 modifier = Modifier,
                 enterTransition = { fadeIn(animationSpec = tween(320)) },
                 exitTransition = { fadeOut(animationSpec = tween(320)) },
                 popEnterTransition = { fadeIn(animationSpec = tween(260)) },
                 popExitTransition = { fadeOut(animationSpec = tween(260)) }
             ) {
-                composable(MainDestination.Recommendation.route) {
-                    RecommendationScreen(paddingValues)
+                composable(MainDestination.MyForums.route) {
+                    MyForumsScreen(paddingValues)
                 }
                 composable(MainDestination.Explore.route) {
                     ExploreRoute(
