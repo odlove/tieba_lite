@@ -10,15 +10,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.thread.ThreadPost
 import app.tiebalite.feature.thread.ui.post.content.ThreadPostContentSection
+import app.tiebalite.feature.thread.ui.post.shared.AuthorAvatar
 import app.tiebalite.feature.thread.ui.post.shared.AuthorNameWithLevel
+import app.tiebalite.feature.thread.ui.post.shared.formatPostMeta
 
 @Composable
 internal fun ThreadReplyCard(
     item: ThreadPost,
+    threadAuthorId: Long?,
 ) {
+    val isThreadAuthor = threadAuthorId != null && threadAuthorId > 0L && item.authorId == threadAuthorId
     Column(
         modifier =
             Modifier
@@ -29,13 +34,32 @@ internal fun ThreadReplyCard(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            AuthorNameWithLevel(
-                name = item.authorName ?: "贴吧用户",
-                level = item.authorLevel,
-                textStyle = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.weight(1f),
+            AuthorAvatar(
+                name = item.authorName,
+                imageUrl = item.authorAvatarUrl,
+                size = 36.dp,
             )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                AuthorNameWithLevel(
+                    name = item.authorName ?: "贴吧用户",
+                    level = item.authorLevel,
+                    isThreadAuthor = isThreadAuthor,
+                    textStyle = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    text = formatPostMeta(item.timestampSeconds, item.ipLocation),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Text(
                 text = "${item.floor}楼",
                 style = MaterialTheme.typography.labelMedium,

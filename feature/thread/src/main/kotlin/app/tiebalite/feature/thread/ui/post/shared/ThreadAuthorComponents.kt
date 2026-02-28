@@ -34,6 +34,7 @@ internal fun AuthorNameWithLevel(
     level: Int,
     textStyle: TextStyle,
     modifier: Modifier = Modifier,
+    isThreadAuthor: Boolean = false,
 ) {
     Row(
         modifier = modifier,
@@ -46,11 +47,32 @@ internal fun AuthorNameWithLevel(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false),
         )
+        if (isThreadAuthor) {
+            Spacer(modifier = Modifier.width(4.dp))
+            OriginalPosterChip()
+        }
         if (level > 0) {
             Spacer(modifier = Modifier.width(4.dp))
             LevelChip(level = level)
         }
     }
+}
+
+@Composable
+private fun OriginalPosterChip() {
+    val chipColor = MaterialTheme.colorScheme.tertiaryContainer
+    Text(
+        text = "楼主",
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 10.sp),
+        color = MaterialTheme.colorScheme.onTertiaryContainer,
+        textAlign = TextAlign.Center,
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(percent = 100))
+                .background(chipColor)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+        maxLines = 1,
+    )
 }
 
 @Composable

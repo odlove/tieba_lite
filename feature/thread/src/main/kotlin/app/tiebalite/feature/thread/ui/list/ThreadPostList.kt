@@ -101,7 +101,10 @@ internal fun ThreadPostList(
                 items = replyPosts,
                 key = { _, item -> item.id },
             ) { index, item ->
-                ThreadReplyCard(item = item)
+                ThreadReplyCard(
+                    item = item,
+                    threadAuthorId = firstFloorPost?.authorId,
+                )
                 if (index < replyPosts.lastIndex) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
