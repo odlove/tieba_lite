@@ -1,5 +1,7 @@
 package app.tiebalite.feature.thread.ui.post.content
 
+import android.content.pm.ApplicationInfo
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
@@ -18,13 +20,20 @@ import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.thread.ThreadPostBody
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import coil3.request.crossfade
+import coil3.request.ImageResult
+import coil3.request.SuccessResult
+import coil3.request.transitionFactory
+import coil3.transition.CrossfadeTransition
+import coil3.transition.Transition
+import coil3.transition.TransitionTarget
 
 @Composable
 internal fun PostImageGrid(images: List<ThreadPostBody.MediaPart.Image>) {
     if (images.isEmpty()) {
         return
     }
+    val context = LocalContext.current
+    val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val containerWidthPx = LocalWindowInfo.current.containerSize.width
     val containerWidthDp = with(LocalDensity.current) { containerWidthPx.toDp() }
     val widthFraction = if (containerWidthDp < 600.dp) 1f else 0.5f
@@ -33,13 +42,29 @@ internal fun PostImageGrid(images: List<ThreadPostBody.MediaPart.Image>) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         images.forEach { image ->
+            val requestBuilder =
+                ImageRequest
+                    .Builder(context)
+                    .data(image.url)
+                    .transitionFactory(AlwaysCrossfadeTransitionFactory)
+            if (isDebuggable) {
+                requestBuilder.listener(
+                    onSuccess = { request, result ->
+                        Log.d(
+                            ThreadImageDebugTag,
+                            "post success source=${result.dataSource} data=${request.data}",
+                        )
+                    },
+                    onError = { request, result ->
+                        Log.d(
+                            ThreadImageDebugTag,
+                            "post error data=${request.data} throwable=${result.throwable}",
+                        )
+                    },
+                )
+            }
             AsyncImage(
-                model =
-                    ImageRequest
-                        .Builder(LocalContext.current)
-                        .data(image.url)
-                        .crossfade(true)
-                        .build(),
+                model = requestBuilder.build(),
                 contentDescription = null,
                 modifier =
                     Modifier
@@ -52,6 +77,26 @@ internal fun PostImageGrid(images: List<ThreadPostBody.MediaPart.Image>) {
         }
     }
 }
+
+private const val ThreadImageDebugTag = "ThreadImageDebug"
+
+private val AlwaysCrossfadeTransitionFactory =
+    object : Transition.Factory {
+        override fun create(
+            target: TransitionTarget,
+            result: ImageResult,
+        ): Transition {
+            if (result !is SuccessResult) {
+                return Transition.Factory.NONE.create(target, result)
+            }
+            return CrossfadeTransition(
+                target = target,
+                result = result,
+                durationMillis = 200,
+                preferExactIntrinsicSize = false,
+            )
+        }
+    }
 
 private fun ThreadPostBody.MediaPart.Image.aspectRatioOrDefault(defaultRatio: Float = 1f): Float {
     val imageWidth = width ?: return defaultRatio

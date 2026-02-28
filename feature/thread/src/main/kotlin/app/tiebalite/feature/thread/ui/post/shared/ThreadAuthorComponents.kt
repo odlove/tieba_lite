@@ -1,5 +1,7 @@
 package app.tiebalite.feature.thread.ui.post.shared
 
+import android.util.Log
+import android.content.pm.ApplicationInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -108,15 +110,33 @@ internal fun AuthorAvatar(
     imageUrl: String?,
     size: Dp,
 ) {
+    val context = LocalContext.current
+    val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val avatarUrl = imageUrl?.trim().orEmpty()
     if (avatarUrl.isNotBlank()) {
+        val requestBuilder =
+            ImageRequest
+                .Builder(context)
+                .data(avatarUrl)
+                .crossfade(true)
+        if (isDebuggable) {
+            requestBuilder.listener(
+                onSuccess = { request, result ->
+                    Log.d(
+                        ThreadImageDebugTag,
+                        "avatar success source=${result.dataSource} data=${request.data}",
+                    )
+                },
+                onError = { request, result ->
+                    Log.d(
+                        ThreadImageDebugTag,
+                        "avatar error data=${request.data} throwable=${result.throwable}",
+                    )
+                },
+            )
+        }
         AsyncImage(
-            model =
-                ImageRequest
-                    .Builder(LocalContext.current)
-                    .data(avatarUrl)
-                    .crossfade(true)
-                    .build(),
+            model = requestBuilder.build(),
             contentDescription = null,
             modifier =
                 Modifier
@@ -141,3 +161,5 @@ internal fun AuthorAvatar(
         )
     }
 }
+
+private const val ThreadImageDebugTag = "ThreadImageDebug"
