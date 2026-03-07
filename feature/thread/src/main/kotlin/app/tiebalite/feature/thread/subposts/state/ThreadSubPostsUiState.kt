@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.subposts
+package app.tiebalite.feature.thread.subposts.state
 
 import app.tiebalite.core.model.thread.ThreadPost
 import app.tiebalite.core.model.thread.ThreadSubPost

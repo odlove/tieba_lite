@@ -1,8 +1,6 @@
-package app.tiebalite.feature.thread.shared
+package app.tiebalite.feature.thread.common.post
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -25,9 +23,11 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.ui.emoticon.DefaultEmoticonResolver
@@ -36,131 +36,69 @@ import app.tiebalite.core.ui.emoticon.EmoticonResolver
 import coil3.compose.AsyncImage
 
 @Composable
-internal fun ThreadPostContentSection(
-    body: ThreadPostBody,
+internal fun ThreadPostRichText(
+    inline: List<ThreadPostBody.InlinePart>,
     modifier: Modifier = Modifier,
+    prefix: AnnotatedString = AnnotatedString(""),
+    suffix: AnnotatedString = AnnotatedString(""),
+    style: TextStyle = MaterialTheme.typography.bodyLarge,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    onClick: (() -> Unit)? = null,
 ) {
     val linkColor = MaterialTheme.colorScheme.primary
     val emoticonResolver = DefaultEmoticonResolver
-    val blocks =
-        remember(body, linkColor, emoticonResolver) {
-            buildThreadPostContentBlocks(
-                body = body,
+    val content =
+        remember(inline, prefix, suffix, linkColor, emoticonResolver) {
+            buildThreadInlineContent(
+                inline = inline,
                 linkColor = linkColor,
                 emoticonResolver = emoticonResolver,
+                prefix = prefix,
+                suffix = suffix,
             )
         }
-    if (blocks.isEmpty()) {
+    if (content.text.isEmpty()) {
         return
     }
-    Column(
+    ThreadInlineText(
+        content = content,
+        style = style,
+        color = color,
+        maxLines = maxLines,
+        overflow = overflow,
+        onClick = onClick,
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        blocks.forEach { block ->
-            when (block) {
-                is ThreadPostContentBlock.Text -> {
-                    ThreadInlineText(
-                        content = block.content,
-                    )
-                }
-
-                is ThreadPostContentBlock.ImageGroup -> {
-                    PostImageGrid(images = block.images)
-                }
-
-                is ThreadPostContentBlock.MediaHint -> {
-                    Text(
-                        text = block.text,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-    }
-}
-
-private fun buildThreadPostContentBlocks(
-    body: ThreadPostBody,
-    linkColor: Color,
-    emoticonResolver: EmoticonResolver,
-): List<ThreadPostContentBlock> {
-    val blocks = mutableListOf<ThreadPostContentBlock>()
-
-    val inlineContent =
-        buildInlineAnnotatedText(
-            inline = body.inline,
-            linkColor = linkColor,
-            emoticonResolver = emoticonResolver,
-        )
-    if (inlineContent.text.isNotEmpty()) {
-        blocks += ThreadPostContentBlock.Text(content = inlineContent)
-    }
-
-    val images =
-        body.media
-            .asSequence()
-            .mapNotNull { part -> part as? ThreadPostBody.MediaPart.Image }
-            .filter { image -> image.url.isNotBlank() }
-            .distinctBy { image -> image.url }
-            .toList()
-    if (images.isNotEmpty()) {
-        blocks += ThreadPostContentBlock.ImageGroup(images = images)
-    }
-
-    body.media.forEach { part ->
-        when (part) {
-            is ThreadPostBody.MediaPart.Image -> Unit
-            is ThreadPostBody.MediaPart.Video -> {
-                blocks += ThreadPostContentBlock.MediaHint(text = "视频")
-            }
-
-            is ThreadPostBody.MediaPart.Voice -> {
-                blocks +=
-                    ThreadPostContentBlock.MediaHint(
-                        text = if (part.durationSeconds > 0) "语音 ${part.durationSeconds}s" else "语音",
-                    )
-            }
-        }
-    }
-
-    return blocks
+    )
 }
 
 @Composable
 private fun ThreadInlineText(
     content: ThreadInlineContent,
+    style: TextStyle,
+    color: Color,
+    maxLines: Int,
+    overflow: TextOverflow,
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val text = content.text
     val uriHandler = LocalUriHandler.current
     var textLayoutResult by remember(text) { mutableStateOf<TextLayoutResult?>(null) }
-    val hasUrlAnnotation =
-        remember(text) {
-            text
-                .getStringAnnotations(
-                    tag = UrlAnnotationTag,
-                    start = 0,
-                    end = text.length,
-                ).isNotEmpty()
-        }
+    val hasUrlAnnotation = remember(text) { text.hasUrlAnnotation() }
     val clickableModifier =
-        if (hasUrlAnnotation) {
-            Modifier.pointerInput(text, uriHandler) {
+        if (hasUrlAnnotation || onClick != null) {
+            Modifier.pointerInput(text, uriHandler, onClick) {
                 detectTapGestures { tapPosition ->
-                    val layout = textLayoutResult ?: return@detectTapGestures
-                    val offset = layout.getOffsetForPosition(tapPosition)
                     val url =
-                        text
-                            .getStringAnnotations(
-                                tag = UrlAnnotationTag,
-                                start = offset,
-                                end = offset,
-                            ).firstOrNull()
-                            ?.item
+                        textLayoutResult
+                            ?.getOffsetForPosition(tapPosition)
+                            ?.let { offset -> text.findUrlAnnotation(offset) }
                     if (!url.isNullOrBlank()) {
                         runCatching { uriHandler.openUri(url) }
+                    } else {
+                        onClick?.invoke()
                     }
                 }
             }
@@ -169,24 +107,29 @@ private fun ThreadInlineText(
         }
     Text(
         text = text,
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurface,
+        style = style,
+        color = color,
         inlineContent = content.inlineContent,
         onTextLayout = { result ->
             textLayoutResult = result
         },
         modifier = modifier.then(clickableModifier),
+        maxLines = maxLines,
+        overflow = overflow,
     )
 }
 
-private fun buildInlineAnnotatedText(
+internal fun buildThreadInlineContent(
     inline: List<ThreadPostBody.InlinePart>,
     linkColor: Color,
     emoticonResolver: EmoticonResolver,
+    prefix: AnnotatedString = AnnotatedString(""),
+    suffix: AnnotatedString = AnnotatedString(""),
 ): ThreadInlineContent {
     val inlineContent = mutableMapOf<String, InlineTextContent>()
     val text =
         buildAnnotatedString {
+            append(prefix)
             inline.forEachIndexed { index, part ->
                 when (part) {
                     is ThreadPostBody.InlinePart.Text -> append(part.text)
@@ -250,6 +193,7 @@ private fun buildInlineAnnotatedText(
                     is ThreadPostBody.InlinePart.Unknown -> append(part.text.ifEmpty { part.link })
                 }
             }
+            append(suffix)
         }
     return ThreadInlineContent(
         text = text,
@@ -257,7 +201,7 @@ private fun buildInlineAnnotatedText(
     )
 }
 
-private data class ThreadInlineContent(
+internal data class ThreadInlineContent(
     val text: AnnotatedString,
     val inlineContent: Map<String, InlineTextContent>,
 )
@@ -298,20 +242,20 @@ private fun ThreadEmoticonInline(
 
 private fun ThreadPostBody.InlinePart.Emoticon.fallbackText(): String = "#(${name.ifBlank { "表情" }})"
 
-private sealed interface ThreadPostContentBlock {
-    data class Text(
-        val content: ThreadInlineContent,
-    ) : ThreadPostContentBlock
+private fun AnnotatedString.hasUrlAnnotation(): Boolean =
+    getStringAnnotations(
+        tag = UrlAnnotationTag,
+        start = 0,
+        end = length,
+    ).isNotEmpty()
 
-    data class ImageGroup(
-        val images: List<ThreadPostBody.MediaPart.Image>,
-    ) : ThreadPostContentBlock
-
-    data class MediaHint(
-        val text: String,
-    ) : ThreadPostContentBlock
-}
+private fun AnnotatedString.findUrlAnnotation(offset: Int): String? =
+    getStringAnnotations(
+        tag = UrlAnnotationTag,
+        start = offset,
+        end = offset,
+    ).firstOrNull()?.item
 
 private const val UrlAnnotationTag = "url"
 private const val LinkPrefix = "🔗"
-private val EmoticonSize = 18.sp
+private val EmoticonSize: TextUnit = 18.sp

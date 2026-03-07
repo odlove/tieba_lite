@@ -9,9 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import app.tiebalite.feature.thread.main.ThreadUiEvent
-import app.tiebalite.feature.thread.main.ThreadViewModel
-import app.tiebalite.feature.thread.main.ThreadScreen
+import app.tiebalite.feature.thread.main.state.ThreadUiEvent
+import app.tiebalite.feature.thread.main.state.ThreadViewModel
+import app.tiebalite.feature.thread.main.screen.ThreadScreen
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

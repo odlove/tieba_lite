@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.subposts
+package app.tiebalite.feature.thread.subposts.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.tiebalite.feature.thread.shared.ThreadPostCard
+import app.tiebalite.feature.thread.common.post.ThreadPostCard
+import app.tiebalite.feature.thread.subposts.post.ThreadSubPostCard
+import app.tiebalite.feature.thread.subposts.state.ThreadSubPostsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,7 +101,6 @@ internal fun ThreadSubPostsScreen(
                     ThreadPostCard(
                         item = post.copy(subPostCount = 0),
                         threadAuthorId = state.threadAuthorId,
-                        onOpenSubPosts = {},
                     )
                 }
                 item(key = "subposts_parent_divider") {

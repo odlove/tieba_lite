@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.main
+package app.tiebalite.feature.thread.main.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.tiebalite.feature.thread.main.ThreadUiState
+import app.tiebalite.feature.thread.main.state.ThreadUiState
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade

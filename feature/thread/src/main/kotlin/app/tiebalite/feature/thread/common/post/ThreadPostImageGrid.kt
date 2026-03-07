@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.shared
+package app.tiebalite.feature.thread.common.post
 
 import android.content.pm.ApplicationInfo
 import android.util.Log

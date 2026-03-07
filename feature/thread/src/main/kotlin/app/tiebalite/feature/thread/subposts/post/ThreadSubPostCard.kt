@@ -1,6 +1,5 @@
-package app.tiebalite.feature.thread.shared
+package app.tiebalite.feature.thread.subposts.post
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,17 +12,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.tiebalite.core.model.thread.ThreadPost
-import app.tiebalite.feature.thread.shared.ThreadPostContentSection
-import app.tiebalite.feature.thread.shared.AuthorAvatar
-import app.tiebalite.feature.thread.shared.AuthorNameWithLevel
-import app.tiebalite.feature.thread.shared.formatPostMeta
+import app.tiebalite.core.model.thread.ThreadSubPost
+import app.tiebalite.feature.thread.common.post.AuthorAvatar
+import app.tiebalite.feature.thread.common.post.AuthorNameWithLevel
+import app.tiebalite.feature.thread.common.post.ThreadPostContentSection
+import app.tiebalite.feature.thread.common.post.formatPostMeta
 
 @Composable
-internal fun ThreadPostCard(
-    item: ThreadPost,
+internal fun ThreadSubPostCard(
+    item: ThreadSubPost,
     threadAuthorId: Long?,
-    onOpenSubPosts: (Long) -> Unit,
 ) {
     val isThreadAuthor = threadAuthorId != null && threadAuthorId > 0L && item.authorId == threadAuthorId
     Column(
@@ -41,7 +39,7 @@ internal fun ThreadPostCard(
             AuthorAvatar(
                 name = item.authorName,
                 imageUrl = item.authorAvatarUrl,
-                size = 36.dp,
+                size = 32.dp,
             )
             Column(
                 modifier = Modifier.weight(1f),
@@ -62,22 +60,9 @@ internal fun ThreadPostCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Text(
-                text = "${item.floor}楼",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
         ThreadPostContentSection(
             body = item.body,
         )
-        if (item.subPostCount > 0) {
-            Text(
-                text = "查看楼中楼 ${item.subPostCount} 条",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onOpenSubPosts(item.id) },
-            )
-        }
     }
 }

@@ -306,6 +306,11 @@ message ThreadUserLite {
   string ip_address = 127;
 }
 
+message ThreadInlineSubPostsLite {
+  uint64 pid = 1;
+  repeated ThreadSubPostLite sub_post_list = 2;
+}
+
 message PbFloorRequestLite {
   PbFloorRequestDataLite data = 1;
 }

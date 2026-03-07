@@ -4,6 +4,7 @@ data class ThreadPost(
     val id: Long,
     val floor: Int,
     val subPostCount: Int = 0,
+    val subPosts: List<ThreadSubPost> = emptyList(),
     val authorId: Long,
     val authorName: String? = null,
     val authorLevel: Int = 0,

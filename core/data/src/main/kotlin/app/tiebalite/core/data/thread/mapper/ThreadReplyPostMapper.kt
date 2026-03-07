@@ -10,12 +10,14 @@ internal class ThreadReplyPostMapper(
     fun map(
         post: ThreadPostLite,
         author: ThreadUserLite?,
+        userMap: Map<Long, ThreadUserLite> = emptyMap(),
     ): ThreadPost {
-        val payload = payloadMapper.map(post = post, author = author)
+        val payload = payloadMapper.map(post = post, author = author, userMap = userMap)
         return ThreadPost(
             id = payload.id,
             floor = payload.floor,
             subPostCount = payload.subPostCount,
+            subPosts = payload.subPosts,
             authorId = payload.authorId,
             authorName = payload.authorName,
             authorLevel = payload.authorLevel,

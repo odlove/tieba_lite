@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import app.tiebalite.feature.thread.subposts.ThreadSubPostsViewModel
-import app.tiebalite.feature.thread.subposts.ThreadSubPostsScreen
+import app.tiebalite.feature.thread.subposts.state.ThreadSubPostsViewModel
+import app.tiebalite.feature.thread.subposts.screen.ThreadSubPostsScreen
 
 @Composable
 fun ThreadSubPostsRoute(

@@ -16,4 +16,10 @@ internal class ThreadAuthorResolver {
         userMap: Map<Long, ThreadUserLite>,
     ): ThreadUserLite? =
         userMap[post.authorId]
+
+    fun resolve(
+        authorId: Long,
+        userMap: Map<Long, ThreadUserLite>,
+    ): ThreadUserLite? =
+        userMap[authorId]
 }

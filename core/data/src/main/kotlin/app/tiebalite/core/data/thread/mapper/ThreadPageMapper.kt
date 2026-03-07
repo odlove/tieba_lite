@@ -31,6 +31,7 @@ class ThreadPageMapper {
                 replyPostMapper.map(
                     post = post,
                     author = authorResolver.resolve(post = post, userMap = userMap),
+                    userMap = userMap,
                 )
             }
 

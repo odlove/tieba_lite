@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.subposts
+package app.tiebalite.feature.thread.subposts.state
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
