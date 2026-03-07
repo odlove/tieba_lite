@@ -1,24 +1,23 @@
 package app.tiebalite.core.data.thread.mapper
 
-import app.tiebalite.core.model.thread.ThreadPostBody
-import app.tiebalite.core.network.proto.thread.ThreadPostLite
+import app.tiebalite.core.model.thread.ThreadSubPost
+import app.tiebalite.core.network.proto.thread.ThreadSubPostLite
 import app.tiebalite.core.network.proto.thread.ThreadUserLite
 
-internal class ThreadPostPayloadMapper(
+internal class ThreadSubPostMapper(
     private val contentMapper: ThreadContentMapper = ThreadContentMapper(),
 ) {
     fun map(
-        post: ThreadPostLite,
+        subPost: ThreadSubPostLite,
         author: ThreadUserLite?,
-    ): ThreadPostPayload {
-        return ThreadPostPayload(
-            id = post.id,
-            floor = post.floor,
-            subPostCount = post.subPostNumber,
+    ): ThreadSubPost {
+        return ThreadSubPost(
+            id = subPost.id,
+            floor = subPost.floor,
             authorId =
                 author?.id
                     ?.takeIf { id -> id > 0L }
-                    ?: post.authorId,
+                    ?: subPost.authorId,
             authorName =
                 author
                     ?.nameShow
@@ -30,24 +29,11 @@ internal class ThreadPostPayloadMapper(
                     ?: 0,
             authorAvatarUrl = portraitToAvatarUrl(author?.portrait.orEmpty()),
             ipLocation = author?.ipAddress?.trim()?.takeIf { it.isNotBlank() },
-            body = contentMapper.map(post.contentList),
+            body = contentMapper.map(subPost.contentList),
             timestampSeconds =
-                post.time
+                subPost.time
                     .takeIf { it > 0 }
                     ?.toLong(),
         )
     }
 }
-
-internal data class ThreadPostPayload(
-    val id: Long,
-    val floor: Int,
-    val subPostCount: Int,
-    val authorId: Long,
-    val authorName: String?,
-    val authorLevel: Int,
-    val authorAvatarUrl: String?,
-    val ipLocation: String?,
-    val body: ThreadPostBody,
-    val timestampSeconds: Long?,
-)

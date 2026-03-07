@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.ui.post.shared
+package app.tiebalite.feature.thread.shared
 
 import app.tiebalite.core.ui.format.formatDateTime
 

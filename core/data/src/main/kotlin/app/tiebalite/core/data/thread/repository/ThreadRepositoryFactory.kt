@@ -12,9 +12,11 @@ object ThreadRepositoryFactory {
         tbsProvider: () -> String? = { null },
     ): ThreadRepository {
         val pbPageNetworkSource = TbClientThreadNetwork.createPbPageNetworkSource(baseUrl = baseUrl)
+        val pbFloorNetworkSource = TbClientThreadNetwork.createPbFloorNetworkSource(baseUrl = baseUrl)
         val remoteDataSource =
             ThreadRemoteDataSource(
                 pbPageNetworkSource = pbPageNetworkSource,
+                pbFloorNetworkSource = pbFloorNetworkSource,
                 sessionProvider = sessionProvider,
                 tbsProvider = tbsProvider,
             )

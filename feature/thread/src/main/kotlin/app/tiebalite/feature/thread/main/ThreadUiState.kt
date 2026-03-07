@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.state
+package app.tiebalite.feature.thread.main
 
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.core.model.thread.ThreadPost

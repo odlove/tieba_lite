@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.ui.screen
+package app.tiebalite.feature.thread.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,9 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import app.tiebalite.feature.thread.state.ThreadUiState
-import app.tiebalite.feature.thread.ui.list.ThreadPostList
-import app.tiebalite.feature.thread.ui.screen.topbar.ThreadTopBar
+import app.tiebalite.feature.thread.main.ThreadUiState
+import app.tiebalite.feature.thread.main.ThreadPostList
+import app.tiebalite.feature.thread.main.ThreadTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +32,7 @@ fun ThreadScreen(
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
+    onOpenSubPosts: (Long) -> Unit,
 ) {
     val hasContent = state.firstFloorPost != null || state.posts.isNotEmpty()
     val layoutDirection = LocalLayoutDirection.current
@@ -74,6 +75,7 @@ fun ThreadScreen(
                     isLoadingMore = state.isLoadingMore,
                     hasMore = state.hasMore,
                     onLoadMore = onLoadMore,
+                    onOpenSubPosts = onOpenSubPosts,
                 )
             }
         }

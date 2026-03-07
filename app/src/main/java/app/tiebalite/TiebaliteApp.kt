@@ -36,6 +36,7 @@ import app.tiebalite.feature.settings.ThemeSettingsEvent
 import app.tiebalite.feature.settings.ThemeSettingsScreen
 import app.tiebalite.feature.settings.ThemeSettingsState
 import app.tiebalite.feature.thread.ThreadRoute
+import app.tiebalite.feature.thread.ThreadSubPostsRoute
 import app.tiebalite.ui.components.TiebaliteBottomBar
 
 enum class MainDestination(
@@ -62,9 +63,12 @@ enum class MainDestination(
 
 private object ThreadRoutes {
     const val ThreadIdArg = "threadId"
+    const val PostIdArg = "postId"
     const val Thread = "thread/{$ThreadIdArg}"
+    const val SubPosts = "thread/{$ThreadIdArg}/subposts/{$PostIdArg}"
 
     fun thread(threadId: String): String = "thread/$threadId"
+    fun subPosts(threadId: Long, postId: Long): String = "thread/$threadId/subposts/$postId"
 }
 
 @Composable
@@ -223,6 +227,36 @@ fun TiebaliteApp(
                     ThreadRoute(
                         paddingValues = paddingValues,
                         threadId = threadId,
+                        onBack = { navController.popBackStack() },
+                        onOpenSubPosts = { postId ->
+                            navController.navigate(ThreadRoutes.subPosts(threadId, postId))
+                        },
+                    )
+                }
+                composable(
+                    route = ThreadRoutes.SubPosts,
+                    arguments =
+                        listOf(
+                            navArgument(ThreadRoutes.ThreadIdArg) {
+                                type = NavType.LongType
+                            },
+                            navArgument(ThreadRoutes.PostIdArg) {
+                                type = NavType.LongType
+                            },
+                        ),
+                ) { backStackEntry ->
+                    val threadId =
+                        backStackEntry.arguments
+                            ?.getLong(ThreadRoutes.ThreadIdArg)
+                            ?: return@composable
+                    val postId =
+                        backStackEntry.arguments
+                            ?.getLong(ThreadRoutes.PostIdArg)
+                            ?: return@composable
+                    ThreadSubPostsRoute(
+                        paddingValues = paddingValues,
+                        threadId = threadId,
+                        postId = postId,
                         onBack = { navController.popBackStack() },
                     )
                 }

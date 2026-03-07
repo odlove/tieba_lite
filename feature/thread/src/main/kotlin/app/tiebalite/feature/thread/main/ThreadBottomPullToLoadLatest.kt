@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.ui.list
+package app.tiebalite.feature.thread.main
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable

@@ -12,3 +12,15 @@ internal fun normalizeUrl(raw: String): String? {
         else -> value
     }
 }
+
+internal fun portraitToAvatarUrl(portrait: String): String? {
+    val value = portrait.trim()
+    if (value.isBlank()) {
+        return null
+    }
+    return if (value.startsWith("http://") || value.startsWith("https://")) {
+        value
+    } else {
+        "http://tb.himg.baidu.com/sys/portrait/item/$value"
+    }
+}

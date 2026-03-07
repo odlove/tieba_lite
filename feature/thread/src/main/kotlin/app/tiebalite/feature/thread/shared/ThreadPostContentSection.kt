@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.ui.post.content
+package app.tiebalite.feature.thread.shared
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

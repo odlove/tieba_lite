@@ -1,5 +1,6 @@
-package app.tiebalite.feature.thread.ui.post.card
+package app.tiebalite.feature.thread.shared
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,15 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.thread.ThreadPost
-import app.tiebalite.feature.thread.ui.post.content.ThreadPostContentSection
-import app.tiebalite.feature.thread.ui.post.shared.AuthorAvatar
-import app.tiebalite.feature.thread.ui.post.shared.AuthorNameWithLevel
-import app.tiebalite.feature.thread.ui.post.shared.formatPostMeta
+import app.tiebalite.feature.thread.shared.ThreadPostContentSection
+import app.tiebalite.feature.thread.shared.AuthorAvatar
+import app.tiebalite.feature.thread.shared.AuthorNameWithLevel
+import app.tiebalite.feature.thread.shared.formatPostMeta
 
 @Composable
-internal fun ThreadReplyCard(
+internal fun ThreadPostCard(
     item: ThreadPost,
     threadAuthorId: Long?,
+    onOpenSubPosts: (Long) -> Unit,
 ) {
     val isThreadAuthor = threadAuthorId != null && threadAuthorId > 0L && item.authorId == threadAuthorId
     Column(
@@ -69,5 +71,13 @@ internal fun ThreadReplyCard(
         ThreadPostContentSection(
             body = item.body,
         )
+        if (item.subPostCount > 0) {
+            Text(
+                text = "查看楼中楼 ${item.subPostCount} 条",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { onOpenSubPosts(item.id) },
+            )
+        }
     }
 }

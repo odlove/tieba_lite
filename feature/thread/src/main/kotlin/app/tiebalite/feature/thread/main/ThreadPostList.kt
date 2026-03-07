@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.ui.list
+package app.tiebalite.feature.thread.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.core.model.thread.ThreadPost
-import app.tiebalite.feature.thread.ui.post.card.ThreadFirstFloorCard
-import app.tiebalite.feature.thread.ui.post.card.ThreadReplyCard
+import app.tiebalite.feature.thread.main.ThreadFirstFloorCard
+import app.tiebalite.feature.thread.shared.ThreadPostCard
 
 @Composable
 internal fun ThreadPostList(
@@ -35,6 +35,7 @@ internal fun ThreadPostList(
     isLoadingMore: Boolean,
     hasMore: Boolean,
     onLoadMore: () -> Unit,
+    onOpenSubPosts: (Long) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val bottomPullState =
@@ -101,9 +102,10 @@ internal fun ThreadPostList(
                 items = replyPosts,
                 key = { _, item -> item.id },
             ) { index, item ->
-                ThreadReplyCard(
+                ThreadPostCard(
                     item = item,
                     threadAuthorId = firstFloorPost?.authorId,
+                    onOpenSubPosts = onOpenSubPosts,
                 )
                 if (index < replyPosts.lastIndex) {
                     HorizontalDivider(

@@ -15,6 +15,7 @@ internal class ThreadReplyPostMapper(
         return ThreadPost(
             id = payload.id,
             floor = payload.floor,
+            subPostCount = payload.subPostCount,
             authorId = payload.authorId,
             authorName = payload.authorName,
             authorLevel = payload.authorLevel,

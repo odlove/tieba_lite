@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.state
+package app.tiebalite.feature.thread.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

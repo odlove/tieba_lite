@@ -9,9 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import app.tiebalite.feature.thread.state.ThreadUiEvent
-import app.tiebalite.feature.thread.state.ThreadViewModel
-import app.tiebalite.feature.thread.ui.screen.ThreadScreen
+import app.tiebalite.feature.thread.main.ThreadUiEvent
+import app.tiebalite.feature.thread.main.ThreadViewModel
+import app.tiebalite.feature.thread.main.ThreadScreen
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -19,6 +19,7 @@ fun ThreadRoute(
     paddingValues: PaddingValues,
     threadId: Long,
     onBack: () -> Unit,
+    onOpenSubPosts: (postId: Long) -> Unit,
     viewModel: ThreadViewModel = viewModel(factory = ThreadViewModel.factory(threadId)),
 ) {
     val context = LocalContext.current
@@ -42,5 +43,6 @@ fun ThreadRoute(
         onRefresh = viewModel::refresh,
         onLoadMore = viewModel::loadMore,
         onRetry = viewModel::refresh,
+        onOpenSubPosts = onOpenSubPosts,
     )
 }

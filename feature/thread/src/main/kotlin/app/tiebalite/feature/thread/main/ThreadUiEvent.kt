@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.state
+package app.tiebalite.feature.thread.main
 
 sealed interface ThreadUiEvent {
     data class ShowToast(

@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.ui.list
+package app.tiebalite.feature.thread.main
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement

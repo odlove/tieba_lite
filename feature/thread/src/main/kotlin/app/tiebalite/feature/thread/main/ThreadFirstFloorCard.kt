@@ -1,4 +1,4 @@
-package app.tiebalite.feature.thread.ui.post.card
+package app.tiebalite.feature.thread.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,10 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
-import app.tiebalite.feature.thread.ui.post.content.ThreadPostContentSection
-import app.tiebalite.feature.thread.ui.post.shared.AuthorAvatar
-import app.tiebalite.feature.thread.ui.post.shared.AuthorNameWithLevel
-import app.tiebalite.feature.thread.ui.post.shared.formatPostMeta
+import app.tiebalite.feature.thread.shared.ThreadPostContentSection
+import app.tiebalite.feature.thread.shared.AuthorAvatar
+import app.tiebalite.feature.thread.shared.AuthorNameWithLevel
+import app.tiebalite.feature.thread.shared.formatPostMeta
 
 @Composable
 internal fun ThreadFirstFloorCard(
