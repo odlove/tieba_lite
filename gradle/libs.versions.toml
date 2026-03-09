@@ -32,6 +32,7 @@ okhttp = "5.3.2"
 protobuf = "4.33.5"
 protobufPlugin = "0.9.6"
 dataStore = "1.2.0"
+zoomImage = "1.4.0"
 
 [libraries]
 
@@ -69,3 +70,4 @@ squareup-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-inte
 protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "dataStore" }
+zoomimage-compose-coil3 = { group = "io.github.panpf.zoomimage", name = "zoomimage-compose-coil3", version.ref = "zoomImage" }

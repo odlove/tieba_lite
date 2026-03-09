@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.feature.thread.subposts.state.ThreadSubPostsViewModel
 import app.tiebalite.feature.thread.subposts.screen.ThreadSubPostsScreen
 
@@ -14,6 +15,7 @@ fun ThreadSubPostsRoute(
     threadId: Long,
     postId: Long,
     onBack: () -> Unit,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
     viewModel: ThreadSubPostsViewModel =
         viewModel(factory = ThreadSubPostsViewModel.factory(threadId = threadId, postId = postId)),
 ) {
@@ -24,5 +26,6 @@ fun ThreadSubPostsRoute(
         onBack = onBack,
         onRetry = viewModel::refresh,
         onLoadMore = viewModel::loadMore,
+        onOpenImageViewer = onOpenImageViewer,
     )
 }

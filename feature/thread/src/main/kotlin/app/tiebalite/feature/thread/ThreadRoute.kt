@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.feature.thread.main.state.ThreadUiEvent
 import app.tiebalite.feature.thread.main.state.ThreadViewModel
 import app.tiebalite.feature.thread.main.screen.ThreadScreen
@@ -20,6 +21,7 @@ fun ThreadRoute(
     threadId: Long,
     onBack: () -> Unit,
     onOpenSubPosts: (postId: Long) -> Unit,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
     viewModel: ThreadViewModel = viewModel(factory = ThreadViewModel.factory(threadId)),
 ) {
     val context = LocalContext.current
@@ -44,5 +46,6 @@ fun ThreadRoute(
         onLoadMore = viewModel::loadMore,
         onRetry = viewModel::refresh,
         onOpenSubPosts = onOpenSubPosts,
+        onOpenImageViewer = onOpenImageViewer,
     )
 }

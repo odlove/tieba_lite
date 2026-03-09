@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadSubPost
 import app.tiebalite.feature.thread.common.post.AuthorAvatar
 import app.tiebalite.feature.thread.common.post.AuthorNameWithLevel
@@ -22,6 +23,7 @@ import app.tiebalite.feature.thread.common.post.formatPostMeta
 internal fun ThreadSubPostCard(
     item: ThreadSubPost,
     threadAuthorId: Long?,
+    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
 ) {
     val isThreadAuthor = threadAuthorId != null && threadAuthorId > 0L && item.authorId == threadAuthorId
     Column(
@@ -63,6 +65,7 @@ internal fun ThreadSubPostCard(
         }
         ThreadPostContentSection(
             body = item.body,
+            onOpenImageViewer = onOpenImageViewer,
         )
     }
 }

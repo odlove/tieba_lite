@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.feature.thread.subposts.post.ThreadParentPostCard
 import app.tiebalite.feature.thread.subposts.post.ThreadSubPostCard
 import app.tiebalite.feature.thread.subposts.state.ThreadSubPostsUiState
@@ -42,6 +43,7 @@ internal fun ThreadSubPostsScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onLoadMore: () -> Unit,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
 ) {
     val postFloor = state.post?.floor
     val title = if (postFloor != null && postFloor > 0) "楼中楼 ${postFloor}楼" else "楼中楼"
@@ -101,6 +103,7 @@ internal fun ThreadSubPostsScreen(
                     ThreadParentPostCard(
                         item = post.copy(subPostCount = 0),
                         threadAuthorId = state.threadAuthorId,
+                        onOpenImageViewer = onOpenImageViewer,
                     )
                 }
                 item(key = "subposts_parent_divider") {
@@ -135,6 +138,7 @@ internal fun ThreadSubPostsScreen(
                 ThreadSubPostCard(
                     item = item,
                     threadAuthorId = state.threadAuthorId,
+                    onOpenImageViewer = onOpenImageViewer,
                 )
                 if (index < state.subPosts.lastIndex) {
                     HorizontalDivider(

@@ -90,6 +90,7 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:thread"))
+    implementation(project(":feature:imageviewer"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

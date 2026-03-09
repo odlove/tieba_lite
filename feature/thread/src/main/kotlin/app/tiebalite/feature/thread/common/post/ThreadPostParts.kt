@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadPost
 import app.tiebalite.core.model.thread.ThreadPostBody
 
@@ -67,6 +68,7 @@ internal fun ThreadPostHeader(
 internal fun ThreadPostBody(
     body: ThreadPostBody,
     modifier: Modifier = Modifier,
+    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -74,6 +76,7 @@ internal fun ThreadPostBody(
     ) {
         ThreadPostContentSection(
             body = body,
+            onOpenImageViewer = onOpenImageViewer,
         )
     }
 }

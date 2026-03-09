@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadPost
 import app.tiebalite.feature.thread.common.post.ThreadPostBody
 import app.tiebalite.feature.thread.common.post.ThreadPostBodyIndent
@@ -18,6 +19,7 @@ import app.tiebalite.feature.thread.common.post.ThreadPostVerticalPadding
 internal fun ThreadParentPostCard(
     item: ThreadPost,
     threadAuthorId: Long?,
+    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -37,6 +39,7 @@ internal fun ThreadParentPostCard(
         ThreadPostBody(
             body = item.body,
             modifier = Modifier.padding(start = ThreadPostBodyIndent),
+            onOpenImageViewer = onOpenImageViewer,
         )
     }
 }

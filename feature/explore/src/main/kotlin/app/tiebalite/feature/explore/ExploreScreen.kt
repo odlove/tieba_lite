@@ -30,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
+import app.tiebalite.core.model.imageviewer.ImageViewerItem
 import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.feed.FeedCard
@@ -40,6 +42,7 @@ fun ExploreScreen(
     paddingValues: PaddingValues,
     state: ExploreUiState,
     onOpenThread: (String) -> Unit,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
@@ -77,6 +80,7 @@ fun ExploreScreen(
                     isRefreshing = state.isRefreshing,
                     isLoadingMore = state.isLoadingMore,
                     onOpenThread = onOpenThread,
+                    onOpenImageViewer = onOpenImageViewer,
                     onLoadMore = onLoadMore,
                 )
             }
@@ -150,6 +154,7 @@ private fun ExploreList(
     isRefreshing: Boolean,
     isLoadingMore: Boolean,
     onOpenThread: (String) -> Unit,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
     onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -170,6 +175,9 @@ private fun ExploreList(
                 item = item,
                 onClick = {
                     onOpenThread(item.id)
+                },
+                onOpenMedia = {
+                    item.toImageViewerArgs()?.let(onOpenImageViewer)
                 },
             )
             if (index < items.lastIndex) {
@@ -218,3 +226,21 @@ private fun LoadMoreEffect(
 }
 
 private const val LoadMorePrefetchDistance = 3
+
+private fun RecommendItem.toImageViewerArgs(): ImageViewerArgs? {
+    if (images.isEmpty()) {
+        return null
+    }
+    return ImageViewerArgs(
+        items =
+            images.mapIndexed { index, image ->
+                ImageViewerItem(
+                    id = "${id}_$index",
+                    imageUrl = image.url,
+                    width = image.width,
+                    height = image.height,
+                )
+            },
+        initialIndex = 0,
+    )
+}

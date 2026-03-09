@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,8 +22,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.tiebalite.theme.ThemeState
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.feature.explore.ExploreRoute
+import app.tiebalite.feature.imageviewer.ImageViewerRoute
+import app.tiebalite.feature.imageviewer.ImageViewerRoutes
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.feature.myforums.MyForumsScreen
@@ -80,6 +84,12 @@ fun TiebaliteApp(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val openImageViewer: (ImageViewerArgs) -> Unit = { args ->
+        navController.navigate(ImageViewerRoutes.Viewer)
+        navController.getBackStackEntry(ImageViewerRoutes.Viewer)
+            .savedStateHandle
+            .set(ImageViewerRoutes.ArgsKey, args)
+    }
 
     val appliedState = state
     val seedColorHex = String.format("#%06X", appliedState.seedColor and 0xFFFFFF)
@@ -122,6 +132,7 @@ fun TiebaliteApp(
                         onOpenThread = { threadId ->
                             navController.navigate(ThreadRoutes.thread(threadId))
                         },
+                        onOpenImageViewer = openImageViewer,
                     )
                 }
                 composable(MainDestination.Messages.route) {
@@ -231,6 +242,7 @@ fun TiebaliteApp(
                         onOpenSubPosts = { postId ->
                             navController.navigate(ThreadRoutes.subPosts(threadId, postId))
                         },
+                        onOpenImageViewer = openImageViewer,
                     )
                 }
                 composable(
@@ -257,6 +269,26 @@ fun TiebaliteApp(
                         paddingValues = paddingValues,
                         threadId = threadId,
                         postId = postId,
+                        onBack = { navController.popBackStack() },
+                        onOpenImageViewer = openImageViewer,
+                    )
+                }
+                composable(
+                    route = ImageViewerRoutes.Viewer,
+                ) { backStackEntry ->
+                    val args =
+                        backStackEntry
+                            .savedStateHandle
+                            .get<ImageViewerArgs>(ImageViewerRoutes.ArgsKey)
+                    if (args == null) {
+                        LaunchedEffect(Unit) {
+                            navController.popBackStack()
+                        }
+                        return@composable
+                    }
+                    ImageViewerRoute(
+                        paddingValues = paddingValues,
+                        args = args,
                         onBack = { navController.popBackStack() },
                     )
                 }

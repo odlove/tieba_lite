@@ -1,6 +1,7 @@
 package app.tiebalite.core.ui.components.feed
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +19,10 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 
 @Composable
-internal fun FeedCardMedia(item: RecommendItem) {
+internal fun FeedCardMedia(
+    item: RecommendItem,
+    onClick: (() -> Unit)? = null,
+) {
     val cover = item.coverImageUrl?.trim().orEmpty()
     if (cover.isBlank()) {
         return
@@ -28,6 +32,7 @@ internal fun FeedCardMedia(item: RecommendItem) {
             Modifier
                 .fillMaxWidth()
                 .aspectRatio(1.85f)
+                .optionalClickable(onClick = onClick)
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
@@ -50,3 +55,7 @@ internal fun FeedCardMedia(item: RecommendItem) {
         )
     }
 }
+
+private fun Modifier.optionalClickable(
+    onClick: (() -> Unit)?,
+): Modifier = if (onClick == null) this else clickable(onClick = onClick)

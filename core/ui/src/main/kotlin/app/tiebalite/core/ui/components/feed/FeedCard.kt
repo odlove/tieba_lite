@@ -15,6 +15,7 @@ fun FeedCard(
     item: RecommendItem,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    onOpenMedia: (() -> Unit)? = null,
 ) {
     Column(
         modifier =
@@ -26,7 +27,10 @@ fun FeedCard(
     ) {
         FeedCardHeader(item = item)
         FeedCardBody(item = item)
-        FeedCardMedia(item = item)
+        FeedCardMedia(
+            item = item,
+            onClick = onOpenMedia,
+        )
         FeedCardActions(item = item)
     }
 }

@@ -9,12 +9,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ExploreRoute(
     paddingValues: PaddingValues,
     onOpenThread: (String) -> Unit,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
     viewModel: ExploreViewModel = viewModel(factory = ExploreViewModel.Factory),
 ) {
     val context = LocalContext.current
@@ -34,6 +36,7 @@ fun ExploreRoute(
         paddingValues = paddingValues,
         state = uiState,
         onOpenThread = onOpenThread,
+        onOpenImageViewer = onOpenImageViewer,
         onRefresh = viewModel::refresh,
         onLoadMore = viewModel::loadMore,
         onRetry = viewModel::refresh,

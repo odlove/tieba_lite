@@ -1,5 +1,6 @@
 package app.tiebalite.core.data.recommend.mapper
 
+import app.tiebalite.core.model.recommend.RecommendImage
 import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedFeedRaw
 
@@ -17,13 +18,20 @@ class PersonalizedFeedMapper {
                     .map { it.text.trim() }
                     .firstOrNull { it.isNotBlank() }
 
-            val coverImageUrl =
+            val images =
                 thread.mediaList
                     .asSequence()
                     .mapNotNull { media ->
-                        normalizeUrl(media.originPic)
+                        normalizeUrl(media.originPic)?.let { url ->
+                            RecommendImage(
+                                url = url,
+                                width = media.width.takeIf { it != 0 },
+                                height = media.height.takeIf { it != 0 },
+                            )
+                        }
                     }
-                    .firstOrNull()
+                    .distinctBy { image -> image.url }
+                    .toList()
             val forumName =
                 thread.forumInfo.name
                     .ifBlank { thread.fname }
@@ -36,7 +44,7 @@ class PersonalizedFeedMapper {
                 snippet = snippet,
                 authorName = authorName.ifBlank { null },
                 authorAvatarUrl = portraitToAvatarUrl(thread.author.portrait),
-                coverImageUrl = coverImageUrl,
+                images = images,
                 replyCount = thread.replyNum,
                 agreeCount = thread.agreeNum,
                 shareCount = thread.shareNum,

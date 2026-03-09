@@ -2,6 +2,7 @@ package app.tiebalite.feature.thread.common.post
 
 import android.content.pm.ApplicationInfo
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,6 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
+import app.tiebalite.core.model.imageviewer.ImageViewerItem
 import app.tiebalite.core.model.thread.ThreadPostBody
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -33,6 +36,7 @@ import coil3.transition.TransitionTarget
 internal fun ThreadPostContentSection(
     body: ThreadPostBody,
     modifier: Modifier = Modifier,
+    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
 ) {
     val blocks =
         remember(body) {
@@ -56,7 +60,10 @@ internal fun ThreadPostContentSection(
                 }
 
                 is ThreadPostContentBlock.ImageGroup -> {
-                    ThreadPostImageGrid(images = block.images)
+                    ThreadPostImageGrid(
+                        images = block.images,
+                        onOpenImageViewer = onOpenImageViewer,
+                    )
                 }
 
                 is ThreadPostContentBlock.MediaHint -> {
@@ -111,7 +118,10 @@ private fun buildThreadPostContentBlocks(
 }
 
 @Composable
-private fun ThreadPostImageGrid(images: List<ThreadPostBody.MediaPart.Image>) {
+private fun ThreadPostImageGrid(
+    images: List<ThreadPostBody.MediaPart.Image>,
+    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
+) {
     if (images.isEmpty()) {
         return
     }
@@ -124,7 +134,7 @@ private fun ThreadPostImageGrid(images: List<ThreadPostBody.MediaPart.Image>) {
         modifier = Modifier.fillMaxWidth(widthFraction),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        images.forEach { image ->
+        images.forEachIndexed { index, image ->
             val requestBuilder =
                 ImageRequest
                     .Builder(context)
@@ -153,6 +163,10 @@ private fun ThreadPostImageGrid(images: List<ThreadPostBody.MediaPart.Image>) {
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(ratio = image.aspectRatioOrDefault())
+                        .clickable(enabled = onOpenImageViewer != null) {
+                            val imageViewerArgs = images.toImageViewerArgs(initialIndex = index) ?: return@clickable
+                            onOpenImageViewer?.invoke(imageViewerArgs)
+                        }
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentScale = ContentScale.Crop,
@@ -194,6 +208,24 @@ private val AlwaysCrossfadeTransitionFactory =
             )
         }
     }
+
+private fun List<ThreadPostBody.MediaPart.Image>.toImageViewerArgs(initialIndex: Int): ImageViewerArgs? {
+    if (isEmpty() || initialIndex !in indices) {
+        return null
+    }
+    return ImageViewerArgs(
+        items =
+            mapIndexed { index, image ->
+                ImageViewerItem(
+                    id = image.url.ifBlank { "thread-image-$index" },
+                    imageUrl = image.url,
+                    width = image.width,
+                    height = image.height,
+                )
+            },
+        initialIndex = initialIndex,
+    )
+}
 
 private fun ThreadPostBody.MediaPart.Image.aspectRatioOrDefault(defaultRatio: Float = 1f): Float {
     val imageWidth = width ?: return defaultRatio

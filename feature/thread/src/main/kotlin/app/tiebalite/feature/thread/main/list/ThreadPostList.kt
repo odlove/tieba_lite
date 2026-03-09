@@ -21,6 +21,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.core.model.thread.ThreadPost
 import app.tiebalite.feature.thread.main.post.ThreadFirstFloorCard
@@ -36,6 +37,7 @@ internal fun ThreadPostList(
     hasMore: Boolean,
     onLoadMore: () -> Unit,
     onOpenSubPosts: (Long) -> Unit,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val bottomPullState =
@@ -70,6 +72,7 @@ internal fun ThreadPostList(
                 item(key = "first_floor_post") {
                     ThreadFirstFloorCard(
                         item = firstFloorPost,
+                        onOpenImageViewer = onOpenImageViewer,
                     )
                 }
                 item(key = "first_floor_post_divider") {
@@ -106,6 +109,7 @@ internal fun ThreadPostList(
                     item = item,
                     threadAuthorId = firstFloorPost?.authorId,
                     onOpenSubPosts = onOpenSubPosts,
+                    onOpenImageViewer = onOpenImageViewer,
                 )
                 if (index < replyPosts.lastIndex) {
                     HorizontalDivider(

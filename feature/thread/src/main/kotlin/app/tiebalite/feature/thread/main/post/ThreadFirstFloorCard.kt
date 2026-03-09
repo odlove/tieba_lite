@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.feature.thread.common.post.ThreadPostContentSection
 import app.tiebalite.feature.thread.common.post.AuthorAvatar
@@ -22,6 +23,7 @@ import app.tiebalite.feature.thread.common.post.formatPostMeta
 @Composable
 internal fun ThreadFirstFloorCard(
     item: ThreadFirstFloorPost,
+    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
 ) {
     Column(
         modifier =
@@ -73,6 +75,7 @@ internal fun ThreadFirstFloorCard(
         }
         ThreadPostContentSection(
             body = item.body,
+            onOpenImageViewer = onOpenImageViewer,
         )
     }
 }
