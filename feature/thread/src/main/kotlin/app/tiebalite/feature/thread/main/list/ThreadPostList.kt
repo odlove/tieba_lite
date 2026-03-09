@@ -1,6 +1,5 @@
 package app.tiebalite.feature.thread.main.list
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,9 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.core.model.thread.ThreadPost
-import app.tiebalite.feature.thread.main.post.ThreadInlineSubPosts
 import app.tiebalite.feature.thread.main.post.ThreadFirstFloorCard
-import app.tiebalite.feature.thread.common.post.ThreadPostCard
+import app.tiebalite.feature.thread.main.post.ThreadReplyListItem
 
 @Composable
 internal fun ThreadPostList(
@@ -104,17 +102,11 @@ internal fun ThreadPostList(
                 items = replyPosts,
                 key = { _, item -> item.id },
             ) { index, item ->
-                Column {
-                    ThreadPostCard(
-                        item = item,
-                        threadAuthorId = firstFloorPost?.authorId,
-                    )
-                    ThreadInlineSubPosts(
-                        post = item,
-                        threadAuthorId = firstFloorPost?.authorId,
-                        onOpenSubPosts = onOpenSubPosts,
-                    )
-                }
+                ThreadReplyListItem(
+                    item = item,
+                    threadAuthorId = firstFloorPost?.authorId,
+                    onOpenSubPosts = onOpenSubPosts,
+                )
                 if (index < replyPosts.lastIndex) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),

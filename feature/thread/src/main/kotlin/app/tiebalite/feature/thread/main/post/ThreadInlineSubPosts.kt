@@ -19,6 +19,7 @@ internal fun ThreadInlineSubPosts(
     post: ThreadPost,
     threadAuthorId: Long?,
     onOpenSubPosts: (Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     if (post.subPosts.isEmpty()) {
         return
@@ -28,9 +29,8 @@ internal fun ThreadInlineSubPosts(
 
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
                 .padding(vertical = 4.dp),
