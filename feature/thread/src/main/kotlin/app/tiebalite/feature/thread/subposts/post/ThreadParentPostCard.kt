@@ -19,8 +19,8 @@ import app.tiebalite.feature.thread.common.post.ThreadPostVerticalPadding
 internal fun ThreadParentPostCard(
     item: ThreadPost,
     threadAuthorId: Long?,
-    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
 ) {
     Column(
         modifier =

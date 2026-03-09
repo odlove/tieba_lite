@@ -19,9 +19,9 @@ import app.tiebalite.feature.thread.common.post.ThreadPostVerticalPadding
 internal fun ThreadReplyListItem(
     item: ThreadPost,
     threadAuthorId: Long?,
+    modifier: Modifier = Modifier,
     onOpenSubPosts: (Long) -> Unit,
     onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
-    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
