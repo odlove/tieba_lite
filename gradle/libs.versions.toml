@@ -5,8 +5,8 @@
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
 
 [versions]
@@ -33,6 +33,8 @@ protobuf = "4.34.0"
 protobufPlugin = "0.9.6"
 dataStore = "1.2.0"
 zoomImage = "1.4.0"
+room = "2.8.4"
+ksp = "2.3.6"
 
 [libraries]
 
@@ -70,4 +72,8 @@ squareup-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-inte
 protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "dataStore" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 zoomimage-compose-coil3 = { group = "io.github.panpf.zoomimage", name = "zoomimage-compose-coil3", version.ref = "zoomImage" }

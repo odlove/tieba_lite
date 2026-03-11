@@ -1,9 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "app.tiebalite.core.data"
+    namespace = "app.tiebalite.core.database"
 
     defaultConfig {
         minSdk = 24
@@ -15,14 +16,17 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.datastore.core)
-    api(project(":core:model"))
-    implementation(project(":core:database"))
-    implementation(project(":core:proto"))
-    implementation(project(":core:network"))
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.room.testing)
 }

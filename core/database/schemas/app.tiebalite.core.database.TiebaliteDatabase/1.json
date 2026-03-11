@@ -1,0 +1,118 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "4b527142a8f6cffa0e9a6cd9d0d903ab",
+    "entities": [
+      {
+        "tableName": "history_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type` TEXT NOT NULL, `target_id` TEXT NOT NULL, `title` TEXT NOT NULL, `subtitle` TEXT, `avatar_url` TEXT, `author_name` TEXT, `forum_name` TEXT, `last_read_post_id` INTEGER, `last_read_floor` INTEGER, `see_lz` INTEGER NOT NULL, `visited_at` INTEGER NOT NULL, `visit_count` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetId",
+            "columnName": "target_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subtitle",
+            "columnName": "subtitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "avatar_url",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "authorName",
+            "columnName": "author_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "forumName",
+            "columnName": "forum_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastReadPostId",
+            "columnName": "last_read_post_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastReadFloor",
+            "columnName": "last_read_floor",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "seeLz",
+            "columnName": "see_lz",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visitedAt",
+            "columnName": "visited_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visitCount",
+            "columnName": "visit_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_history_records_type_target_id",
+            "unique": true,
+            "columnNames": [
+              "type",
+              "target_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_history_records_type_target_id` ON `${TABLE_NAME}` (`type`, `target_id`)"
+          },
+          {
+            "name": "index_history_records_visited_at",
+            "unique": false,
+            "columnNames": [
+              "visited_at"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_history_records_visited_at` ON `${TABLE_NAME}` (`visited_at`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b527142a8f6cffa0e9a6cd9d0d903ab')"
+    ]
+  }
+}
