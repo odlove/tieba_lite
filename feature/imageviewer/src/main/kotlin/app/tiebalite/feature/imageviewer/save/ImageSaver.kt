@@ -1,4 +1,4 @@
-package app.tiebalite.feature.imageviewer
+package app.tiebalite.feature.imageviewer.save
 
 import android.content.ContentValues
 import android.content.Context
