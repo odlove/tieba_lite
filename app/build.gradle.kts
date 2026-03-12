@@ -89,6 +89,7 @@ dependencies {
     implementation(project(":feature:messages"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:history"))
     implementation(project(":feature:thread"))
     implementation(project(":feature:imageviewer"))
     testImplementation(libs.junit)

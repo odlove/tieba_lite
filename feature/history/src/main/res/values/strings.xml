@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">浏览历史</string>
+    <string name="history_empty">还没有浏览历史</string>
+    <string name="history_count">共 %1$d 条</string>
+    <string name="history_clear_all">清空全部</string>
+    <string name="history_delete">删除</string>
+    <string name="history_thread_fallback">帖子 %1$d</string>
+</resources>

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -23,6 +24,7 @@ import app.tiebalite.core.ui.components.SettingsItem
 @Composable
 fun ProfileScreen(
     paddingValues: PaddingValues,
+    onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -42,6 +44,20 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = contentPadding,
         ) {
+            item {
+                SettingsItem(
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.History,
+                            contentDescription = null,
+                        )
+                    },
+                    title = { Text(text = "浏览历史") },
+                    subtitle = { Text(text = "查看最近访问过的帖子") },
+                    onClick = onOpenHistory,
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
             item {
                 SettingsItem(
                     leadingContent = {

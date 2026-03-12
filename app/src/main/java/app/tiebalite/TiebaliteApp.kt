@@ -32,6 +32,8 @@ import app.tiebalite.theme.ThemeState
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.feature.explore.ExploreRoute
+import app.tiebalite.feature.history.HistoryRoute
+import app.tiebalite.feature.history.HistoryRoutes
 import app.tiebalite.feature.imageviewer.ImageViewerEntry
 import app.tiebalite.feature.messages.MessagesScreen
 import app.tiebalite.feature.profile.ProfileScreen
@@ -169,6 +171,7 @@ fun TiebaliteApp(
                     composable(MainDestination.Profile.route) {
                         ProfileScreen(
                             paddingValues = paddingValues,
+                            onOpenHistory = { navController.navigate(HistoryRoutes.Home) },
                             onOpenSettings = { navController.navigate(SettingsRoutes.Home) },
                         )
                     }
@@ -177,6 +180,15 @@ fun TiebaliteApp(
                             paddingValues = paddingValues,
                             onOpenAccountManage = { navController.navigate(SettingsRoutes.Account) },
                             onOpenTheme = { navController.navigate(SettingsRoutes.Theme) },
+                            onBack = { navController.popBackStack() },
+                        )
+                    }
+                    composable(HistoryRoutes.Home) {
+                        HistoryRoute(
+                            paddingValues = paddingValues,
+                            onOpenThread = { threadId ->
+                                navController.navigate(ThreadRoutes.thread(threadId.toString()))
+                            },
                             onBack = { navController.popBackStack() },
                         )
                     }
