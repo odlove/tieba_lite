@@ -4,6 +4,7 @@ import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.core.model.thread.ThreadPost
 
 data class ThreadUiState(
+    val forumId: Long? = null,
     val forumName: String? = null,
     val forumAvatarUrl: String? = null,
     val firstFloorPost: ThreadFirstFloorPost? = null,

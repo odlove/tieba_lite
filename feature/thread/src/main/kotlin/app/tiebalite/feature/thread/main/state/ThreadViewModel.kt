@@ -7,8 +7,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.tiebalite.core.data.auth.di.AuthGraphProvider
+import app.tiebalite.core.data.di.ApplicationScopeProvider
+import app.tiebalite.core.data.history.repository.ThreadHistoryRepository
+import app.tiebalite.core.data.history.repository.ThreadHistoryRepositoryFactory
 import app.tiebalite.core.data.thread.repository.ThreadRepository
 import app.tiebalite.core.data.thread.repository.ThreadRepositoryFactory
+import app.tiebalite.core.model.history.ThreadHistoryEntry
+import app.tiebalite.core.model.thread.ThreadPage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +28,8 @@ import kotlinx.coroutines.launch
 class ThreadViewModel(
     private val threadId: Long,
     private val repository: ThreadRepository,
+    private val historyRepository: ThreadHistoryRepository,
+    private val applicationScope: CoroutineScope,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ThreadUiState())
     val uiState: StateFlow<ThreadUiState> = _uiState.asStateFlow()
@@ -30,6 +38,7 @@ class ThreadViewModel(
     val uiEvents: SharedFlow<ThreadUiEvent> = _uiEvents.asSharedFlow()
 
     private var requestJob: Job? = null
+    private var activeVisitLogId: Long? = null
 
     init {
         refreshInternal(initial = true)
@@ -79,6 +88,7 @@ class ThreadViewModel(
                     onSuccess = { page ->
                         _uiState.update { current ->
                             current.copy(
+                                forumId = page.forumId,
                                 forumName = page.forumName,
                                 forumAvatarUrl = page.forumAvatarUrl,
                                 firstFloorPost = current.firstFloorPost ?: page.firstFloorPost,
@@ -89,6 +99,7 @@ class ThreadViewModel(
                                 errorMessage = null,
                             )
                         }
+                        recordThreadEnteredIfNeeded(page)
                     },
                     onFailure = {
                         emitNetworkError()
@@ -123,6 +134,7 @@ class ThreadViewModel(
                     onSuccess = { page ->
                         _uiState.update {
                             it.copy(
+                                forumId = page.forumId,
                                 forumName = page.forumName,
                                 forumAvatarUrl = page.forumAvatarUrl,
                                 firstFloorPost = page.firstFloorPost,
@@ -135,6 +147,7 @@ class ThreadViewModel(
                                 errorMessage = null,
                             )
                         }
+                        recordThreadEnteredIfNeeded(page)
                     },
                     onFailure = {
                         val hasContent =
@@ -161,6 +174,42 @@ class ThreadViewModel(
             }
     }
 
+    override fun onCleared() {
+        val visitLogId = activeVisitLogId
+        if (visitLogId != null) {
+            applicationScope.launch {
+                runCatching {
+                    historyRepository.onThreadLeft(
+                        visitLogId = visitLogId,
+                    )
+                }
+            }
+        }
+        super.onCleared()
+    }
+
+    private suspend fun recordThreadEnteredIfNeeded(page: ThreadPage) {
+        if (activeVisitLogId != null) {
+            return
+        }
+        val firstFloorPost = page.firstFloorPost ?: return
+        runCatching {
+            historyRepository.onThreadEntered(
+                ThreadHistoryEntry(
+                    threadId = page.threadId,
+                    title = firstFloorPost.title,
+                    authorName = firstFloorPost.authorName,
+                    authorAvatarUrl = firstFloorPost.authorAvatarUrl,
+                    forumId = page.forumId,
+                    forumName = page.forumName,
+                    forumAvatarUrl = page.forumAvatarUrl,
+                ),
+            )
+        }.onSuccess { visitLogId ->
+            activeVisitLogId = visitLogId
+        }
+    }
+
     private fun emitNetworkError() {
         _uiEvents.tryEmit(ThreadUiEvent.ShowToast(NETWORK_ERROR_MESSAGE))
     }
@@ -177,6 +226,9 @@ class ThreadViewModel(
                     val authGraph =
                         (application as? AuthGraphProvider)?.authGraph
                             ?: error("Application must implement AuthGraphProvider")
+                    val applicationScope =
+                        (application as? ApplicationScopeProvider)?.applicationScope
+                            ?: error("Application must implement ApplicationScopeProvider")
                     val authReader = authGraph.authReader
                     ThreadViewModel(
                         threadId = threadId,
@@ -185,6 +237,8 @@ class ThreadViewModel(
                                 sessionProvider = { authReader.currentSession() },
                                 tbsProvider = { authReader.currentSession()?.tbs },
                             ),
+                        historyRepository = ThreadHistoryRepositoryFactory.create(application),
+                        applicationScope = applicationScope,
                     )
                 }
             }

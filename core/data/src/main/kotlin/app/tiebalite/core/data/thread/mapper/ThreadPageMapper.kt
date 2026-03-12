@@ -37,6 +37,7 @@ class ThreadPageMapper {
 
         return ThreadPage(
             threadId = threadId,
+            forumId = data.forum.id.takeIf { it > 0 },
             forumName = data.forum.name.ifBlank { thread.fname }.ifBlank { null },
             forumAvatarUrl = normalizeUrl(data.forum.avatar),
             firstFloorPost = firstFloorPost,
