@@ -1,18 +1,18 @@
 package app.tiebalite.feature.thread.main.post
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.thread.ThreadPost
+import app.tiebalite.feature.thread.common.post.ThreadPostRichText
 
 @Composable
 internal fun ThreadInlineSubPosts(
@@ -49,15 +49,16 @@ internal fun ThreadInlineSubPosts(
         }
 
         if (remainingCount > 0) {
-            Text(
-                text = "还有 $remainingCount 条回复",
+            ThreadPostRichText(
+                inline = emptyList(),
+                suffix = AnnotatedString("还有 $remainingCount 条回复"),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clickable { onOpenSubPosts(post.id) }
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp),
+                onClick = { onOpenSubPosts(post.id) },
             )
         }
     }
