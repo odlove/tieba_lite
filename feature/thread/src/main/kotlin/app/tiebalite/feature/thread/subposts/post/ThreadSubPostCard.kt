@@ -63,9 +63,16 @@ internal fun ThreadSubPostCard(
                 )
             }
         }
-        ThreadPostContentSection(
-            body = item.body,
-            onOpenImageViewer = onOpenImageViewer,
-        )
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 42.dp),
+        ) {
+            ThreadPostContentSection(
+                body = item.body,
+                onOpenImageViewer = onOpenImageViewer,
+            )
+        }
     }
 }
