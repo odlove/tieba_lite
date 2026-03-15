@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,23 +20,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.tiebalite.theme.ThemeState
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
-import app.tiebalite.feature.explore.ExploreRoute
 import app.tiebalite.feature.history.HistoryRoute
 import app.tiebalite.feature.history.HistoryRoutes
 import app.tiebalite.feature.imageviewer.ImageViewerEntry
-import app.tiebalite.feature.messages.MessagesScreen
-import app.tiebalite.feature.profile.ProfileScreen
-import app.tiebalite.feature.myforums.MyForumsScreen
 import app.tiebalite.feature.settings.SettingsRoutes
 import app.tiebalite.feature.settings.SettingsHomeRoute
 import app.tiebalite.feature.settings.account.SettingsAccountDetailRoute
@@ -49,7 +42,6 @@ import app.tiebalite.feature.settings.ThemeSettingsScreen
 import app.tiebalite.feature.settings.ThemeSettingsState
 import app.tiebalite.feature.thread.ThreadRoute
 import app.tiebalite.feature.thread.ThreadSubPostsRoute
-import app.tiebalite.ui.components.TiebaliteBottomBar
 import kotlinx.coroutines.delay
 
 enum class MainDestination(
@@ -84,6 +76,10 @@ private object ThreadRoutes {
     fun subPosts(threadId: Long, postId: Long): String = "thread/$threadId/subposts/$postId"
 }
 
+private object RootRoutes {
+    const val Main = "main"
+}
+
 @Composable
 fun TiebaliteApp(
     themeState: ThemeState,
@@ -93,8 +89,6 @@ fun TiebaliteApp(
     val navController = rememberNavController()
     var imageViewerArgs by rememberSaveable { mutableStateOf<ImageViewerArgs?>(null) }
     var isImageViewerVisible by rememberSaveable { mutableStateOf(false) }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
     val openImageViewer: (ImageViewerArgs) -> Unit = { args ->
         imageViewerArgs = args
     }
@@ -129,50 +123,28 @@ fun TiebaliteApp(
             }
         }
         Box(modifier = Modifier.fillMaxSize()) {
-            AppScaffold(
-                showBottomBar = currentRoute?.let { route ->
-                    MainDestination.values().any { it.route == route }
-                } ?: true,
-                currentRoute = currentRoute,
-                onNavigate = { route ->
-                    navController.navigate(route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
+            androidx.compose.material3.Scaffold(
+                contentWindowInsets = WindowInsets.safeDrawing
+                    .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
             ) { paddingValues ->
                 NavHost(
                     navController = navController,
-                    startDestination = MainDestination.Explore.route,
-                    modifier = Modifier,
+                    startDestination = RootRoutes.Main,
+                    modifier = Modifier.fillMaxSize(),
                     enterTransition = { fadeIn(animationSpec = tween(320)) },
                     exitTransition = { fadeOut(animationSpec = tween(320)) },
                     popEnterTransition = { fadeIn(animationSpec = tween(260)) },
-                    popExitTransition = { fadeOut(animationSpec = tween(260)) }
+                    popExitTransition = { fadeOut(animationSpec = tween(260)) },
                 ) {
-                    composable(MainDestination.MyForums.route) {
-                        MyForumsScreen(paddingValues)
-                    }
-                    composable(MainDestination.Explore.route) {
-                        ExploreRoute(
-                            paddingValues = paddingValues,
+                    composable(RootRoutes.Main) {
+                        MainShell(
+                            rootPaddingValues = paddingValues,
                             onOpenThread = { threadId ->
                                 navController.navigate(ThreadRoutes.thread(threadId))
                             },
-                            onOpenImageViewer = openImageViewer,
-                        )
-                    }
-                    composable(MainDestination.Messages.route) {
-                        MessagesScreen(paddingValues)
-                    }
-                    composable(MainDestination.Profile.route) {
-                        ProfileScreen(
-                            paddingValues = paddingValues,
                             onOpenHistory = { navController.navigate(HistoryRoutes.Home) },
                             onOpenSettings = { navController.navigate(SettingsRoutes.Home) },
+                            onOpenImageViewer = openImageViewer,
                         )
                     }
                     composable(SettingsRoutes.Home) {
@@ -338,26 +310,3 @@ fun TiebaliteApp(
 
 private const val ImageViewerEnterDurationMillis = 220
 private const val ImageViewerExitDurationMillis = 180
-
-@Composable
-private fun AppScaffold(
-    showBottomBar: Boolean,
-    currentRoute: String?,
-    onNavigate: (String) -> Unit,
-    content: @Composable (PaddingValues) -> Unit
-) {
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                TiebaliteBottomBar(
-                    destinations = MainDestination.values(),
-                    currentRoute = currentRoute,
-                    onNavigate = onNavigate
-                )
-            }
-        },
-        contentWindowInsets = WindowInsets.safeDrawing
-            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
-        content = content
-    )
-}
