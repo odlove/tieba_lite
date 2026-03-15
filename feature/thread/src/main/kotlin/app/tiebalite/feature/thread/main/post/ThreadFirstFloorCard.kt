@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.feature.thread.common.post.ThreadPostContentSection
+import app.tiebalite.feature.thread.common.post.ThreadAgreeStat
 import app.tiebalite.feature.thread.common.post.AuthorAvatar
 import app.tiebalite.feature.thread.common.post.AuthorNameWithLevel
 import app.tiebalite.feature.thread.common.post.formatPostMeta
@@ -60,11 +61,17 @@ internal fun ThreadFirstFloorCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Text(
-                text = "1楼",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "1楼",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                ThreadAgreeStat(agreeCount = item.agreeCount)
+            }
         }
         if (item.title.isNotBlank()) {
             Text(

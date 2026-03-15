@@ -14,6 +14,7 @@ internal class ThreadSubPostMapper(
         return ThreadSubPost(
             id = subPost.id,
             floor = subPost.floor,
+            agreeCount = ThreadAgreeParser.parseCount(subPost.agree),
             authorId =
                 author?.id
                     ?.takeIf { id -> id > 0L }

@@ -21,6 +21,7 @@ internal class ThreadPostPayloadMapper(
             floor = post.floor,
             subPostCount = post.subPostNumber,
             subPosts = parseSubPosts(post = post, userMap = userMap),
+            agreeCount = ThreadAgreeParser.parseCount(post.agree),
             authorId =
                 author?.id
                     ?.takeIf { id -> id > 0L }
@@ -85,6 +86,7 @@ internal data class ThreadPostPayload(
     val floor: Int,
     val subPostCount: Int,
     val subPosts: List<ThreadSubPost>,
+    val agreeCount: Long,
     val authorId: Long,
     val authorName: String?,
     val authorLevel: Int,

@@ -12,4 +12,5 @@ data class ThreadPost(
     val ipLocation: String? = null,
     val body: ThreadPostBody = ThreadPostBody(),
     val timestampSeconds: Long? = null,
+    val agreeCount: Long = 0,
 )

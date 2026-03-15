@@ -16,12 +16,14 @@ class ThreadPageMapper {
         val userMap = authorResolver.buildUserMap(data.userListList)
         val fallbackThreadTitle = thread.title.ifBlank { "(无标题)" }
         val firstFloorPostLite = resolveFirstFloorPost(raw = raw)
+        val threadAgreeCount = thread.agreeNum.takeIf { value -> value > 0 }?.toLong()
         val firstFloorPost =
             firstFloorPostLite?.let { post ->
                 firstFloorPostMapper.map(
                     post = post,
                     author = authorResolver.resolve(post = post, userMap = userMap),
                     fallbackThreadTitle = fallbackThreadTitle,
+                    threadAgreeCount = threadAgreeCount,
                 )
             }
         val posts =

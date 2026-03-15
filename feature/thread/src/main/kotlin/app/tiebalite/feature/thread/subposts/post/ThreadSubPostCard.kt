@@ -16,6 +16,7 @@ import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadSubPost
 import app.tiebalite.feature.thread.common.post.AuthorAvatar
 import app.tiebalite.feature.thread.common.post.AuthorNameWithLevel
+import app.tiebalite.feature.thread.common.post.ThreadAgreeStat
 import app.tiebalite.feature.thread.common.post.ThreadPostContentSection
 import app.tiebalite.feature.thread.common.post.formatPostMeta
 
@@ -62,6 +63,7 @@ internal fun ThreadSubPostCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            ThreadAgreeStat(agreeCount = item.agreeCount)
         }
         Column(
             modifier =

@@ -11,6 +11,7 @@ internal class ThreadFirstFloorPostMapper(
         post: ThreadPostLite,
         author: ThreadUserLite?,
         fallbackThreadTitle: String,
+        threadAgreeCount: Long? = null,
     ): ThreadFirstFloorPost {
         val payload = payloadMapper.map(post = post, author = author)
         return ThreadFirstFloorPost(
@@ -22,6 +23,7 @@ internal class ThreadFirstFloorPostMapper(
             ipLocation = payload.ipLocation,
             body = payload.body,
             timestampSeconds = payload.timestampSeconds,
+            agreeCount = threadAgreeCount ?: payload.agreeCount,
         )
     }
 }
