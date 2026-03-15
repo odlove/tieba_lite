@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -21,6 +22,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,6 +34,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
+import app.tiebalite.feature.thread.main.list.ThreadLoadMoreEffect
 import app.tiebalite.feature.thread.subposts.post.ThreadParentPostCard
 import app.tiebalite.feature.thread.subposts.post.ThreadSubPostCard
 import app.tiebalite.feature.thread.subposts.state.ThreadSubPostsUiState
@@ -41,6 +45,7 @@ internal fun ThreadSubPostsScreen(
     paddingValues: PaddingValues,
     state: ThreadSubPostsUiState,
     onBack: () -> Unit,
+    onRefresh: () -> Unit,
     onRetry: () -> Unit,
     onLoadMore: () -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
@@ -48,6 +53,7 @@ internal fun ThreadSubPostsScreen(
     val postFloor = state.post?.floor
     val title = if (postFloor != null && postFloor > 0) "楼中楼 ${postFloor}楼" else "楼中楼"
     val layoutDirection = LocalLayoutDirection.current
+    val listState = rememberLazyListState()
     val listPadding =
         PaddingValues(
             start = paddingValues.calculateStartPadding(layoutDirection),
@@ -91,78 +97,88 @@ internal fun ThreadSubPostsScreen(
             return@Scaffold
         }
 
-        LazyColumn(
+        ThreadLoadMoreEffect(
+            listState = listState,
+            isRefreshing = state.isRefreshing,
+            isLoadingMore = state.isLoadingMore,
+            hasMore = state.hasMore,
+            onLoadMore = onLoadMore,
+        )
+
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = onRefresh,
+            state = rememberPullToRefreshState(),
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-            contentPadding = listPadding,
         ) {
-            state.post?.let { post ->
-                item(key = "subposts_parent_post") {
-                    ThreadParentPostCard(
-                        item = post.copy(subPostCount = 0),
-                        threadAuthorId = state.threadAuthorId,
-                        onOpenImageViewer = onOpenImageViewer,
-                    )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                contentPadding = listPadding,
+            ) {
+                state.post?.let { post ->
+                    item(key = "subposts_parent_post") {
+                        ThreadParentPostCard(
+                            item = post.copy(subPostCount = 0),
+                            threadAuthorId = state.threadAuthorId,
+                            onOpenImageViewer = onOpenImageViewer,
+                        )
+                    }
+                    item(key = "subposts_parent_divider") {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            thickness = 2.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                        )
+                    }
                 }
-                item(key = "subposts_parent_divider") {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        thickness = 2.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                    )
-                }
-            }
 
-            item(key = "subposts_header") {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "全部楼中楼 ${state.totalCount.takeIf { it > 0 } ?: state.subPosts.size}",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-
-            itemsIndexed(
-                items = state.subPosts,
-                key = { _, item -> item.id },
-            ) { index, item ->
-                ThreadSubPostCard(
-                    item = item,
-                    threadAuthorId = state.threadAuthorId,
-                    onOpenImageViewer = onOpenImageViewer,
-                )
-                if (index < state.subPosts.lastIndex) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                    )
-                }
-            }
-
-            if (state.hasMore || state.isLoadingMore) {
-                item(key = "subposts_load_more") {
-                    Box(
+                item(key = "subposts_header") {
+                    Row(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 12.dp),
-                        contentAlignment = Alignment.Center,
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (state.isLoadingMore) {
+                        Text(
+                            text = "全部楼中楼 ${state.totalCount.takeIf { it > 0 } ?: state.subPosts.size}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+
+                itemsIndexed(
+                    items = state.subPosts,
+                    key = { _, item -> item.id },
+                ) { index, item ->
+                    ThreadSubPostCard(
+                        item = item,
+                        threadAuthorId = state.threadAuthorId,
+                        onOpenImageViewer = onOpenImageViewer,
+                    )
+                    if (index < state.subPosts.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                        )
+                    }
+                }
+
+                if (state.hasMore && state.isLoadingMore) {
+                    item(key = "subposts_load_more") {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
                             CircularProgressIndicator()
-                        } else {
-                            TextButton(onClick = onLoadMore) {
-                                Text(text = "加载更多楼中楼")
-                            }
                         }
                     }
                 }

@@ -15,7 +15,7 @@ internal fun ThreadLoadMoreEffect(
     hasMore: Boolean,
     onLoadMore: () -> Unit,
 ) {
-    val shouldLoadMore by remember {
+    val shouldLoadMore by remember(listState, hasMore) {
         derivedStateOf {
             if (!hasMore) {
                 return@derivedStateOf false

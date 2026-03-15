@@ -11,6 +11,7 @@ data class ThreadSubPostsUiState(
     val hasMore: Boolean = true,
     val totalCount: Int = 0,
     val isInitialLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
 )

@@ -10,8 +10,11 @@ import app.tiebalite.core.data.auth.di.AuthGraphProvider
 import app.tiebalite.core.data.thread.repository.ThreadRepository
 import app.tiebalite.core.data.thread.repository.ThreadRepositoryFactory
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,6 +26,8 @@ class ThreadSubPostsViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ThreadSubPostsUiState())
     val uiState: StateFlow<ThreadSubPostsUiState> = _uiState.asStateFlow()
+    private val _uiEvents = MutableSharedFlow<ThreadSubPostsUiEvent>(extraBufferCapacity = 1)
+    val uiEvents: SharedFlow<ThreadSubPostsUiEvent> = _uiEvents.asSharedFlow()
 
     private var requestJob: Job? = null
 
@@ -33,8 +38,10 @@ class ThreadSubPostsViewModel(
     fun refresh() {
         requestJob?.cancel()
         _uiState.update { current ->
+            val hasContent = current.post != null || current.subPosts.isNotEmpty()
             current.copy(
-                isInitialLoading = current.subPosts.isEmpty(),
+                isInitialLoading = !hasContent,
+                isRefreshing = hasContent,
                 isLoadingMore = false,
                 errorMessage = null,
             )
@@ -56,18 +63,24 @@ class ThreadSubPostsViewModel(
                                 hasMore = page.hasMore,
                                 totalCount = page.totalCount,
                                 isInitialLoading = false,
+                                isRefreshing = false,
                                 isLoadingMore = false,
                                 errorMessage = null,
                             )
                         }
                     },
                     onFailure = {
+                        val hasContent = _uiState.value.post != null || _uiState.value.subPosts.isNotEmpty()
+                        if (hasContent) {
+                            emitNetworkError()
+                        }
                         _uiState.update { current ->
                             current.copy(
                                 isInitialLoading = false,
+                                isRefreshing = false,
                                 isLoadingMore = false,
                                 errorMessage =
-                                    if (current.subPosts.isEmpty()) {
+                                    if (current.post == null && current.subPosts.isEmpty()) {
                                         NETWORK_ERROR_MESSAGE
                                     } else {
                                         null
@@ -81,7 +94,7 @@ class ThreadSubPostsViewModel(
 
     fun loadMore() {
         val state = _uiState.value
-        if (state.isInitialLoading || state.isLoadingMore || !state.hasMore) {
+        if (state.isInitialLoading || state.isRefreshing || state.isLoadingMore || !state.hasMore) {
             return
         }
         requestJob?.cancel()
@@ -114,6 +127,7 @@ class ThreadSubPostsViewModel(
                         }
                     },
                     onFailure = {
+                        emitNetworkError()
                         _uiState.update { current ->
                             current.copy(
                                 isLoadingMore = false,
@@ -123,6 +137,10 @@ class ThreadSubPostsViewModel(
                     },
                 )
             }
+    }
+
+    private fun emitNetworkError() {
+        _uiEvents.tryEmit(ThreadSubPostsUiEvent.ShowToast(NETWORK_ERROR_MESSAGE))
     }
 
     companion object {
