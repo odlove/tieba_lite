@@ -22,4 +22,8 @@ android {
 
 dependencies {
     implementation(project(":core:ui"))
+    implementation(project(":core:data"))
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.coil.compose)
 }

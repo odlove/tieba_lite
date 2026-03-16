@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.feature.explore.ExploreRoute
 import app.tiebalite.feature.messages.MessagesScreen
-import app.tiebalite.feature.myforums.MyForumsScreen
+import app.tiebalite.feature.myforums.MyForumsRoute
 import app.tiebalite.feature.profile.ProfileScreen
 import app.tiebalite.ui.components.TiebaliteBottomBar
 
@@ -64,7 +64,7 @@ internal fun MainShell(
             popExitTransition = { fadeOut(animationSpec = tween(260)) },
         ) {
             composable(MainDestination.MyForums.route) {
-                MyForumsScreen(paddingValues)
+                MyForumsRoute(paddingValues = paddingValues)
             }
             composable(MainDestination.Explore.route) {
                 ExploreRoute(

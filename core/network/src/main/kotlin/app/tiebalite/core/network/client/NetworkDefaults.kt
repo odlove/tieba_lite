@@ -3,6 +3,7 @@ package app.tiebalite.core.network.client
 object NetworkDefaults {
     const val BASE_URL = "https://tieba.baidu.com/"
     const val TBCLIENT_BASE_URL = "https://tiebac.baidu.com/"
+    const val FORUM_GUIDE_CMD = 309683
     const val PERSONALIZED_CMD = 309264
     const val PB_PAGE_CMD = 302001
     const val PB_FLOOR_CMD = 302002
