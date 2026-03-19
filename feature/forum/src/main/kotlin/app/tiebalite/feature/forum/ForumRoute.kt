@@ -1,4 +1,4 @@
-package app.tiebalite.feature.explore
+package app.tiebalite.feature.forum
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,34 +13,37 @@ import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun ExploreRoute(
+fun ForumRoute(
     paddingValues: PaddingValues,
+    forumName: String,
+    onBack: () -> Unit,
     onOpenThread: (String) -> Unit,
-    onOpenForum: (String) -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
-    viewModel: ExploreViewModel = viewModel(factory = ExploreViewModel.Factory),
+    viewModel: ForumViewModel = viewModel(factory = ForumViewModel.factory(forumName)),
 ) {
     val context = LocalContext.current
     val currentContext by rememberUpdatedState(context)
     val uiState by viewModel.uiState.collectAsState()
+
     LaunchedEffect(viewModel) {
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
-                is ExploreUiEvent.ShowToast -> {
+                is ForumUiEvent.ShowToast -> {
                     Toast.makeText(currentContext, event.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    ExploreScreen(
+    ForumScreen(
         paddingValues = paddingValues,
+        forumName = forumName,
         state = uiState,
-        onOpenThread = onOpenThread,
-        onOpenForum = onOpenForum,
-        onOpenImageViewer = onOpenImageViewer,
+        onBack = onBack,
         onRefresh = viewModel::refresh,
         onLoadMore = viewModel::loadMore,
         onRetry = viewModel::refresh,
+        onOpenThread = onOpenThread,
+        onOpenImageViewer = onOpenImageViewer,
     )
 }

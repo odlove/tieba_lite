@@ -92,6 +92,7 @@ dependencies {
     implementation(project(":feature:history"))
     implementation(project(":feature:thread"))
     implementation(project(":feature:imageviewer"))
+    implementation(project(":feature:forum"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

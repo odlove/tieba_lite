@@ -30,6 +30,7 @@ fun ThreadScreen(
     paddingValues: PaddingValues,
     state: ThreadUiState,
     onBack: () -> Unit,
+    onOpenForum: (String) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
@@ -51,6 +52,7 @@ fun ThreadScreen(
         ThreadTopBar(
             state = state,
             onBack = onBack,
+            onOpenForum = onOpenForum,
         )
 
         PullToRefreshBox(

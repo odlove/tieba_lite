@@ -1,6 +1,7 @@
 package app.tiebalite.feature.thread.main.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import coil3.request.crossfade
 internal fun ThreadTopBar(
     state: ThreadUiState,
     onBack: () -> Unit,
+    onOpenForum: ((String) -> Unit)? = null,
 ) {
     val forumName = state.forumName?.trim()?.takeIf { it.isNotEmpty() }
     val threadTitle = state.firstFloorPost?.title?.trim()?.takeIf { it.isNotEmpty() } ?: "帖子"
@@ -53,6 +55,7 @@ internal fun ThreadTopBar(
                         ThreadForumChip(
                             forumName = forumName,
                             avatarUrl = state.forumAvatarUrl,
+                            onClick = onOpenForum?.let { callback -> { callback(forumName) } },
                         )
                     } else {
                         Text(
@@ -87,11 +90,14 @@ internal fun ThreadTopBar(
 private fun ThreadForumChip(
     forumName: String,
     avatarUrl: String?,
+    onClick: (() -> Unit)? = null,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(100),
-        modifier = Modifier.padding(horizontal = 48.dp),
+        modifier = Modifier
+            .padding(horizontal = 48.dp)
+            .let { modifier -> if (onClick == null) modifier else modifier.clickable(onClick = onClick) },
     ) {
         Row(
             modifier =

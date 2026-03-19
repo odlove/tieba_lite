@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.activity.compose.BackHandler
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,6 +31,7 @@ import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.feature.history.HistoryRoute
 import app.tiebalite.feature.history.HistoryRoutes
+import app.tiebalite.feature.forum.ForumRoute
 import app.tiebalite.feature.imageviewer.ImageViewerEntry
 import app.tiebalite.feature.settings.SettingsRoutes
 import app.tiebalite.feature.settings.SettingsHomeRoute
@@ -74,6 +76,13 @@ private object ThreadRoutes {
 
     fun thread(threadId: String): String = "thread/$threadId"
     fun subPosts(threadId: Long, postId: Long): String = "thread/$threadId/subposts/$postId"
+}
+
+private object ForumRoutes {
+    const val ForumNameArg = "forumName"
+    const val Forum = "forum/{$ForumNameArg}"
+
+    fun forum(forumName: String): String = "forum/${Uri.encode(forumName)}"
 }
 
 private object RootRoutes {
@@ -142,6 +151,9 @@ fun TiebaliteApp(
                             onOpenThread = { threadId ->
                                 navController.navigate(ThreadRoutes.thread(threadId))
                             },
+                            onOpenForum = { forumName ->
+                                navController.navigate(ForumRoutes.forum(forumName))
+                            },
                             onOpenHistory = { navController.navigate(HistoryRoutes.Home) },
                             onOpenSettings = { navController.navigate(SettingsRoutes.Home) },
                             onOpenImageViewer = openImageViewer,
@@ -160,6 +172,9 @@ fun TiebaliteApp(
                             paddingValues = paddingValues,
                             onOpenThread = { threadId ->
                                 navController.navigate(ThreadRoutes.thread(threadId.toString()))
+                            },
+                            onOpenForum = { forumName ->
+                                navController.navigate(ForumRoutes.forum(forumName))
                             },
                             onBack = { navController.popBackStack() },
                         )
@@ -235,6 +250,31 @@ fun TiebaliteApp(
                         )
                     }
                     composable(
+                        route = ForumRoutes.Forum,
+                        arguments =
+                            listOf(
+                                navArgument(ForumRoutes.ForumNameArg) {
+                                    type = NavType.StringType
+                                },
+                            ),
+                    ) { backStackEntry ->
+                        val forumName =
+                            backStackEntry.arguments
+                                ?.getString(ForumRoutes.ForumNameArg)
+                                ?.let(Uri::decode)
+                                ?.takeIf { it.isNotBlank() }
+                                ?: return@composable
+                        ForumRoute(
+                            paddingValues = paddingValues,
+                            forumName = forumName,
+                            onBack = { navController.popBackStack() },
+                            onOpenThread = { threadId ->
+                                navController.navigate(ThreadRoutes.thread(threadId))
+                            },
+                            onOpenImageViewer = openImageViewer,
+                        )
+                    }
+                    composable(
                         route = ThreadRoutes.Thread,
                         arguments =
                             listOf(
@@ -251,6 +291,9 @@ fun TiebaliteApp(
                             paddingValues = paddingValues,
                             threadId = threadId,
                             onBack = { navController.popBackStack() },
+                            onOpenForum = { forumName ->
+                                navController.navigate(ForumRoutes.forum(forumName))
+                            },
                             onOpenSubPosts = { postId ->
                                 navController.navigate(ThreadRoutes.subPosts(threadId, postId))
                             },

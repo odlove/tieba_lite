@@ -15,6 +15,7 @@ fun FeedCard(
     item: RecommendItem,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    onOpenForum: ((String) -> Unit)? = null,
     onOpenMedia: (() -> Unit)? = null,
 ) {
     Column(
@@ -25,7 +26,10 @@ fun FeedCard(
                 .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        FeedCardHeader(item = item)
+        FeedCardHeader(
+            item = item,
+            onOpenForum = onOpenForum,
+        )
         FeedCardBody(item = item)
         FeedCardMedia(
             item = item,

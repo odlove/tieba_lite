@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun MyForumsRoute(
     paddingValues: PaddingValues,
+    onOpenForum: (String) -> Unit,
     viewModel: MyForumsViewModel = viewModel(factory = MyForumsViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -16,5 +17,6 @@ fun MyForumsRoute(
         paddingValues = paddingValues,
         state = uiState,
         onRetry = viewModel::refresh,
+        onOpenForum = onOpenForum,
     )
 }

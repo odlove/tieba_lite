@@ -47,6 +47,7 @@ fun HistoryScreen(
     paddingValues: PaddingValues,
     state: HistoryUiState,
     onOpenThread: (Long) -> Unit,
+    onOpenForum: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -86,6 +87,7 @@ fun HistoryScreen(
                     HistoryItem(
                         item = item,
                         onClick = { onOpenThread(item.threadId) },
+                        onOpenForum = onOpenForum,
                     )
                     if (index < state.items.lastIndex) {
                         HorizontalDivider(
@@ -119,6 +121,7 @@ private fun HistoryEmpty(
 private fun HistoryItem(
     item: ThreadHistoryRecord,
     onClick: () -> Unit,
+    onOpenForum: (String) -> Unit,
 ) {
     val forumName = item.forumName?.takeIf { it.isNotBlank() }
     val forumAvatarUrl = item.forumAvatarUrl?.takeIf { it.isNotBlank() }
@@ -147,6 +150,7 @@ private fun HistoryItem(
                 HistoryForumChip(
                     name = it,
                     avatarUrl = forumAvatarUrl,
+                    onClick = { onOpenForum(it) },
                 )
             }
             Box(
@@ -176,11 +180,13 @@ private fun HistoryItem(
 private fun HistoryForumChip(
     name: String,
     avatarUrl: String?,
+    onClick: () -> Unit,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         shape = MaterialTheme.shapes.small,
+        modifier = Modifier.clickable(onClick = onClick),
     ) {
         Row(
             modifier =

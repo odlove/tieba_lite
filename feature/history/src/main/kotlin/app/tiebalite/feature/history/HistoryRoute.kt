@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun HistoryRoute(
     paddingValues: PaddingValues,
     onOpenThread: (Long) -> Unit,
+    onOpenForum: (String) -> Unit,
     onBack: () -> Unit,
     viewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory),
 ) {
@@ -36,6 +37,7 @@ fun HistoryRoute(
         paddingValues = paddingValues,
         state = uiState,
         onOpenThread = onOpenThread,
+        onOpenForum = onOpenForum,
         onBack = onBack,
     )
 }

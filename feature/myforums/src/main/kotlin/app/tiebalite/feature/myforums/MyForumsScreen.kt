@@ -1,6 +1,7 @@
 package app.tiebalite.feature.myforums
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,6 +39,7 @@ fun MyForumsScreen(
     paddingValues: PaddingValues,
     state: MyForumsUiState,
     onRetry: () -> Unit,
+    onOpenForum: (String) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppTopBar(title = "我的吧")
@@ -58,6 +60,7 @@ fun MyForumsScreen(
             else -> MyForumsList(
                 paddingValues = paddingValues,
                 state = state,
+                onOpenForum = onOpenForum,
             )
         }
     }
@@ -67,20 +70,26 @@ fun MyForumsScreen(
 private fun MyForumsList(
     paddingValues: PaddingValues,
     state: MyForumsUiState,
+    onOpenForum: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 12.dp),
     ) {
-        items(
+        itemsIndexed(
             items = state.items,
-            key = { item -> item.forumId },
-        ) { item ->
-            MyForumListItem(item = item)
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+            key = { _, item -> item.forumId },
+        ) { index, item ->
+            MyForumListItem(
+                item = item,
+                onClick = { onOpenForum(item.forumName) },
             )
+            if (index < state.items.lastIndex) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                )
+            }
         }
     }
 }
@@ -88,11 +97,13 @@ private fun MyForumsList(
 @Composable
 private fun MyForumListItem(
     item: app.tiebalite.core.model.myforums.MyForumItem,
+    onClick: () -> Unit,
 ) {
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),

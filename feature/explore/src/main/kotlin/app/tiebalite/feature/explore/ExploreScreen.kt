@@ -42,6 +42,7 @@ fun ExploreScreen(
     paddingValues: PaddingValues,
     state: ExploreUiState,
     onOpenThread: (String) -> Unit,
+    onOpenForum: (String) -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
@@ -80,6 +81,7 @@ fun ExploreScreen(
                     isRefreshing = state.isRefreshing,
                     isLoadingMore = state.isLoadingMore,
                     onOpenThread = onOpenThread,
+                    onOpenForum = onOpenForum,
                     onOpenImageViewer = onOpenImageViewer,
                     onLoadMore = onLoadMore,
                 )
@@ -154,6 +156,7 @@ private fun ExploreList(
     isRefreshing: Boolean,
     isLoadingMore: Boolean,
     onOpenThread: (String) -> Unit,
+    onOpenForum: (String) -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
     onLoadMore: () -> Unit,
 ) {
@@ -176,6 +179,7 @@ private fun ExploreList(
                 onClick = {
                     onOpenThread(item.id)
                 },
+                onOpenForum = onOpenForum,
                 onOpenMedia = {
                     item.toImageViewerArgs()?.let(onOpenImageViewer)
                 },

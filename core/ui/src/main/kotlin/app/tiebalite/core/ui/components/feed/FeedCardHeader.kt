@@ -1,6 +1,7 @@
 package app.tiebalite.core.ui.components.feed
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +31,10 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 
 @Composable
-internal fun FeedCardHeader(item: RecommendItem) {
+internal fun FeedCardHeader(
+    item: RecommendItem,
+    onOpenForum: ((String) -> Unit)? = null,
+) {
     val subtitle = formatDateTime(item.lastTimeTimestampSeconds)
     val forumName = item.forumName?.trim()?.takeIf { it.isNotEmpty() }
     Row(
@@ -67,6 +71,7 @@ internal fun FeedCardHeader(item: RecommendItem) {
             FeedForumChip(
                 name = it,
                 avatarUrl = item.forumAvatarUrl,
+                onClick = onOpenForum?.let { callback -> { callback(it) } },
             )
         }
     }
@@ -76,6 +81,7 @@ internal fun FeedCardHeader(item: RecommendItem) {
 private fun FeedForumChip(
     name: String,
     avatarUrl: String?,
+    onClick: (() -> Unit)? = null,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -86,6 +92,8 @@ private fun FeedForumChip(
             modifier =
                 Modifier
                     .height(32.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .let { modifier -> if (onClick == null) modifier else modifier.clickable(onClick = onClick) }
                     .padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),

@@ -27,6 +27,7 @@ import app.tiebalite.ui.components.TiebaliteBottomBar
 internal fun MainShell(
     rootPaddingValues: PaddingValues,
     onOpenThread: (String) -> Unit,
+    onOpenForum: (String) -> Unit,
     onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
@@ -64,12 +65,16 @@ internal fun MainShell(
             popExitTransition = { fadeOut(animationSpec = tween(260)) },
         ) {
             composable(MainDestination.MyForums.route) {
-                MyForumsRoute(paddingValues = paddingValues)
+                MyForumsRoute(
+                    paddingValues = paddingValues,
+                    onOpenForum = onOpenForum,
+                )
             }
             composable(MainDestination.Explore.route) {
                 ExploreRoute(
                     paddingValues = paddingValues,
                     onOpenThread = onOpenThread,
+                    onOpenForum = onOpenForum,
                     onOpenImageViewer = onOpenImageViewer,
                 )
             }
