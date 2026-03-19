@@ -88,9 +88,9 @@ class ThreadViewModel(
                     onSuccess = { page ->
                         _uiState.update { current ->
                             current.copy(
-                                forumId = page.forumId,
-                                forumName = page.forumName,
-                                forumAvatarUrl = page.forumAvatarUrl,
+                                forumId = page.forumId ?: current.forumId,
+                                forumName = page.forumName ?: current.forumName,
+                                forumAvatarUrl = page.forumAvatarUrl ?: current.forumAvatarUrl,
                                 firstFloorPost = current.firstFloorPost ?: page.firstFloorPost,
                                 posts = (current.posts + page.posts).distinctBy { post -> post.id },
                                 isLoadingMore = false,
