@@ -100,6 +100,7 @@ internal fun ImageViewerScreen(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
+            beyondViewportPageCount = 1,
             userScrollEnabled = !dragDismissState.isDragging,
         ) { page ->
             ImageViewerPage(
