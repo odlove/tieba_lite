@@ -17,7 +17,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
-import app.tiebalite.core.model.thread.ThreadPost
 import app.tiebalite.core.model.thread.ThreadPostBody
 import java.util.Locale
 
@@ -28,19 +27,26 @@ internal val ThreadPostBodyIndent = 36.dp + ThreadPostHeaderSpacing
 
 @Composable
 internal fun ThreadPostHeader(
-    item: ThreadPost,
+    authorId: Long,
+    authorName: String?,
+    authorLevel: Int,
+    authorAvatarUrl: String?,
+    ipLocation: String?,
+    timestampSeconds: Long?,
+    agreeCount: Long,
+    floor: Int?,
     threadAuthorId: Long?,
     modifier: Modifier = Modifier,
 ) {
-    val isThreadAuthor = threadAuthorId != null && threadAuthorId > 0L && item.authorId == threadAuthorId
+    val isThreadAuthor = threadAuthorId != null && threadAuthorId > 0L && authorId == threadAuthorId
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(ThreadPostHeaderSpacing),
     ) {
         AuthorAvatar(
-            name = item.authorName,
-            imageUrl = item.authorAvatarUrl,
+            name = authorName,
+            imageUrl = authorAvatarUrl,
             size = 36.dp,
         )
         Column(
@@ -48,14 +54,14 @@ internal fun ThreadPostHeader(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             AuthorNameWithLevel(
-                name = item.authorName ?: "贴吧用户",
-                level = item.authorLevel,
+                name = authorName ?: "贴吧用户",
+                level = authorLevel,
                 isThreadAuthor = isThreadAuthor,
                 textStyle = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(
-                text = formatPostMeta(item.timestampSeconds, item.ipLocation),
+                text = formatPostMeta(timestampSeconds, ipLocation),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -66,12 +72,14 @@ internal fun ThreadPostHeader(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "${item.floor}楼",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            ThreadAgreeStat(agreeCount = item.agreeCount)
+            floor?.let {
+                Text(
+                    text = "${it}楼",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            ThreadAgreeStat(agreeCount = agreeCount)
         }
     }
 }

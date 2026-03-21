@@ -2,23 +2,18 @@ package app.tiebalite.feature.thread.subposts.post
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadSubPost
-import app.tiebalite.feature.thread.common.post.AuthorAvatar
-import app.tiebalite.feature.thread.common.post.AuthorNameWithLevel
-import app.tiebalite.feature.thread.common.post.ThreadAgreeStat
-import app.tiebalite.feature.thread.common.post.ThreadPostContentSection
-import app.tiebalite.feature.thread.common.post.formatPostMeta
+import app.tiebalite.feature.thread.common.post.ThreadPostBody
+import app.tiebalite.feature.thread.common.post.ThreadPostBodyIndent
+import app.tiebalite.feature.thread.common.post.ThreadPostHeader
+import app.tiebalite.feature.thread.common.post.ThreadPostHorizontalPadding
+import app.tiebalite.feature.thread.common.post.ThreadPostVerticalPadding
 
 @Composable
 internal fun ThreadSubPostCard(
@@ -26,55 +21,31 @@ internal fun ThreadSubPostCard(
     threadAuthorId: Long?,
     onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
 ) {
-    val isThreadAuthor = threadAuthorId != null && threadAuthorId > 0L && item.authorId == threadAuthorId
     Column(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(
+                    horizontal = ThreadPostHorizontalPadding,
+                    vertical = ThreadPostVerticalPadding,
+                ),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            AuthorAvatar(
-                name = item.authorName,
-                imageUrl = item.authorAvatarUrl,
-                size = 32.dp,
-            )
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                AuthorNameWithLevel(
-                    name = item.authorName ?: "贴吧用户",
-                    level = item.authorLevel,
-                    isThreadAuthor = isThreadAuthor,
-                    textStyle = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    text = formatPostMeta(item.timestampSeconds, item.ipLocation),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            ThreadAgreeStat(agreeCount = item.agreeCount)
-        }
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(start = 42.dp),
-        ) {
-            ThreadPostContentSection(
-                body = item.body,
-                onOpenImageViewer = onOpenImageViewer,
-            )
-        }
+        ThreadPostHeader(
+            authorId = item.authorId,
+            authorName = item.authorName,
+            authorLevel = item.authorLevel,
+            authorAvatarUrl = item.authorAvatarUrl,
+            ipLocation = item.ipLocation,
+            timestampSeconds = item.timestampSeconds,
+            agreeCount = item.agreeCount,
+            floor = null,
+            threadAuthorId = threadAuthorId,
+        )
+        ThreadPostBody(
+            body = item.body,
+            modifier = Modifier.padding(start = ThreadPostBodyIndent),
+            onOpenImageViewer = onOpenImageViewer,
+        )
     }
 }

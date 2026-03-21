@@ -33,7 +33,14 @@ internal fun ThreadParentPostCard(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         ThreadPostHeader(
-            item = item,
+            authorId = item.authorId,
+            authorName = item.authorName,
+            authorLevel = item.authorLevel,
+            authorAvatarUrl = item.authorAvatarUrl,
+            ipLocation = item.ipLocation,
+            timestampSeconds = item.timestampSeconds,
+            agreeCount = item.agreeCount,
+            floor = item.floor,
             threadAuthorId = threadAuthorId,
         )
         ThreadPostBody(
