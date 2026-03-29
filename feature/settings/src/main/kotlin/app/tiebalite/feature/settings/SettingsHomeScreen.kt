@@ -1,6 +1,5 @@
 package app.tiebalite.feature.settings
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -13,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +20,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SettingsItem
+import app.tiebalite.core.ui.components.SettingsItemIcon
+import app.tiebalite.core.ui.components.SettingsItemStyle
 import app.tiebalite.feature.settings.account.SettingsAccountViewModel
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
@@ -37,32 +37,33 @@ fun SettingsHomeScreen(
     onBack: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
-    val contentPadding = PaddingValues(
-        start = paddingValues.calculateStartPadding(layoutDirection) + 24.dp,
-        end = paddingValues.calculateEndPadding(layoutDirection) + 24.dp,
-        top = 10.dp,
-        bottom = paddingValues.calculateBottomPadding() + 24.dp
-    )
+    val contentPadding =
+        PaddingValues(
+            start = paddingValues.calculateStartPadding(layoutDirection),
+            end = paddingValues.calculateEndPadding(layoutDirection),
+            top = 12.dp,
+            bottom = paddingValues.calculateBottomPadding() + 24.dp,
+        )
+    val dividerPadding = Modifier.padding(horizontal = 16.dp)
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppTopBar(
             title = stringResource(R.string.settings_home_title),
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-            onNavigationClick = onBack
+            onNavigationClick = onBack,
         )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
         ) {
             item {
                 SettingsItem(
+                    style = SettingsItemStyle.WideLeading,
                     leadingContent = {
-                        Icon(
+                        SettingsItemIcon(
                             imageVector = Icons.Outlined.PersonOutline,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            style = SettingsItemStyle.WideLeading,
                         )
                     },
                     title = { Text(text = stringResource(R.string.settings_account_entry_title)) },
@@ -80,22 +81,28 @@ fun SettingsHomeScreen(
                     },
                     onClick = onOpenAccountManage,
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(
+                    modifier = dividerPadding,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
             }
             item {
                 SettingsItem(
+                    style = SettingsItemStyle.WideLeading,
                     leadingContent = {
-                        Icon(
+                        SettingsItemIcon(
                             imageVector = Icons.Outlined.Palette,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            style = SettingsItemStyle.WideLeading,
                         )
                     },
                     title = { Text(text = stringResource(R.string.settings_theme_entry_title)) },
                     subtitle = { Text(text = stringResource(R.string.settings_theme_entry_desc)) },
                     onClick = onOpenTheme,
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(
+                    modifier = dividerPadding,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
             }
         }
     }

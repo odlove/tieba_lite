@@ -3,7 +3,6 @@ package app.tiebalite.feature.settings.account
 import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +29,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.SettingsItem
+import app.tiebalite.core.ui.components.SettingsItemIcon
+import app.tiebalite.core.ui.components.SettingsItemStyle
 import app.tiebalite.feature.settings.R
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -61,7 +61,6 @@ fun SettingsAccountDetailScreen(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = contentPadding,
         ) {
             if (account == null) {
@@ -76,18 +75,21 @@ fun SettingsAccountDetailScreen(
                 if (!account.isActive) {
                     item {
                         SettingsItem(
+                            style = SettingsItemStyle.WideLeading,
                             leadingContent = {
-                                Icon(
+                                SettingsItemIcon(
                                     imageVector = Icons.Outlined.CheckCircle,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    style = SettingsItemStyle.WideLeading,
                                 )
                             },
                             title = { Text(text = stringResource(R.string.settings_account_detail_set_active_title)) },
                             subtitle = { Text(text = stringResource(R.string.settings_account_detail_set_active_desc)) },
                             onClick = onSwitchAccount,
                         )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                        )
                     }
                 }
 
@@ -169,6 +171,7 @@ fun SettingsAccountDetailScreen(
                         label = stringResource(R.string.settings_account_detail_updated_at),
                         value = formatUpdatedAt(account.updatedAtMillis),
                         monospace = true,
+                        showDivider = false,
                     )
                 }
             }
@@ -181,6 +184,7 @@ private fun DetailField(
     label: String,
     value: String,
     monospace: Boolean = false,
+    showDivider: Boolean = true,
 ) {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
@@ -224,7 +228,11 @@ private fun DetailField(
             fontFamily = if (monospace) FontFamily.Monospace else null,
         )
     }
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    if (showDivider) {
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+    }
 }
 
 private fun String?.orDash(): String =
