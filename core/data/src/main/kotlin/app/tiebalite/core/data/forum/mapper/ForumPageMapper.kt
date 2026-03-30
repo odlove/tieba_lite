@@ -82,6 +82,7 @@ class ForumPageMapper {
                     ?: thread.createTime
                         .takeIf { it > 0 }
                         ?.toLong(),
+            isTop = thread.isTop == 1,
         )
     }
 

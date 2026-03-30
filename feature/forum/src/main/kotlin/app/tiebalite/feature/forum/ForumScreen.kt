@@ -1,6 +1,7 @@
 package app.tiebalite.feature.forum
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.forum.ForumHeader
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
@@ -117,6 +119,10 @@ private fun ForumContent(
     onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val (stickyItems, regularItems) =
+        remember(state.items) {
+            state.items.partition { item -> item.isTop }
+        }
     ForumLoadMoreEffect(
         listState = listState,
         isRefreshing = state.isRefreshing,
@@ -146,6 +152,25 @@ private fun ForumContent(
             }
         }
 
+        if (stickyItems.isNotEmpty()) {
+            item(key = "forum_sticky_threads") {
+                ForumStickyThreadsSection(
+                    items = stickyItems,
+                    onOpenThread = onOpenThread,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
+            if (regularItems.isNotEmpty()) {
+                item(key = "forum_sticky_threads_divider") {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        thickness = 2.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+                }
+            }
+        }
+
         if (state.items.isEmpty()) {
             item(key = "forum_empty_hint") {
                 Box(
@@ -164,7 +189,7 @@ private fun ForumContent(
         }
 
         itemsIndexed(
-            items = state.items,
+            items = regularItems,
             key = { _, item -> item.id },
         ) { index, item ->
             FeedCard(
@@ -174,7 +199,7 @@ private fun ForumContent(
                     item.toImageViewerArgs()?.let(onOpenImageViewer)
                 },
             )
-            if (index < state.items.lastIndex || state.isLoadingMore) {
+            if (index < regularItems.lastIndex || state.isLoadingMore) {
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.colorScheme.outlineVariant,
@@ -194,6 +219,64 @@ private fun ForumContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ForumStickyThreadsSection(
+    items: List<RecommendItem>,
+    onOpenThread: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        items.forEachIndexed { index, item ->
+            ForumStickyThreadItem(
+                item = item,
+                onClick = { onOpenThread(item.id) },
+            )
+            if (index < items.lastIndex) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ForumStickyThreadItem(
+    item: RecommendItem,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "置顶",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        }
+        Text(
+            text = item.title,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

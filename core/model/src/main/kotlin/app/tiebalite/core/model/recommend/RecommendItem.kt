@@ -13,6 +13,7 @@ data class RecommendItem(
     val agreeCount: Int = 0,
     val shareCount: Long = 0,
     val lastTimeTimestampSeconds: Long? = null,
+    val isTop: Boolean = false,
 ) {
     val coverImageUrl: String?
         get() = images.firstOrNull()?.url
