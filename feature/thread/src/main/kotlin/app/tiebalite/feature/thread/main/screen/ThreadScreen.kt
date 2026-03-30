@@ -36,6 +36,7 @@ fun ThreadScreen(
     state: ThreadUiState,
     onBack: () -> Unit,
     onOpenForum: (String) -> Unit,
+    onCopyThreadLink: () -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
@@ -63,6 +64,7 @@ fun ThreadScreen(
             state = state,
             onBack = onBack,
             onOpenForum = onOpenForum,
+            onCopyThreadLink = onCopyThreadLink,
         )
 
         PullToRefreshBox(

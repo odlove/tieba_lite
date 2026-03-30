@@ -48,6 +48,10 @@ class ThreadViewModel(
         refreshInternal(initial = false)
     }
 
+    fun copyThreadLink() {
+        _uiEvents.tryEmit(ThreadUiEvent.CopyThreadLink(threadId))
+    }
+
     fun loadMore() {
         val state = _uiState.value
         if (state.isInitialLoading || state.isRefreshing || state.isLoadingMore) {
