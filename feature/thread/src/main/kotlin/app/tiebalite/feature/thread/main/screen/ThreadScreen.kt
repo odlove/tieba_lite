@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
+import app.tiebalite.feature.thread.main.state.ThreadReplySortType
 import app.tiebalite.feature.thread.main.state.ThreadUiState
 import app.tiebalite.feature.thread.main.list.ThreadPostList
 import app.tiebalite.feature.thread.main.screen.ThreadTopBar
@@ -37,6 +38,7 @@ fun ThreadScreen(
     onBack: () -> Unit,
     onOpenForum: (String) -> Unit,
     onCopyThreadLink: () -> Unit,
+    onSetSortType: (Int) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
@@ -89,7 +91,10 @@ fun ThreadScreen(
                     contentPadding = contentPadding,
                     isRefreshing = state.isRefreshing,
                     isLoadingMore = state.isLoadingMore,
-                    hasMore = state.hasMore,
+                    canLoadMoreBelow = state.canLoadMoreBelow,
+                    sortType = state.sortType,
+                    allowLoadLatestPosts = state.sortType == ThreadReplySortType.Ascending,
+                    onSetSortType = onSetSortType,
                     onLoadMore = onLoadMore,
                     onOpenSubPosts = onOpenSubPosts,
                     onOpenImageViewer = onOpenImageViewer,

@@ -23,7 +23,7 @@ class PbPageNetworkSource(
 
     suspend fun fetchPage(
         threadId: Long,
-        page: Int = 1,
+        page: Int = 0,
         postId: Long = 0L,
         seeLz: Boolean = false,
         sortType: Int = 0,
@@ -180,7 +180,7 @@ class PbPageNetworkSource(
                     .setScrH(scrH)
                     .setScrDip(scrDip)
                     .setQType(2)
-                    .setPn(page.coerceAtLeast(1))
+                    .setPn(page.coerceAtLeast(0))
                     .setCommon(common)
                     .setIsCommReverse(0)
                     .setObjSource("")

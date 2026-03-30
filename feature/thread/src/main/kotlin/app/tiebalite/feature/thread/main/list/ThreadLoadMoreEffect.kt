@@ -12,12 +12,12 @@ internal fun ThreadLoadMoreEffect(
     listState: LazyListState,
     isRefreshing: Boolean,
     isLoadingMore: Boolean,
-    hasMore: Boolean,
+    canLoadMoreBelow: Boolean,
     onLoadMore: () -> Unit,
 ) {
-    val shouldLoadMore by remember(listState, hasMore) {
+    val shouldLoadMore by remember(listState, canLoadMoreBelow) {
         derivedStateOf {
-            if (!hasMore) {
+            if (!canLoadMoreBelow) {
                 return@derivedStateOf false
             }
             val totalItemsCount = listState.layoutInfo.totalItemsCount
@@ -27,11 +27,10 @@ internal fun ThreadLoadMoreEffect(
         }
     }
 
-    LaunchedEffect(shouldLoadMore, isRefreshing, isLoadingMore, hasMore) {
-        if (hasMore && shouldLoadMore && !isRefreshing && !isLoadingMore) {
+    LaunchedEffect(shouldLoadMore, isRefreshing, isLoadingMore, canLoadMoreBelow) {
+        if (shouldLoadMore && !isRefreshing && !isLoadingMore) {
             onLoadMore()
         }
     }
 }
-
 private const val LoadMorePrefetchDistance = 3

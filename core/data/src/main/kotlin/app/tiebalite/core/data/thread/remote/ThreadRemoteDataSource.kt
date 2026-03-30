@@ -16,6 +16,7 @@ class ThreadRemoteDataSource(
         threadId: Long,
         page: Int,
         postId: Long,
+        sortType: Int,
         lastPostId: Long?,
     ): Result<PbPageRaw> {
         val session = sessionProvider()
@@ -23,6 +24,7 @@ class ThreadRemoteDataSource(
             threadId = threadId,
             page = page,
             postId = postId,
+            sortType = sortType,
             lastPostId = lastPostId,
             bduss = session?.bduss,
             stoken = session?.stoken,

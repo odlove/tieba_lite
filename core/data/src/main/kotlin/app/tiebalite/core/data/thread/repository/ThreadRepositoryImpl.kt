@@ -16,12 +16,14 @@ class ThreadRepositoryImpl(
         threadId: Long,
         page: Int,
         postId: Long,
+        sortType: Int,
         lastPostId: Long?,
     ): Result<ThreadPage> =
         remoteDataSource.loadThreadPage(
             threadId = threadId,
             page = page,
             postId = postId,
+            sortType = sortType,
             lastPostId = lastPostId,
         ).mapCatching(mapper::map)
 

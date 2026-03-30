@@ -15,8 +15,10 @@ class ThreadPageMapper {
         val threadId = thread.id
         val userMap = authorResolver.buildUserMap(data.userListList)
         val fallbackThreadTitle = thread.title.ifBlank { "(无标题)" }
+        val containsFirstFloorPost = data.postListList.any { post -> post.floor == 1 }
         val firstFloorPostLite = resolveFirstFloorPost(raw = raw)
         val threadAgreeCount = thread.agreeNum.takeIf { value -> value > 0 }?.toLong()
+        val nextPagePostId = resolveNextPagePostId(thread.pids)
         val firstFloorPost =
             firstFloorPostLite?.let { post ->
                 firstFloorPostMapper.map(
@@ -37,16 +39,22 @@ class ThreadPageMapper {
                 )
             }
 
-        return ThreadPage(
+        val page =
+            ThreadPage(
             threadId = threadId,
             forumId = data.forum.id.takeIf { it > 0 },
             forumName = data.forum.name.ifBlank { thread.fname }.ifBlank { null },
             forumAvatarUrl = normalizeUrl(data.forum.avatar),
             firstFloorPost = firstFloorPost,
             currentPage = data.page.currentPage.takeIf { it > 0 } ?: 1,
+            totalPage = data.page.totalPage.takeIf { it > 0 } ?: 1,
+            nextPagePostId = nextPagePostId,
+            containsFirstFloorPost = containsFirstFloorPost,
             hasMore = data.page.hasMore != 0,
+            hasPrevious = data.page.hasPrev != 0,
             posts = posts,
         )
+        return page
     }
 
     private fun resolveFirstFloorPost(raw: PbPageRaw): ThreadPostLite? {
@@ -57,4 +65,15 @@ class ThreadPageMapper {
         raw: PbPageRaw,
     ): List<ThreadPostLite> =
         raw.response.data.postListList.filter { post -> post.floor != 1 }
+
+    private fun resolveNextPagePostId(
+        pids: String,
+    ): Long =
+        pids
+            .split(',')
+            .asSequence()
+            .map { value -> value.trim() }
+            .firstOrNull { value -> value.isNotEmpty() }
+            ?.toLongOrNull()
+            ?: 0L
 }

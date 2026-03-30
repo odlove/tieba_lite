@@ -112,7 +112,7 @@ internal fun ThreadSubPostsScreen(
             listState = listState,
             isRefreshing = state.isRefreshing,
             isLoadingMore = state.isLoadingMore,
-            hasMore = state.hasMore,
+            canLoadMoreBelow = state.hasMore,
             onLoadMore = onLoadMore,
         )
 

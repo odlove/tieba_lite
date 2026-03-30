@@ -7,6 +7,10 @@ data class ThreadPage(
     val forumAvatarUrl: String? = null,
     val firstFloorPost: ThreadFirstFloorPost? = null,
     val currentPage: Int = 1,
+    val totalPage: Int = 1,
+    val nextPagePostId: Long = 0L,
+    val containsFirstFloorPost: Boolean = false,
     val hasMore: Boolean = false,
+    val hasPrevious: Boolean = false,
     val posts: List<ThreadPost> = emptyList(),
 )

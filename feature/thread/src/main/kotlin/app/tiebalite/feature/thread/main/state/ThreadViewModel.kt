@@ -52,6 +52,13 @@ class ThreadViewModel(
         _uiEvents.tryEmit(ThreadUiEvent.CopyThreadLink(threadId))
     }
 
+    fun setSortType(sortType: Int) {
+        if (_uiState.value.sortType == sortType) {
+            return
+        }
+        refreshInternal(initial = false, sortType = sortType)
+    }
+
     fun loadMore() {
         val state = _uiState.value
         if (state.isInitialLoading || state.isRefreshing || state.isLoadingMore) {
@@ -61,7 +68,11 @@ class ThreadViewModel(
             return
         }
 
-        val loadLatestPosts = !state.hasMore
+        if (!state.canLoadMoreBelow && state.sortType == ThreadReplySortType.Descending) {
+            return
+        }
+
+        val loadLatestPosts = !state.canLoadMoreBelow && state.sortType == ThreadReplySortType.Ascending
 
         requestJob?.cancel()
         _uiState.update {
@@ -77,8 +88,18 @@ class ThreadViewModel(
                 ?.id
                 ?: state.posts.lastOrNull()?.id
                 ?: 0L
-        val pageToLoad = if (loadLatestPosts) LATEST_POSTS_PAGE else state.currentPage + 1
-        val postId = if (loadLatestPosts) latestPostId else 0L
+        val pageToLoad =
+            if (loadLatestPosts) {
+                FIRST_PAGE
+            } else {
+                nextPageToLoad(state)
+            }
+        val postId =
+            when {
+                loadLatestPosts -> latestPostId
+                state.sortType == ThreadReplySortType.Descending -> state.nextPagePostId
+                else -> 0L
+            }
         val lastPostId = if (loadLatestPosts) latestPostId else null
 
         requestJob =
@@ -87,9 +108,12 @@ class ThreadViewModel(
                     threadId = threadId,
                     page = pageToLoad,
                     postId = postId,
+                    sortType = state.sortType,
                     lastPostId = lastPostId,
                 ).fold(
                     onSuccess = { page ->
+                        val canLoadMoreBelow = resolveCanLoadMoreBelow(page = page, sortType = state.sortType)
+                        val nextPagePostId = resolveNextPagePostId(page = page, sortType = state.sortType)
                         _uiState.update { current ->
                             current.copy(
                                 forumId = page.forumId ?: current.forumId,
@@ -98,8 +122,12 @@ class ThreadViewModel(
                                 firstFloorPost = current.firstFloorPost ?: page.firstFloorPost,
                                 posts = (current.posts + page.posts).distinctBy { post -> post.id },
                                 isLoadingMore = false,
-                                currentPage = maxOf(current.currentPage, page.currentPage),
+                                currentPage = page.currentPage.takeIf { value -> value > 0 } ?: current.currentPage,
+                                totalPage = page.totalPage.takeIf { value -> value > 0 } ?: current.totalPage,
+                                nextPagePostId = nextPagePostId,
                                 hasMore = page.hasMore,
+                                canLoadMoreBelow = canLoadMoreBelow,
+                                hasPrevious = page.hasPrevious,
                                 errorMessage = null,
                             )
                         }
@@ -118,7 +146,10 @@ class ThreadViewModel(
             }
     }
 
-    private fun refreshInternal(initial: Boolean) {
+    private fun refreshInternal(
+        initial: Boolean,
+        sortType: Int = _uiState.value.sortType,
+    ) {
         requestJob?.cancel()
         _uiState.update { current ->
             current.copy(
@@ -134,20 +165,28 @@ class ThreadViewModel(
                 repository.loadThreadPage(
                     threadId = threadId,
                     page = FIRST_PAGE,
+                    sortType = sortType,
                 ).fold(
                     onSuccess = { page ->
-                        _uiState.update {
-                            it.copy(
+                        val canLoadMoreBelow = resolveCanLoadMoreBelow(page = page, sortType = sortType)
+                        val nextPagePostId = resolveNextPagePostId(page = page, sortType = sortType)
+                        _uiState.update { current ->
+                            current.copy(
                                 forumId = page.forumId,
                                 forumName = page.forumName,
                                 forumAvatarUrl = page.forumAvatarUrl,
-                                firstFloorPost = page.firstFloorPost,
+                                firstFloorPost = page.firstFloorPost ?: current.firstFloorPost,
                                 posts = page.posts,
                                 isInitialLoading = false,
                                 isRefreshing = false,
                                 isLoadingMore = false,
-                                currentPage = page.currentPage.takeIf { value -> value > 0 } ?: FIRST_PAGE,
+                                currentPage = page.currentPage.takeIf { value -> value > 0 } ?: FIRST_RESPONSE_PAGE,
+                                totalPage = page.totalPage.takeIf { value -> value > 0 } ?: FIRST_RESPONSE_PAGE,
+                                nextPagePostId = nextPagePostId,
                                 hasMore = page.hasMore,
+                                canLoadMoreBelow = canLoadMoreBelow,
+                                hasPrevious = page.hasPrevious,
+                                sortType = sortType,
                                 errorMessage = null,
                             )
                         }
@@ -218,9 +257,46 @@ class ThreadViewModel(
         _uiEvents.tryEmit(ThreadUiEvent.ShowToast(NETWORK_ERROR_MESSAGE))
     }
 
+    private fun nextPageToLoad(state: ThreadUiState): Int =
+        // currentPage is only kept as a best-effort input for the next pn value.
+        // The API can report unstable paging metadata, especially in descending mode.
+        when (state.sortType) {
+            ThreadReplySortType.Descending ->
+                (state.totalPage - state.currentPage)
+                    .coerceAtLeast(FIRST_RESPONSE_PAGE)
+
+            else -> state.currentPage + 1
+        }
+
+    private fun resolveCanLoadMoreBelow(
+        page: ThreadPage,
+        sortType: Int,
+    ): Boolean =
+        when (sortType) {
+            // Descending paging metadata is unreliable: the API can keep hasMore=true even on
+            // the final chunk and does not expose a clear "reached oldest reply" flag, so we
+            // treat "this response already contains floor 1" as the end condition.
+            ThreadReplySortType.Descending -> !page.containsFirstFloorPost
+
+            else -> page.hasMore
+        }
+
+    private fun resolveNextPagePostId(
+        page: ThreadPage,
+        sortType: Int,
+    ): Long =
+        when (sortType) {
+            // In descending mode, using the raw pids order can make the next request overlap
+            // with replies we already have, especially right after the first load. Use the
+            // lowest-floor reply from this response as the next pid instead.
+            ThreadReplySortType.Descending -> page.posts.minByOrNull { post -> post.floor }?.id ?: page.nextPagePostId
+
+            else -> page.nextPagePostId
+        }
+
     companion object {
-        private const val FIRST_PAGE = 1
-        private const val LATEST_POSTS_PAGE = 0
+        private const val FIRST_PAGE = 0
+        private const val FIRST_RESPONSE_PAGE = 1
         private const val NETWORK_ERROR_MESSAGE = "网络错误"
 
         fun factory(threadId: Long): ViewModelProvider.Factory =

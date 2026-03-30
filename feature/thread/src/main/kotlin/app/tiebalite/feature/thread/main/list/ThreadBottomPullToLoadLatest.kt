@@ -24,7 +24,8 @@ internal data class BottomPullToLoadLatestState(
 @Composable
 internal fun rememberBottomPullToLoadLatestState(
     listState: LazyListState,
-    hasMore: Boolean,
+    enabled: Boolean,
+    canLoadMoreBelow: Boolean,
     isRefreshing: Boolean,
     isLoadingMore: Boolean,
     onTriggered: () -> Unit,
@@ -37,10 +38,11 @@ internal fun rememberBottomPullToLoadLatestState(
     }
 
     val connection =
-        remember(listState, hasMore, isRefreshing, isLoadingMore, triggerDistancePx) {
+        remember(listState, enabled, canLoadMoreBelow, isRefreshing, isLoadingMore, triggerDistancePx) {
             object : NestedScrollConnection {
                 private fun canPullToLoadLatest(): Boolean =
-                    !hasMore &&
+                    enabled &&
+                        !canLoadMoreBelow &&
                         !isRefreshing &&
                         !isLoadingMore &&
                         listState.layoutInfo.totalItemsCount > 0 &&
