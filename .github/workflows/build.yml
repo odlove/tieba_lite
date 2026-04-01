@@ -1,0 +1,55 @@
+name: Build, Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Prepare signing
+        run: |
+          [ -n "${{ secrets.KEYSTORE }}" ] || { echo "KEYSTORE is empty"; exit 1; }
+          [ -n "${{ secrets.RELEASESTOREPASSWORD }}" ] || { echo "RELEASESTOREPASSWORD is empty"; exit 1; }
+          [ -n "${{ secrets.RELEASEKEYPASSWORD }}" ] || { echo "RELEASEKEYPASSWORD is empty"; exit 1; }
+          [ -n "${{ vars.RELEASE_KEY_ALIAS }}" ] || { echo "RELEASE_KEY_ALIAS is empty"; exit 1; }
+
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > release.jks
+          cat > keystore.properties <<EOF
+          keystore.file=release.jks
+          keystore.password=${{ secrets.RELEASESTOREPASSWORD }}
+          keystore.key.alias=${{ vars.RELEASE_KEY_ALIAS }}
+          keystore.key.password=${{ secrets.RELEASEKEYPASSWORD }}
+          EOF
+
+      - name: Build release
+        run: ./gradlew :app:assembleRelease
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          tag_name: v${{ inputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: v${{ inputs.version }}
+          files: |
+            ./app/build/outputs/apk/release/*.apk
+            ./app/build/outputs/mapping/release/mapping.txt
+          fail_on_unmatched_files: true
