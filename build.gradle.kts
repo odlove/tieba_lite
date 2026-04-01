@@ -22,15 +22,21 @@ val printLintReports =
             val reports =
                 rootProject.allprojects
                     .map { project -> project.file("build/reports/lint-results-debug.txt") }
-                    .filter { report -> report.isFile && report.length() > 0L }
                     .sortedBy { report -> report.absolutePath }
-            if (reports.isEmpty()) {
-                println("No lint text reports found.")
-                return@doLast
-            }
+
+            var printedAny = false
             reports.forEach { report ->
+                if (!report.isFile || report.length() == 0L) {
+                    return@forEach
+                }
+                printedAny = true
                 println("\n===== ${report.relativeTo(rootProject.projectDir)} =====")
                 println(report.readText())
+            }
+
+            if (!printedAny) {
+                println("===== printLintReports =====")
+                println("no issues found")
             }
         }
     }
