@@ -9,6 +9,7 @@ data class ThreadUiState(
     val forumAvatarUrl: String? = null,
     val firstFloorPost: ThreadFirstFloorPost? = null,
     val posts: List<ThreadPost> = emptyList(),
+    val seeLz: Boolean = false,
     val sortType: Int = ThreadReplySortType.Ascending,
     val isInitialLoading: Boolean = true,
     val isRefreshing: Boolean = false,

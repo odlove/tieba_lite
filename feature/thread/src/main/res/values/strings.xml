@@ -3,7 +3,8 @@
     <string name="thread_top_bar_more">更多选项</string>
     <string name="thread_copy_link">复制帖子链接</string>
     <string name="thread_link_copied">帖子链接已复制</string>
-    <string name="thread_reply_header">全部回复 %1$d</string>
+    <string name="thread_reply_header">全部回复</string>
+    <string name="thread_show_only_author">只看楼主</string>
     <string name="thread_sort_ascending">正序</string>
     <string name="thread_sort_descending">倒序</string>
 </resources>

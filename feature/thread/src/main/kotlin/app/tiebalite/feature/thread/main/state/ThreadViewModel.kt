@@ -59,6 +59,13 @@ class ThreadViewModel(
         refreshInternal(initial = false, sortType = sortType)
     }
 
+    fun setSeeLz(seeLz: Boolean) {
+        if (_uiState.value.seeLz == seeLz) {
+            return
+        }
+        refreshInternal(initial = false, seeLz = seeLz)
+    }
+
     fun loadMore() {
         val state = _uiState.value
         if (state.isInitialLoading || state.isRefreshing || state.isLoadingMore) {
@@ -108,6 +115,7 @@ class ThreadViewModel(
                     threadId = threadId,
                     page = pageToLoad,
                     postId = postId,
+                    seeLz = state.seeLz,
                     sortType = state.sortType,
                     lastPostId = lastPostId,
                 ).fold(
@@ -148,6 +156,7 @@ class ThreadViewModel(
 
     private fun refreshInternal(
         initial: Boolean,
+        seeLz: Boolean = _uiState.value.seeLz,
         sortType: Int = _uiState.value.sortType,
     ) {
         requestJob?.cancel()
@@ -165,6 +174,7 @@ class ThreadViewModel(
                 repository.loadThreadPage(
                     threadId = threadId,
                     page = FIRST_PAGE,
+                    seeLz = seeLz,
                     sortType = sortType,
                 ).fold(
                     onSuccess = { page ->
@@ -177,6 +187,7 @@ class ThreadViewModel(
                                 forumAvatarUrl = page.forumAvatarUrl,
                                 firstFloorPost = page.firstFloorPost ?: current.firstFloorPost,
                                 posts = page.posts,
+                                seeLz = seeLz,
                                 isInitialLoading = false,
                                 isRefreshing = false,
                                 isLoadingMore = false,

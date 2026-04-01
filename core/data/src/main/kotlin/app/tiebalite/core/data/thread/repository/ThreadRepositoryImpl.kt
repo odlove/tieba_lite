@@ -16,6 +16,7 @@ class ThreadRepositoryImpl(
         threadId: Long,
         page: Int,
         postId: Long,
+        seeLz: Boolean,
         sortType: Int,
         lastPostId: Long?,
     ): Result<ThreadPage> =
@@ -23,6 +24,7 @@ class ThreadRepositoryImpl(
             threadId = threadId,
             page = page,
             postId = postId,
+            seeLz = seeLz,
             sortType = sortType,
             lastPostId = lastPostId,
         ).mapCatching(mapper::map)

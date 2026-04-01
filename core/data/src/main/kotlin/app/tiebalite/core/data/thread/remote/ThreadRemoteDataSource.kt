@@ -16,6 +16,7 @@ class ThreadRemoteDataSource(
         threadId: Long,
         page: Int,
         postId: Long,
+        seeLz: Boolean,
         sortType: Int,
         lastPostId: Long?,
     ): Result<PbPageRaw> {
@@ -24,6 +25,7 @@ class ThreadRemoteDataSource(
             threadId = threadId,
             page = page,
             postId = postId,
+            seeLz = seeLz,
             sortType = sortType,
             lastPostId = lastPostId,
             bduss = session?.bduss,

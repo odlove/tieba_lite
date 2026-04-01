@@ -42,8 +42,10 @@ internal fun ThreadPostList(
     isRefreshing: Boolean,
     isLoadingMore: Boolean,
     canLoadMoreBelow: Boolean,
+    seeLz: Boolean,
     sortType: Int,
     allowLoadLatestPosts: Boolean,
+    onSetSeeLz: (Boolean) -> Unit,
     onSetSortType: (Int) -> Unit,
     onLoadMore: () -> Unit,
     onOpenSubPosts: (Long) -> Unit,
@@ -102,11 +104,9 @@ internal fun ThreadPostList(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(
-                            text = stringResource(R.string.thread_reply_header, replyPosts.size),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
+                        ReplySeeLzToggle(
+                            seeLz = seeLz,
+                            onSetSeeLz = onSetSeeLz,
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         ReplySortToggle(
@@ -169,60 +169,81 @@ internal fun ThreadPostList(
 }
 
 @Composable
-private fun ReplySortToggle(
-    sortType: Int,
-    onSetSortType: (Int) -> Unit,
+private fun ReplySeeLzToggle(
+    seeLz: Boolean,
+    onSetSeeLz: (Boolean) -> Unit,
 ) {
-    val ascendingInteractionSource = remember { MutableInteractionSource() }
-    val descendingInteractionSource = remember { MutableInteractionSource() }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = stringResource(R.string.thread_sort_ascending),
-            modifier = Modifier
-                .clickable(
-                    interactionSource = ascendingInteractionSource,
-                    indication = ripple(bounded = false),
-                    enabled = sortType != ThreadReplySortType.Ascending,
-                ) {
-                    onSetSortType(ThreadReplySortType.Ascending)
-                }
-                .padding(horizontal = 8.dp),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = if (sortType == ThreadReplySortType.Ascending) FontWeight.SemiBold else FontWeight.Normal,
-            color =
-                if (sortType == ThreadReplySortType.Ascending) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+        ReplyHeaderToggleText(
+            text = stringResource(R.string.thread_reply_header),
+            selected = !seeLz,
+            onClick = { onSetSeeLz(false) },
         )
         Text(
             text = "/",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(
-            text = stringResource(R.string.thread_sort_descending),
-            modifier = Modifier
-                .clickable(
-                    interactionSource = descendingInteractionSource,
-                    indication = ripple(bounded = false),
-                    enabled = sortType != ThreadReplySortType.Descending,
-                ) {
-                    onSetSortType(ThreadReplySortType.Descending)
-                }
-                .padding(horizontal = 8.dp),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = if (sortType == ThreadReplySortType.Descending) FontWeight.SemiBold else FontWeight.Normal,
-            color =
-                if (sortType == ThreadReplySortType.Descending) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+        ReplyHeaderToggleText(
+            text = stringResource(R.string.thread_show_only_author),
+            selected = seeLz,
+            onClick = { onSetSeeLz(true) },
         )
     }
+}
+
+@Composable
+private fun ReplySortToggle(
+    sortType: Int,
+    onSetSortType: (Int) -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ReplyHeaderToggleText(
+            text = stringResource(R.string.thread_sort_ascending),
+            selected = sortType == ThreadReplySortType.Ascending,
+            onClick = { onSetSortType(ThreadReplySortType.Ascending) },
+        )
+        Text(
+            text = "/",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        ReplyHeaderToggleText(
+            text = stringResource(R.string.thread_sort_descending),
+            selected = sortType == ThreadReplySortType.Descending,
+            onClick = { onSetSortType(ThreadReplySortType.Descending) },
+        )
+    }
+}
+
+@Composable
+private fun ReplyHeaderToggleText(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Text(
+        text = text,
+        modifier = Modifier
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = false),
+                enabled = !selected,
+                onClick = onClick,
+            )
+            .padding(horizontal = 8.dp),
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+        color =
+            if (selected) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+    )
 }

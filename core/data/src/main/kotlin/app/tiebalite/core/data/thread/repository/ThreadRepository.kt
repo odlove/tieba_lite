@@ -8,6 +8,7 @@ interface ThreadRepository {
         threadId: Long,
         page: Int = 0,
         postId: Long = 0L,
+        seeLz: Boolean = false,
         sortType: Int = 0,
         lastPostId: Long? = null,
     ): Result<ThreadPage>

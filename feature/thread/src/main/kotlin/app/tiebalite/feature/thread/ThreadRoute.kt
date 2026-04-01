@@ -61,6 +61,7 @@ fun ThreadRoute(
         onBack = onBack,
         onOpenForum = onOpenForum,
         onCopyThreadLink = viewModel::copyThreadLink,
+        onSetSeeLz = viewModel::setSeeLz,
         onSetSortType = viewModel::setSortType,
         onRefresh = viewModel::refresh,
         onLoadMore = viewModel::loadMore,
