@@ -13,9 +13,14 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_NOTES_PATH: ./changelog/releases/v${{ inputs.version }}.md
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Ensure release notes file exists
+        run: test -f "$RELEASE_NOTES_PATH"
 
       - uses: actions/setup-java@v5
         with:
@@ -49,6 +54,7 @@ jobs:
           tag_name: v${{ inputs.version }}
           target_commitish: ${{ github.sha }}
           name: v${{ inputs.version }}
+          body_path: ${{ env.RELEASE_NOTES_PATH }}
           files: |
             ./app/build/outputs/apk/release/*.apk
             ./app/build/outputs/mapping/release/mapping.txt
