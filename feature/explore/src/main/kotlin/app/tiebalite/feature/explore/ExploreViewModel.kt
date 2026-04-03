@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.tiebalite.core.data.auth.di.AuthGraphProvider
+import app.tiebalite.core.data.auth.service.AuthReader
 import app.tiebalite.core.data.recommend.repository.RecommendLoadType
 import app.tiebalite.core.data.recommend.repository.RecommendRepository
 import app.tiebalite.core.data.recommend.repository.RecommendRepositoryFactory
@@ -17,11 +18,13 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ExploreViewModel(
     private val repository: RecommendRepository,
+    private val authReader: AuthReader,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ExploreUiState())
     val uiState: StateFlow<ExploreUiState> = _uiState.asStateFlow()
@@ -29,12 +32,22 @@ class ExploreViewModel(
     val uiEvents: SharedFlow<ExploreUiEvent> = _uiEvents.asSharedFlow()
 
     private var requestJob: Job? = null
+    private var initialRefreshStarted = false
 
     init {
-        refreshInternal(initial = true)
+        viewModelScope.launch {
+            authReader.state.first { state -> state.isLoaded }
+            startInitialRefreshIfNeeded()
+        }
     }
 
     fun refresh() {
+        if (!authReader.state.value.isLoaded) {
+            _uiEvents.tryEmit(
+                ExploreUiEvent.ShowToast(message = AUTH_NOT_LOADED_MESSAGE),
+            )
+            return
+        }
         refreshInternal(initial = false)
     }
 
@@ -137,6 +150,15 @@ class ExploreViewModel(
             }
     }
 
+    private fun startInitialRefreshIfNeeded(): Boolean {
+        if (_uiState.value.items.isEmpty() && !initialRefreshStarted) {
+            initialRefreshStarted = true
+            refreshInternal(initial = true)
+            return true
+        }
+        return false
+    }
+
     private fun emitNetworkError() {
         _uiEvents.tryEmit(
             ExploreUiEvent.ShowToast(message = NETWORK_ERROR_MESSAGE),
@@ -144,6 +166,7 @@ class ExploreViewModel(
     }
 
     companion object {
+        private const val AUTH_NOT_LOADED_MESSAGE = "账号状态尚未加载完成，这不应该发生，请联系开发者"
         private const val FIRST_PAGE = 1
         private const val NETWORK_ERROR_MESSAGE = "网络错误"
 
@@ -161,6 +184,7 @@ class ExploreViewModel(
                                 sessionProvider = { authReader.currentSession() },
                                 tbsProvider = { authReader.currentSession()?.tbs },
                             ),
+                        authReader = authReader,
                     )
                 }
             }

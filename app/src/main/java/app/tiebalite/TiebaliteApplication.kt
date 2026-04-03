@@ -10,14 +10,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
 class TiebaliteApplication : Application(), AuthGraphProvider, ApplicationScopeProvider {
-    override val applicationScope: CoroutineScope by lazy(LazyThreadSafetyMode.NONE) {
-        CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    }
+    override val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    override val authGraph: AuthGraph by lazy(LazyThreadSafetyMode.NONE) {
-        DefaultAuthGraph(
-            context = this,
-            scope = applicationScope,
-        )
+    override lateinit var authGraph: AuthGraph
+        private set
+
+    override fun onCreate() {
+        super.onCreate()
+        authGraph =
+            DefaultAuthGraph(
+                context = this,
+                scope = applicationScope,
+            )
     }
 }

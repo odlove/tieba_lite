@@ -48,12 +48,14 @@ private fun AuthStoreSnapshot.toReaderState(): AuthReaderState =
         activeAccount = activeAccount,
         accounts = accounts,
         cookiesByAccountId = cookies,
+        isLoaded = isLoaded,
     )
 
 data class AuthReaderState(
     val activeAccount: AuthAccount?,
     val accounts: List<AuthAccount>,
     val cookiesByAccountId: Map<String, String>,
+    val isLoaded: Boolean,
 ) {
     val isLoggedIn: Boolean
         get() = activeAccount?.session?.isValid == true

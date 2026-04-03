@@ -66,6 +66,7 @@ internal class AuthStore private constructor(
                         accounts = accounts,
                         activeAccountId = activeAccountId,
                         cookies = cookies,
+                        isLoaded = true,
                     )
             }
         }
@@ -292,6 +293,7 @@ internal data class AuthStoreSnapshot(
     val accounts: List<AuthAccount> = emptyList(),
     val activeAccountId: String? = null,
     val cookies: Map<String, String> = emptyMap(),
+    val isLoaded: Boolean = false,
 ) {
     val activeAccount: AuthAccount?
         get() =
