@@ -36,6 +36,7 @@ dependencies {
     api(libs.material.color.utilities)
     api(project(":core:model"))
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
     implementation(libs.coil.network.okhttp)
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.core)
