@@ -1,6 +1,7 @@
 package app.tiebalite.feature.thread.main.list
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +54,17 @@ internal fun ThreadPostList(
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val isReplyHeaderPinned =
+        remember(listState, firstFloorPost) {
+            derivedStateOf {
+                if (firstFloorPost == null) {
+                    return@derivedStateOf false
+                }
+                val replyHeaderIndex = 2
+                listState.firstVisibleItemIndex > replyHeaderIndex ||
+                    (listState.firstVisibleItemIndex == replyHeaderIndex && listState.firstVisibleItemScrollOffset > 0)
+            }
+        }
     val bottomPullState =
         rememberBottomPullToLoadLatestState(
             listState = listState,
@@ -95,24 +108,36 @@ internal fun ThreadPostList(
                         color = MaterialTheme.colorScheme.outlineVariant,
                     )
                 }
-                item(key = "reply_header") {
-                    Row(
+                stickyHeader(key = "reply_header") {
+                    androidx.compose.foundation.layout.Column(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                .background(MaterialTheme.colorScheme.surface),
                     ) {
-                        ReplySeeLzToggle(
-                            seeLz = seeLz,
-                            onSetSeeLz = onSetSeeLz,
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        ReplySortToggle(
-                            sortType = sortType,
-                            onSetSortType = onSetSortType,
-                        )
+                        Row(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ReplySeeLzToggle(
+                                seeLz = seeLz,
+                                onSetSeeLz = onSetSeeLz,
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            ReplySortToggle(
+                                sortType = sortType,
+                                onSetSortType = onSetSortType,
+                            )
+                        }
+                        if (isReplyHeaderPinned.value) {
+                            androidx.compose.material3.HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                            )
+                        }
                     }
                 }
             }
