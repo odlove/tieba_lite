@@ -2,10 +2,6 @@ name: Build, Release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: Version
-        required: true
 
 permissions:
   contents: write
@@ -13,11 +9,17 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      RELEASE_NOTES_PATH: ./changelog/releases/v${{ inputs.version }}.md
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Read app version
+        run: |
+          VERSION_NAME=$(sed -n 's/^[[:space:]]*versionName = "\([^"]*\)"$/\1/p' app/build.gradle.kts)
+          [ -n "$VERSION_NAME" ] || { echo "Failed to read versionName"; exit 1; }
+
+          echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+          echo "RELEASE_NOTES_PATH=./changelog/releases/v$VERSION_NAME.md" >> "$GITHUB_ENV"
 
       - name: Ensure release notes file exists
         run: test -f "$RELEASE_NOTES_PATH"
@@ -51,9 +53,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           prerelease: true
-          tag_name: v${{ inputs.version }}
+          tag_name: v${{ env.VERSION_NAME }}
           target_commitish: ${{ github.sha }}
-          name: v${{ inputs.version }}
+          name: v${{ env.VERSION_NAME }}
           body_path: ${{ env.RELEASE_NOTES_PATH }}
           files: |
             ./app/build/outputs/apk/release/*.apk
