@@ -2,7 +2,6 @@ package app.tiebalite.core.network.source.tbclient.forum
 
 import android.content.res.Resources
 import android.os.Build
-import app.tiebalite.core.network.client.NetworkClientFactory
 import app.tiebalite.core.network.client.NetworkDefaults
 import app.tiebalite.core.network.proto.forumguide.ForumGuideCommonReqLite
 import app.tiebalite.core.network.proto.forumguide.ForumGuideReqDataLite
@@ -17,9 +16,7 @@ import kotlin.math.roundToInt
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
-import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.Retrofit
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -43,38 +40,6 @@ internal interface ForumGuideApi {
         @Header("x_bd_data_type") xBdDataType: String = "protobuf",
         @Part data: MultipartBody.Part,
     ): ResponseBody
-}
-
-object TbClientForumNetwork {
-    fun createFrsPageNetworkSource(
-        baseUrl: String = NetworkDefaults.TBCLIENT_BASE_URL,
-        okHttpClient: OkHttpClient = NetworkClientFactory.createOkHttpClient(),
-    ): FrsPageNetworkSource =
-        createFrsPageNetworkSource(
-            retrofit = NetworkClientFactory.createRetrofit(baseUrl = baseUrl, okHttpClient = okHttpClient),
-        )
-
-    fun createFrsPageNetworkSource(
-        retrofit: Retrofit,
-    ): FrsPageNetworkSource {
-        val api = retrofit.create(FrsPageApi::class.java)
-        return FrsPageNetworkSource(api = api)
-    }
-
-    fun createForumGuideNetworkSource(
-        baseUrl: String = NetworkDefaults.TBCLIENT_BASE_URL,
-        okHttpClient: OkHttpClient = NetworkClientFactory.createOkHttpClient(),
-    ): ForumGuideNetworkSource =
-        createForumGuideNetworkSource(
-            retrofit = NetworkClientFactory.createRetrofit(baseUrl = baseUrl, okHttpClient = okHttpClient),
-        )
-
-    fun createForumGuideNetworkSource(
-        retrofit: Retrofit,
-    ): ForumGuideNetworkSource {
-        val api = retrofit.create(ForumGuideApi::class.java)
-        return ForumGuideNetworkSource(api = api)
-    }
 }
 
 class ForumGuideNetworkSource internal constructor(

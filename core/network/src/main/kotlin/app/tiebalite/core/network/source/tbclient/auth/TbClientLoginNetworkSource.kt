@@ -1,17 +1,14 @@
 package app.tiebalite.core.network.source.tbclient.auth
 
-import app.tiebalite.core.network.client.NetworkClientFactory
 import app.tiebalite.core.network.client.NetworkDefaults
-import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
-import retrofit2.Retrofit
+import org.json.JSONArray
+import org.json.JSONObject
+import kotlin.coroutines.cancellation.CancellationException
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
 import retrofit2.http.POST
-import kotlin.coroutines.cancellation.CancellationException
-import org.json.JSONArray
-import org.json.JSONObject
 
 interface TbClientLoginApi {
     @FormUrlEncoded
@@ -27,23 +24,6 @@ interface TbClientLoginApi {
         @Header("User-Agent") userAgent: String = NetworkDefaults.TBCLIENT_USER_AGENT,
         @Header("Cookie") cookie: String = "ka=open",
     ): ResponseBody
-}
-
-object TbClientAuthNetwork {
-    fun createLoginNetworkSource(
-        baseUrl: String = NetworkDefaults.TBCLIENT_BASE_URL,
-        okHttpClient: OkHttpClient = NetworkClientFactory.createOkHttpClient(),
-    ): TbClientLoginNetworkSource =
-        createLoginNetworkSource(
-            retrofit = NetworkClientFactory.createRetrofit(baseUrl = baseUrl, okHttpClient = okHttpClient),
-        )
-
-    fun createLoginNetworkSource(
-        retrofit: Retrofit,
-    ): TbClientLoginNetworkSource {
-        val api = retrofit.create(TbClientLoginApi::class.java)
-        return TbClientLoginNetworkSource(api = api)
-    }
 }
 
 class TbClientLoginNetworkSource(

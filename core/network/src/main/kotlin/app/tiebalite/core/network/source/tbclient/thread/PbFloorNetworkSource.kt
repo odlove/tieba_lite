@@ -13,6 +13,34 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
+import retrofit2.http.Header
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
+import retrofit2.http.PartMap
+import retrofit2.http.Query
+
+interface PbFloorApi {
+    @Multipart
+    @POST("c/f/pb/floor")
+    suspend fun getPbFloor(
+        @Query("cmd") cmd: Int = NetworkDefaults.PB_FLOOR_CMD,
+        @Query("format") format: String = "protobuf",
+        @Header("Charset") charset: String = "UTF-8",
+        @Header("client_type") clientType: String = "2",
+        @Header("client_user_token") clientUserToken: String? = null,
+        @Header("cookie") cookie: String,
+        @Header("cuid") cuid: String,
+        @Header("cuid_galaxy2") cuidGalaxy2: String,
+        @Header("cuid_gid") cuidGid: String = "",
+        @Header("c3_aid") c3Aid: String,
+        @Header("User-Agent") userAgent: String = NetworkDefaults.TBCLIENT_USER_AGENT,
+        @Header("x_bd_data_type") xBdDataType: String = "protobuf",
+        @PartMap formParts: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part data: MultipartBody.Part,
+    ): ResponseBody
+}
 
 class PbFloorNetworkSource(
     private val api: PbFloorApi,
