@@ -21,6 +21,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -145,189 +147,51 @@ fun TiebaliteApp(
                     popEnterTransition = { fadeIn(animationSpec = tween(260)) },
                     popExitTransition = { fadeOut(animationSpec = tween(260)) },
                 ) {
-                    composable(RootRoutes.Main) {
-                        MainShell(
-                            rootPaddingValues = paddingValues,
-                            onOpenThread = { threadId ->
-                                navController.navigate(ThreadRoutes.thread(threadId))
-                            },
-                            onOpenForum = { forumName ->
-                                navController.navigate(ForumRoutes.forum(forumName))
-                            },
-                            onOpenHistory = { navController.navigate(HistoryRoutes.Home) },
-                            onOpenSettings = { navController.navigate(SettingsRoutes.Home) },
-                            onOpenImageViewer = openImageViewer,
-                        )
-                    }
-                    composable(SettingsRoutes.Home) {
-                        SettingsHomeRoute(
-                            paddingValues = paddingValues,
-                            onOpenAccountManage = { navController.navigate(SettingsRoutes.Account) },
-                            onOpenTheme = { navController.navigate(SettingsRoutes.Theme) },
-                            onBack = { navController.popBackStack() },
-                        )
-                    }
-                    composable(HistoryRoutes.Home) {
-                        HistoryRoute(
-                            paddingValues = paddingValues,
-                            onOpenThread = { threadId ->
-                                navController.navigate(ThreadRoutes.thread(threadId.toString()))
-                            },
-                            onOpenForum = { forumName ->
-                                navController.navigate(ForumRoutes.forum(forumName))
-                            },
-                            onBack = { navController.popBackStack() },
-                        )
-                    }
-                    composable(SettingsRoutes.Account) {
-                        SettingsAccountRoute(
-                            paddingValues = paddingValues,
-                            onOpenWebLogin = { navController.navigate(SettingsRoutes.Login) },
-                            onOpenCredentialLogin = { navController.navigate(SettingsRoutes.CredentialLogin) },
-                            onOpenAccountDetail = { accountId ->
-                                navController.navigate(SettingsRoutes.accountDetail(accountId))
-                            },
-                            onBack = { navController.popBackStack() },
-                        )
-                    }
-                    composable(
-                        route = SettingsRoutes.AccountDetail,
-                        arguments =
-                            listOf(
-                                navArgument(SettingsRoutes.AccountIdArg) {
-                                    type = NavType.StringType
-                                },
-                            ),
-                    ) { backStackEntry ->
-                        val accountId =
-                            backStackEntry.arguments
-                                ?.getString(SettingsRoutes.AccountIdArg)
-                                .orEmpty()
-                        SettingsAccountDetailRoute(
-                            paddingValues = paddingValues,
-                            accountId = accountId,
-                            onBack = { navController.popBackStack() },
-                        )
-                    }
-                    composable(SettingsRoutes.Login) {
-                        LoginRoute(
-                            paddingValues = paddingValues,
-                            onBack = { navController.popBackStack() },
-                        )
-                    }
-                    composable(SettingsRoutes.CredentialLogin) {
-                        CredentialLoginRoute(
-                            paddingValues = paddingValues,
-                            onBack = { navController.popBackStack() },
-                        )
-                    }
-                    composable(SettingsRoutes.Theme) {
-                        ThemeSettingsScreen(
-                            paddingValues = paddingValues,
-                            state = ThemeSettingsState(
-                                themeMode = state.themeMode,
-                                useDynamicColor = state.useDynamicColor,
-                                seedColorHex = seedColorHex
-                            ),
-                            onEvent = { event ->
-                                when (event) {
-                                    is ThemeSettingsEvent.SetThemeMode ->
-                                        themeState.setThemeMode(event.mode)
-                                    is ThemeSettingsEvent.SetDynamicColor ->
-                                        themeState.setDynamicColor(event.enabled)
-                                    is ThemeSettingsEvent.SetSeedColor ->
-                                        run {
-                                            val cleaned = event.value.trim().removePrefix("#")
-                                            if (cleaned.length != 6) {
-                                                null
-                                            } else {
-                                                cleaned.toLongOrNull(16)?.let { 0xFF000000 or it }
-                                            }
-                                        }?.let { themeState.setSeedColor(it) }
-                                }
-                            },
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    composable(
-                        route = ForumRoutes.Forum,
-                        arguments =
-                            listOf(
-                                navArgument(ForumRoutes.ForumNameArg) {
-                                    type = NavType.StringType
-                                },
-                            ),
-                    ) { backStackEntry ->
-                        val forumName =
-                            backStackEntry.arguments
-                                ?.getString(ForumRoutes.ForumNameArg)
-                                ?.let(Uri::decode)
-                                ?.takeIf { it.isNotBlank() }
-                                ?: return@composable
-                        ForumRoute(
-                            paddingValues = paddingValues,
-                            forumName = forumName,
-                            onBack = { navController.popBackStack() },
-                            onOpenThread = { threadId ->
-                                navController.navigate(ThreadRoutes.thread(threadId))
-                            },
-                            onOpenImageViewer = openImageViewer,
-                        )
-                    }
-                    composable(
-                        route = ThreadRoutes.Thread,
-                        arguments =
-                            listOf(
-                                navArgument(ThreadRoutes.ThreadIdArg) {
-                                    type = NavType.LongType
-                                },
-                            ),
-                    ) { backStackEntry ->
-                        val threadId =
-                            backStackEntry.arguments
-                                ?.getLong(ThreadRoutes.ThreadIdArg)
-                                ?: return@composable
-                        ThreadRoute(
-                            paddingValues = paddingValues,
-                            threadId = threadId,
-                            onBack = { navController.popBackStack() },
-                            onOpenForum = { forumName ->
-                                navController.navigate(ForumRoutes.forum(forumName))
-                            },
-                            onOpenSubPosts = { postId ->
-                                navController.navigate(ThreadRoutes.subPosts(threadId, postId))
-                            },
-                            onOpenImageViewer = openImageViewer,
-                        )
-                    }
-                    composable(
-                        route = ThreadRoutes.SubPosts,
-                        arguments =
-                            listOf(
-                                navArgument(ThreadRoutes.ThreadIdArg) {
-                                    type = NavType.LongType
-                                },
-                                navArgument(ThreadRoutes.PostIdArg) {
-                                    type = NavType.LongType
-                                },
-                            ),
-                    ) { backStackEntry ->
-                        val threadId =
-                            backStackEntry.arguments
-                                ?.getLong(ThreadRoutes.ThreadIdArg)
-                                ?: return@composable
-                        val postId =
-                            backStackEntry.arguments
-                                ?.getLong(ThreadRoutes.PostIdArg)
-                                ?: return@composable
-                        ThreadSubPostsRoute(
-                            paddingValues = paddingValues,
-                            threadId = threadId,
-                            postId = postId,
-                            onBack = { navController.popBackStack() },
-                            onOpenImageViewer = openImageViewer,
-                        )
-                    }
+                    mainGraph(
+                        navController = navController,
+                        paddingValues = paddingValues,
+                        onOpenImageViewer = openImageViewer,
+                    )
+                    settingsGraph(
+                        navController = navController,
+                        paddingValues = paddingValues,
+                        themeSettingsState = ThemeSettingsState(
+                            themeMode = state.themeMode,
+                            useDynamicColor = state.useDynamicColor,
+                            seedColorHex = seedColorHex
+                        ),
+                        onThemeSettingsEvent = { event ->
+                            when (event) {
+                                is ThemeSettingsEvent.SetThemeMode ->
+                                    themeState.setThemeMode(event.mode)
+                                is ThemeSettingsEvent.SetDynamicColor ->
+                                    themeState.setDynamicColor(event.enabled)
+                                is ThemeSettingsEvent.SetSeedColor ->
+                                    run {
+                                        val cleaned = event.value.trim().removePrefix("#")
+                                        if (cleaned.length != 6) {
+                                            null
+                                        } else {
+                                            cleaned.toLongOrNull(16)?.let { 0xFF000000 or it }
+                                        }
+                                    }?.let { themeState.setSeedColor(it) }
+                            }
+                        },
+                    )
+                    historyGraph(
+                        navController = navController,
+                        paddingValues = paddingValues,
+                    )
+                    forumGraph(
+                        navController = navController,
+                        paddingValues = paddingValues,
+                        onOpenImageViewer = openImageViewer,
+                    )
+                    threadGraph(
+                        navController = navController,
+                        paddingValues = paddingValues,
+                        onOpenImageViewer = openImageViewer,
+                    )
                 }
             }
             imageViewerArgs?.let { args ->
@@ -348,6 +212,204 @@ fun TiebaliteApp(
                 }
             }
         }
+    }
+}
+
+private fun NavGraphBuilder.mainGraph(
+    navController: NavController,
+    paddingValues: PaddingValues,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
+) {
+    composable(RootRoutes.Main) {
+        MainShell(
+            rootPaddingValues = paddingValues,
+            onOpenThread = { threadId ->
+                navController.navigate(ThreadRoutes.thread(threadId))
+            },
+            onOpenForum = { forumName ->
+                navController.navigate(ForumRoutes.forum(forumName))
+            },
+            onOpenHistory = { navController.navigate(HistoryRoutes.Home) },
+            onOpenSettings = { navController.navigate(SettingsRoutes.Home) },
+            onOpenImageViewer = onOpenImageViewer,
+        )
+    }
+}
+
+private fun NavGraphBuilder.settingsGraph(
+    navController: NavController,
+    paddingValues: PaddingValues,
+    themeSettingsState: ThemeSettingsState,
+    onThemeSettingsEvent: (ThemeSettingsEvent) -> Unit,
+) {
+    composable(SettingsRoutes.Home) {
+        SettingsHomeRoute(
+            paddingValues = paddingValues,
+            onOpenAccountManage = { navController.navigate(SettingsRoutes.Account) },
+            onOpenTheme = { navController.navigate(SettingsRoutes.Theme) },
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(SettingsRoutes.Account) {
+        SettingsAccountRoute(
+            paddingValues = paddingValues,
+            onOpenWebLogin = { navController.navigate(SettingsRoutes.Login) },
+            onOpenCredentialLogin = { navController.navigate(SettingsRoutes.CredentialLogin) },
+            onOpenAccountDetail = { accountId ->
+                navController.navigate(SettingsRoutes.accountDetail(accountId))
+            },
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(
+        route = SettingsRoutes.AccountDetail,
+        arguments =
+            listOf(
+                navArgument(SettingsRoutes.AccountIdArg) {
+                    type = NavType.StringType
+                },
+            ),
+    ) { backStackEntry ->
+        val accountId =
+            backStackEntry.arguments
+                ?.getString(SettingsRoutes.AccountIdArg)
+                .orEmpty()
+        SettingsAccountDetailRoute(
+            paddingValues = paddingValues,
+            accountId = accountId,
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(SettingsRoutes.Login) {
+        LoginRoute(
+            paddingValues = paddingValues,
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(SettingsRoutes.CredentialLogin) {
+        CredentialLoginRoute(
+            paddingValues = paddingValues,
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(SettingsRoutes.Theme) {
+        ThemeSettingsScreen(
+            paddingValues = paddingValues,
+            state = themeSettingsState,
+            onEvent = onThemeSettingsEvent,
+            onBack = { navController.popBackStack() }
+        )
+    }
+}
+
+private fun NavGraphBuilder.historyGraph(
+    navController: NavController,
+    paddingValues: PaddingValues,
+) {
+    composable(HistoryRoutes.Home) {
+        HistoryRoute(
+            paddingValues = paddingValues,
+            onOpenThread = { threadId ->
+                navController.navigate(ThreadRoutes.thread(threadId.toString()))
+            },
+            onOpenForum = { forumName ->
+                navController.navigate(ForumRoutes.forum(forumName))
+            },
+            onBack = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.forumGraph(
+    navController: NavController,
+    paddingValues: PaddingValues,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
+) {
+    composable(
+        route = ForumRoutes.Forum,
+        arguments =
+            listOf(
+                navArgument(ForumRoutes.ForumNameArg) {
+                    type = NavType.StringType
+                },
+            ),
+    ) { backStackEntry ->
+        val forumName =
+            backStackEntry.arguments
+                ?.getString(ForumRoutes.ForumNameArg)
+                ?.let(Uri::decode)
+                ?.takeIf { it.isNotBlank() }
+                ?: return@composable
+        ForumRoute(
+            paddingValues = paddingValues,
+            forumName = forumName,
+            onBack = { navController.popBackStack() },
+            onOpenThread = { threadId ->
+                navController.navigate(ThreadRoutes.thread(threadId))
+            },
+            onOpenImageViewer = onOpenImageViewer,
+        )
+    }
+}
+
+private fun NavGraphBuilder.threadGraph(
+    navController: NavController,
+    paddingValues: PaddingValues,
+    onOpenImageViewer: (ImageViewerArgs) -> Unit,
+) {
+    composable(
+        route = ThreadRoutes.Thread,
+        arguments =
+            listOf(
+                navArgument(ThreadRoutes.ThreadIdArg) {
+                    type = NavType.LongType
+                },
+            ),
+    ) { backStackEntry ->
+        val threadId =
+            backStackEntry.arguments
+                ?.getLong(ThreadRoutes.ThreadIdArg)
+                ?: return@composable
+        ThreadRoute(
+            paddingValues = paddingValues,
+            threadId = threadId,
+            onBack = { navController.popBackStack() },
+            onOpenForum = { forumName ->
+                navController.navigate(ForumRoutes.forum(forumName))
+            },
+            onOpenSubPosts = { postId ->
+                navController.navigate(ThreadRoutes.subPosts(threadId, postId))
+            },
+            onOpenImageViewer = onOpenImageViewer,
+        )
+    }
+    composable(
+        route = ThreadRoutes.SubPosts,
+        arguments =
+            listOf(
+                navArgument(ThreadRoutes.ThreadIdArg) {
+                    type = NavType.LongType
+                },
+                navArgument(ThreadRoutes.PostIdArg) {
+                    type = NavType.LongType
+                },
+            ),
+    ) { backStackEntry ->
+        val threadId =
+            backStackEntry.arguments
+                ?.getLong(ThreadRoutes.ThreadIdArg)
+                ?: return@composable
+        val postId =
+            backStackEntry.arguments
+                ?.getLong(ThreadRoutes.PostIdArg)
+                ?: return@composable
+        ThreadSubPostsRoute(
+            paddingValues = paddingValues,
+            threadId = threadId,
+            postId = postId,
+            onBack = { navController.popBackStack() },
+            onOpenImageViewer = onOpenImageViewer,
+        )
     }
 }
 
