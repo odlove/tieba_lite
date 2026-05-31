@@ -20,4 +20,5 @@ dependencies {
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp.logging)
     api(project(":core:proto"))
+    testImplementation(libs.junit)
 }

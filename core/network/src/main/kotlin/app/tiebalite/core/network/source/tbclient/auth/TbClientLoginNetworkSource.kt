@@ -19,7 +19,6 @@ interface TbClientLoginApi {
         @Field("user_id") userId: String? = null,
         @Field("channel_id") channelId: String = "",
         @Field("channel_uid") channelUid: String = "",
-        @Field("_client_version") clientVersion: String = NetworkDefaults.TBCLIENT_CLIENT_VERSION,
         @Field("authsid") authSid: String = "null",
         @Header("User-Agent") userAgent: String = NetworkDefaults.TBCLIENT_USER_AGENT,
         @Header("Cookie") cookie: String = "ka=open",
