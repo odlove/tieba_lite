@@ -53,14 +53,22 @@ internal class DefaultAuthService(
 
     override suspend fun loginWithCredential(session: AuthSession): Result<String> =
         runCatching {
+            require(session.isValid) { "invalid auth session" }
+            val payload = fetchProfilePayloadBySession(session).getOrThrow()
             val accountId =
                 authStore.upsertAccount(
-                    session = session,
+                    session = session.copy(tbs = payload.tbs),
                     activate = false,
                 )
+            val saved =
+                authStore.saveProfile(
+                    accountId = accountId,
+                    profile = payload.profile,
+                    tbs = payload.tbs,
+                )
+            check(saved) { "failed to save profile" }
             val activated = authStore.setActiveAccount(accountId)
             check(activated) { "failed to activate account" }
-            refreshProfileForActive(preferCookie = false).getOrNull()
             accountId
         }
 
