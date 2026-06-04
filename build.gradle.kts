@@ -58,8 +58,8 @@ plugins {
     alias(libs.plugins.protobuf) apply false
 }
 
-val unifiedCompileSdkMajor = 36
-val unifiedCompileSdkMinor = 1
+val unifiedCompileSdkMajor = 37
+val unifiedCompileSdkMinor = 0
 
 val printLintReports =
     tasks.register<PrintLintReportsTask>("printLintReports") {

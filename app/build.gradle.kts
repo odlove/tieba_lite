@@ -64,6 +64,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
             matchingFallbacks += listOf("release")
             isMinifyEnabled = false
+            //noinspection NotShrinkingResources
             isShrinkResources = false
         }
         release {
