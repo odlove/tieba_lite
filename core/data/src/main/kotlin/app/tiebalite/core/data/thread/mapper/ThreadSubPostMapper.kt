@@ -1,24 +1,46 @@
 package app.tiebalite.core.data.thread.mapper
 
+import app.tiebalite.core.data.common.mapper.portraitToAvatarUrl
 import app.tiebalite.core.model.thread.ThreadSubPost
-import app.tiebalite.core.network.proto.thread.ThreadSubPostLite
+import app.tiebalite.core.network.proto.thread.AgreeLite
+import app.tiebalite.core.network.proto.thread.ThreadPbContentLite
+import app.tiebalite.core.network.proto.thread.ThreadSubPostListLite
 import app.tiebalite.core.network.proto.thread.ThreadUserLite
 
 internal class ThreadSubPostMapper(
     private val contentMapper: ThreadContentMapper = ThreadContentMapper(),
 ) {
     fun map(
-        subPost: ThreadSubPostLite,
+        subPost: ThreadSubPostListLite,
         author: ThreadUserLite?,
-    ): ThreadSubPost {
-        return ThreadSubPost(
+    ): ThreadSubPost =
+        mapFields(
             id = subPost.id,
             floor = subPost.floor,
-            agreeCount = ThreadAgreeParser.parseCount(subPost.agree),
+            agree = subPost.agree,
+            authorId = subPost.authorId,
+            author = author,
+            content = subPost.contentList,
+            time = subPost.time,
+        )
+
+    private fun mapFields(
+        id: Long,
+        floor: Int,
+        agree: AgreeLite,
+        authorId: Long,
+        author: ThreadUserLite?,
+        content: List<ThreadPbContentLite>,
+        time: Int,
+    ): ThreadSubPost {
+        return ThreadSubPost(
+            id = id,
+            floor = floor,
+            agreeCount = agree.agreeNum,
             authorId =
                 author?.id
                     ?.takeIf { id -> id > 0L }
-                    ?: subPost.authorId,
+                    ?: authorId,
             authorName =
                 author
                     ?.nameShow
@@ -30,9 +52,9 @@ internal class ThreadSubPostMapper(
                     ?: 0,
             authorAvatarUrl = portraitToAvatarUrl(author?.portrait.orEmpty()),
             ipLocation = author?.ipAddress?.trim()?.takeIf { it.isNotBlank() },
-            body = contentMapper.map(subPost.contentList),
+            body = contentMapper.map(content),
             timestampSeconds =
-                subPost.time
+                time
                     .takeIf { it > 0 }
                     ?.toLong(),
         )

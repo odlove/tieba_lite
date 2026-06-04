@@ -1,17 +1,15 @@
 package app.tiebalite.core.network.client
 
-import android.os.Build
 import okhttp3.FormBody
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.security.MessageDigest
-import kotlin.math.roundToInt
 
 class TbClientFormInterceptor(
-    private val clientIdProvider: () -> String = { defaultClientId },
+    private val clientIdProvider: () -> String = { TbClientIdentity.default.clientId },
     private val timestampProvider: () -> Long = { System.currentTimeMillis() },
-    private val modelProvider: () -> String = { Build.MODEL },
-    private val osVersionProvider: () -> String = { Build.VERSION.SDK_INT.toString() },
+    private val modelProvider: () -> String = { TbClientDevice.current.model },
+    private val osVersionProvider: () -> String = { TbClientDevice.current.osVersion },
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
@@ -40,11 +38,6 @@ class TbClientFormInterceptor(
     companion object {
         private const val SIGN_PARAM = "sign"
         private const val SIGN_SALT = "tiebaclient!!!"
-
-        private val defaultClientId: String by lazy {
-            val initTime = System.currentTimeMillis()
-            "wappc_${initTime}_${(Math.random() * 1000).roundToInt()}"
-        }
 
         internal fun buildSignedFormBody(
             body: FormBody,

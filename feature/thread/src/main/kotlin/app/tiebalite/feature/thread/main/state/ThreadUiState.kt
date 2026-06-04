@@ -16,7 +16,6 @@ data class ThreadUiState(
     val isLoadingMore: Boolean = false,
     val currentPage: Int = 1,
     val totalPage: Int = 1,
-    val nextPagePostId: Long = 0L,
     val hasMore: Boolean = true,
     val canLoadMoreBelow: Boolean = true,
     val hasPrevious: Boolean = false,

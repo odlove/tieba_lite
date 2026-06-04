@@ -6,8 +6,7 @@ import app.tiebalite.core.model.thread.ThreadSubPostsPage
 interface ThreadRepository {
     suspend fun loadThreadPage(
         threadId: Long,
-        page: Int = 0,
-        postId: Long = 0L,
+        page: Int = 1,
         seeLz: Boolean = false,
         sortType: Int = 0,
         lastPostId: Long? = null,

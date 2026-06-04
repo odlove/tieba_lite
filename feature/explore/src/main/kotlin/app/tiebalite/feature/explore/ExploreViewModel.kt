@@ -182,7 +182,6 @@ class ExploreViewModel(
                         repository =
                             RecommendRepositoryFactory.create(
                                 sessionProvider = { authReader.currentSession() },
-                                tbsProvider = { authReader.currentSession()?.tbs },
                             ),
                         authReader = authReader,
                     )

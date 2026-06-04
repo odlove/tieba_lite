@@ -15,7 +15,6 @@ class ThreadRepositoryImpl(
     override suspend fun loadThreadPage(
         threadId: Long,
         page: Int,
-        postId: Long,
         seeLz: Boolean,
         sortType: Int,
         lastPostId: Long?,
@@ -23,7 +22,6 @@ class ThreadRepositoryImpl(
         remoteDataSource.loadThreadPage(
             threadId = threadId,
             page = page,
-            postId = postId,
             seeLz = seeLz,
             sortType = sortType,
             lastPostId = lastPostId,

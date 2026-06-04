@@ -10,33 +10,35 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-interface TbClientLoginApi {
+internal interface TbClientLoginApi {
     @FormUrlEncoded
     @POST("c/s/login")
     suspend fun login(
         @Field("bdusstoken") bdussToken: String,
-        @Field("stoken") stoken: String,
-        @Field("user_id") userId: String? = null,
+        @Field("stoken") stoken: String? = null,
         @Field("channel_id") channelId: String = "",
         @Field("channel_uid") channelUid: String = "",
-        @Field("authsid") authSid: String = "null",
+        @Field("first_login") firstLogin: String = "1",
+        @Field("send_tb") sendTb: String = "0",
         @Header("User-Agent") userAgent: String = NetworkDefaults.TBCLIENT_USER_AGENT,
         @Header("Cookie") cookie: String = "ka=open",
     ): ResponseBody
 }
 
-class TbClientLoginNetworkSource(
+class TbClientLoginNetworkSource internal constructor(
     private val api: TbClientLoginApi,
 ) {
     suspend fun login(
         bduss: String,
         stoken: String,
+        bdussTokenSuffix: String = "",
     ): Result<TbClientLoginRaw> {
         return try {
+            require(bduss.isNotBlank()) { "bduss is required" }
             val responseText =
                 api.login(
-                    bdussToken = "$bduss|null",
-                    stoken = stoken,
+                    bdussToken = "$bduss|$bdussTokenSuffix",
+                    stoken = stoken.takeIf { it.isNotBlank() },
                 ).string()
             val root = JSONObject(responseText)
             val raw = root.toRawMap()

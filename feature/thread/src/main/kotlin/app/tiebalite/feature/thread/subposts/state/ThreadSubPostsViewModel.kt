@@ -164,7 +164,6 @@ class ThreadSubPostsViewModel(
                         repository =
                             ThreadRepositoryFactory.create(
                                 sessionProvider = { authReader.currentSession() },
-                                tbsProvider = { authReader.currentSession()?.tbs },
                             ),
                     )
                 }

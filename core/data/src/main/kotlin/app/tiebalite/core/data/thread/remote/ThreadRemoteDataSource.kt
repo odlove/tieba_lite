@@ -10,12 +10,10 @@ class ThreadRemoteDataSource(
     private val pbPageNetworkSource: PbPageNetworkSource,
     private val pbFloorNetworkSource: PbFloorNetworkSource,
     private val sessionProvider: () -> AuthSession? = { null },
-    private val tbsProvider: () -> String? = { null },
 ) {
     suspend fun loadThreadPage(
         threadId: Long,
         page: Int,
-        postId: Long,
         seeLz: Boolean,
         sortType: Int,
         lastPostId: Long?,
@@ -24,13 +22,11 @@ class ThreadRemoteDataSource(
         return pbPageNetworkSource.fetchPage(
             threadId = threadId,
             page = page,
-            postId = postId,
             seeLz = seeLz,
             sortType = sortType,
             lastPostId = lastPostId,
             bduss = session?.bduss,
             stoken = session?.stoken,
-            tbs = tbsProvider() ?: session?.tbs,
         )
     }
 
@@ -50,7 +46,6 @@ class ThreadRemoteDataSource(
             forumId = forumId,
             bduss = session?.bduss,
             stoken = session?.stoken,
-            tbs = tbsProvider() ?: session?.tbs,
         )
     }
 }

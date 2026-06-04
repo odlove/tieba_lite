@@ -1,22 +1,20 @@
 package app.tiebalite.core.network.source.tbclient.forum
 
-import android.content.res.Resources
-import android.net.Uri
-import android.os.Build
 import app.tiebalite.core.network.client.NetworkDefaults
+import app.tiebalite.core.network.client.TbClientDevice
+import app.tiebalite.core.network.client.TbClientIdentity
 import app.tiebalite.core.network.proto.frs.FrsPageResponseLite
-import app.tiebalite.core.network.proto.frs.FrsPageAdParamLite
-import app.tiebalite.core.network.proto.frs.FrsPageRequestDataLite
-import app.tiebalite.core.network.proto.frs.FrsPageRequestLite
-import app.tiebalite.core.network.proto.recommend.AppPosInfoLite
-import app.tiebalite.core.network.proto.recommend.CommonReqLite
-import java.util.UUID
+import app.tiebalite.core.network.source.tbclient.ProtoWire
+import app.tiebalite.core.network.source.tbclient.TbClientScreen
+import app.tiebalite.core.network.source.tbclient.appPosFields
+import app.tiebalite.core.network.source.tbclient.buildDataPart
+import app.tiebalite.core.network.source.tbclient.buildTbClientCookie
+import app.tiebalite.core.network.source.tbclient.buildTextParts
+import app.tiebalite.core.network.source.tbclient.commonReqFields
+import app.tiebalite.core.network.source.tbclient.stokenParts
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.roundToInt
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -54,23 +52,27 @@ data class FrsPageRaw(
 
 class FrsPageNetworkSource internal constructor(
     private val api: FrsPageApi,
+    private val device: TbClientDevice = TbClientDevice.current,
+    private val identity: TbClientIdentity = TbClientIdentity.default,
 ) {
-    private val identity = FrsDeviceIdentity.create()
-
     suspend fun fetchPage(
         forumName: String,
         page: Int = 1,
         loadType: Int = 1,
-        sortType: Int = 0,
+        sortType: Int = DEFAULT_SORT_TYPE,
         goodClassifyId: Int? = null,
         clientUserToken: String? = null,
         bduss: String? = null,
         stoken: String? = null,
-        tbs: String? = null,
     ): Result<FrsPageRaw> {
         return try {
+            require(forumName.isNotBlank()) { "forumName is required" }
             val requestBytes =
-                buildRequestBody(
+                buildFrsPageRequestBody(
+                    identity = identity,
+                    device = device,
+                    screen = TbClientScreen.current(),
+                    timestamp = System.currentTimeMillis(),
                     forumName = forumName,
                     page = page,
                     loadType = loadType,
@@ -78,27 +80,20 @@ class FrsPageNetworkSource internal constructor(
                     goodClassifyId = goodClassifyId,
                     bduss = bduss,
                     stoken = stoken,
-                    tbs = tbs,
                 )
-            val formParts = buildFormParts(stoken)
-            val dataPart =
-                MultipartBody.Part.createFormData(
-                    "data",
-                    "file",
-                    requestBytes.toRequestBody(BinaryMediaType),
-                )
+            val formParts = buildTextParts(stokenParts(stoken))
 
-            val encodedForumName = Uri.encode(forumName)
+            val encodedForumName = percentEncodeUtf8(forumName)
             val responseBytes =
                 api.getFrsPage(
                     clientUserToken = clientUserToken,
-                    cookie = buildCookie(identity.cuid),
+                    cookie = buildTbClientCookie(identity = identity, device = device),
                     cuid = identity.cuid,
                     cuidGalaxy2 = identity.cuidGalaxy2,
                     c3Aid = identity.c3Aid,
                     forumName = encodedForumName,
                     formParts = formParts,
-                    data = dataPart,
+                    data = buildDataPart(requestBytes),
                 ).bytes()
             val response = FrsPageResponseLite.parseFrom(responseBytes)
             val errorNo = response.error.errorno
@@ -122,139 +117,135 @@ class FrsPageNetworkSource internal constructor(
         }
     }
 
-    private fun buildFormParts(
-        stoken: String?,
-    ): Map<String, RequestBody> {
-        val parts = linkedMapOf<String, RequestBody>()
-        stoken?.takeIf { it.isNotBlank() }?.let {
-            parts["stoken"] = it.toRequestBody(PlainTextMediaType)
-        }
-        return parts
-    }
-
-    private fun buildRequestBody(
-        forumName: String,
-        page: Int,
-        loadType: Int,
-        sortType: Int,
-        goodClassifyId: Int?,
-        bduss: String?,
-        stoken: String?,
-        tbs: String?,
-    ): ByteArray {
-        val metrics = Resources.getSystem().displayMetrics
-        val scrW = metrics.widthPixels.takeIf { it > 0 } ?: DefaultScrW
-        val scrH = metrics.heightPixels.takeIf { it > 0 } ?: DefaultScrH
-        val scrDip = metrics.density.takeIf { it > 0f }?.toDouble() ?: DefaultScrDip
-
-        val common =
-            CommonReqLite.newBuilder()
-                .setClientType(2)
-                .setClientVersion(NetworkDefaults.TBCLIENT_CLIENT_VERSION)
-                .setClientId(identity.clientId)
-                .setPhoneImei("")
-                .setFrom(From)
-                .setCuid(identity.cuid)
-                .setTimestamp(System.currentTimeMillis())
-                .setModel(Build.MODEL)
-                .setBduss(bduss.orEmpty())
-                .setTbs(tbs.orEmpty())
-                .setNetType(1)
-                .setPhoneNewimei("")
-                .setKa("open")
-                .setStoken(stoken.orEmpty())
-                .setCuidGalaxy2(identity.cuidGalaxy2)
-                .setCuidGid("")
-                .setOaid("")
-                .setC3Aid(identity.c3Aid)
-                .setScrW(scrW)
-                .setScrH(scrH)
-                .setScrDip(scrDip)
-                .setQType(0)
-                .setPersonalizedRecSwitch(1)
-                .build()
-
-        val appPos =
-            AppPosInfoLite.newBuilder()
-                .setApMac("02:00:00:00:00:00")
-                .setApConnected(true)
-                .setCoordinateType("BD09LL")
-                .setAddrTimestamp(0L)
-                .setAspShownInfo("")
-                .build()
-
-        val adParam =
-            FrsPageAdParamLite.newBuilder()
-                .setLoadCount(0)
-                .setRefreshCount(1)
-                .setYogaLibVersion("")
-                .build()
-
-        return FrsPageRequestLite.newBuilder()
-            .setData(
-                FrsPageRequestDataLite.newBuilder()
-                    .setKw(Uri.encode(forumName))
-                    .setRn(90)
-                    .setRnNeed(30)
-                    .setIsGood(if (goodClassifyId != null) 1 else 0)
-                    .setCid(goodClassifyId ?: 0)
-                    .setWithGroup(1)
-                    .setScrW(scrW)
-                    .setScrH(scrH)
-                    .setScrDip(scrDip)
-                    .setQType(2)
-                    .setPn(page.coerceAtLeast(1))
-                    .setStType("recom_flist")
-                    .setNetError(0)
-                    .setCommon(common)
-                    .setCategoryId(0)
-                    .setYuelaouLocate("")
-                    .setYuelaouParams("")
-                    .setSortType(sortType)
-                    .setLastClickTid(0L)
-                    .setLoadType(loadType.coerceAtLeast(1))
-                    .setAppPos(appPos)
-                    .setAdParam(adParam)
-                    .setObjLocate("")
-                    .setObjSource("")
-                    .setCallFrom(0)
-                    .setUpSchema("")
-                    .setRequestTimes(0)
-                    .setIsNewfeed(0)
-                    .setIsNewfrs(0)
-                    .build(),
-            ).build()
-            .toByteArray()
-    }
-
-    private fun buildCookie(cuid: String): String = "ka=open;CUID=$cuid;TBBRAND=${Build.MODEL};"
 }
-
-private val PlainTextMediaType = "text/plain".toMediaType()
-private val BinaryMediaType = "application/octet-stream".toMediaType()
 
 private const val From = "1020031h"
-private const val DefaultScrW = 1080
-private const val DefaultScrH = 2400
-private const val DefaultScrDip = 3.0
+private const val DEFAULT_SORT_TYPE = -1
 
-private data class FrsDeviceIdentity(
-    val clientId: String,
-    val cuid: String,
-    val cuidGalaxy2: String,
-    val c3Aid: String,
-) {
-    companion object {
-        fun create(): FrsDeviceIdentity {
-            val initTime = System.currentTimeMillis()
-            val cuid = UUID.randomUUID().toString().replace("-", "")
-            val c3Aid = UUID.randomUUID().toString().replace("-", "")
-            return FrsDeviceIdentity(
-                clientId = "wappc_${initTime}_${(Math.random() * 1000).roundToInt()}",
-                cuid = cuid,
-                cuidGalaxy2 = cuid,
-                c3Aid = c3Aid,
-            )
+internal fun buildFrsPageRequestBody(
+    identity: TbClientIdentity,
+    device: TbClientDevice,
+    screen: TbClientScreen,
+    timestamp: Long,
+    forumName: String,
+    page: Int,
+    loadType: Int,
+    sortType: Int,
+    goodClassifyId: Int?,
+    bduss: String?,
+    stoken: String?,
+): ByteArray {
+    val normalizedLoadType = loadType.coerceAtLeast(1)
+    val common =
+        commonReqFields(
+            identity = identity,
+            device = device,
+            screen = screen,
+            timestamp = timestamp,
+            from = From,
+            qType = 0,
+            bduss = bduss,
+            stoken = stoken,
+            includeApplist = true,
+        )
+    val adParam =
+        listOf(
+            ProtoWire.varint(1, 0),
+            ProtoWire.varint(2, 0),
+            ProtoWire.string(3, ""),
+        )
+    val data =
+        listOf(
+            ProtoWire.string(1, percentEncodeUtf8(forumName)),
+            ProtoWire.varint(15, page.coerceAtLeast(1)),
+            ProtoWire.varint(2, 90),
+            ProtoWire.varint(3, 30),
+            ProtoWire.varint(8, 1),
+            ProtoWire.varint(4, if (goodClassifyId != null) 1 else 0),
+            ProtoWire.varint(5, goodClassifyId ?: 0),
+            ProtoWire.varint(11, screen.width),
+            ProtoWire.varint(12, screen.height),
+            ProtoWire.double(13, screen.density),
+            ProtoWire.string(16, ""),
+            ProtoWire.varint(14, 2),
+            ProtoWire.varint(27, 0),
+            ProtoWire.varint(17, 0),
+            ProtoWire.varint(18, 0),
+            ProtoWire.varint(19, 0),
+            ProtoWire.string(40, ""),
+            ProtoWire.varint(44, 0),
+            ProtoWire.varint(69, 1),
+            ProtoWire.string(45, ""),
+            ProtoWire.varint(47, sortType),
+            ProtoWire.varint(87, 0),
+            ProtoWire.varint(48, 0L),
+            ProtoWire.message(50, appPosFields()),
+            ProtoWire.varint(49, normalizedLoadType),
+            ProtoWire.string(52, "2"),
+            ProtoWire.string(53, "-2"),
+            ProtoWire.varint(55, 0),
+            ProtoWire.varint(56, 0),
+            ProtoWire.varint(58, 0L),
+            ProtoWire.string(67, ""),
+            ProtoWire.string(65, ""),
+            ProtoWire.string(78, ""),
+            ProtoWire.double(68, 0.0),
+            ProtoWire.varint(66, 0),
+            ProtoWire.message(51, adParam),
+            ProtoWire.varint(59, 1),
+            ProtoWire.string(60, ""),
+            ProtoWire.string(61, ""),
+            ProtoWire.varint(63, 0),
+            ProtoWire.string(62, buildAdExtParams(loadType = normalizedLoadType)),
+            ProtoWire.message(64, buildAppTransmitDataFields()),
+            ProtoWire.varint(70, 0L),
+            ProtoWire.message(39, common),
+            ProtoWire.string(72, ""),
+            ProtoWire.varint(73, 1),
+            ProtoWire.string(74, ""),
+            ProtoWire.string(75, ""),
+            ProtoWire.string(76, "%7B%7D"),
+            ProtoWire.varint(91, 0),
+            ProtoWire.varint(92, 0),
+            ProtoWire.varint(84, 0),
+            ProtoWire.varint(80, 0L),
+            ProtoWire.varint(88, 0),
+            ProtoWire.string(86, ""),
+            ProtoWire.string(82, ""),
+            ProtoWire.varint(89, 0),
+            ProtoWire.varint(90, 0),
+        )
+    return ProtoWire.encode(listOf(ProtoWire.message(1, data)))
+}
+
+private fun buildAdExtParams(loadType: Int): String {
+    val reqType = if (loadType != 1) 1 else 0
+    return """{"iadex":"","nad_core_version":"6.39.0.5","floor_info":"","req_type":$reqType,"pre_ad_thread_count":0}"""
+}
+
+private fun buildAppTransmitDataFields(): List<ProtoWire.Field> =
+    listOf(
+        ProtoWire.string(2, ""),
+        ProtoWire.string(3, ""),
+        ProtoWire.string(4, ""),
+        ProtoWire.varint(6, 0),
+        ProtoWire.string(15, "Asia/Shanghai"),
+    )
+
+private fun percentEncodeUtf8(value: String): String {
+    val builder = StringBuilder()
+    value.toByteArray(Charsets.UTF_8).forEach { rawByte ->
+        val byte = rawByte.toInt() and 0xff
+        val char = byte.toChar()
+        if (char in 'A'..'Z' || char in 'a'..'z' || char in '0'..'9' || char == '-' || char == '_' || char == '.' || char == '~') {
+            builder.append(char)
+        } else {
+            builder.append('%')
+            builder.append(UpperHexChars[byte ushr 4])
+            builder.append(UpperHexChars[byte and 0x0f])
         }
     }
+    return builder.toString()
 }
+
+private const val UpperHexChars = "0123456789ABCDEF"

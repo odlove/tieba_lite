@@ -8,7 +8,6 @@ import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedNetworkS
 class RecommendRemoteDataSource(
     private val personalizedNetworkSource: PersonalizedNetworkSource,
     private val sessionProvider: () -> AuthSession? = { null },
-    private val tbsProvider: () -> String? = { null },
 ) {
     suspend fun loadFeed(
         loadType: RecommendLoadType,
@@ -20,7 +19,6 @@ class RecommendRemoteDataSource(
             page = page,
             bduss = session?.bduss,
             stoken = session?.stoken,
-            tbs = tbsProvider(),
         )
     }
 }

@@ -1,29 +1,24 @@
 package app.tiebalite.core.network.source.tbclient.thread
 
-import android.content.res.Resources
-import android.os.Build
 import app.tiebalite.core.network.client.NetworkDefaults
-import app.tiebalite.core.network.proto.thread.PbPageRequestDataLite
-import app.tiebalite.core.network.proto.thread.PbPageRequestLite
-import app.tiebalite.core.network.proto.thread.PbPageResponseLite
-import app.tiebalite.core.network.proto.thread.ThreadAdParamLite
-import app.tiebalite.core.network.proto.thread.ThreadAppPosInfoLite
-import app.tiebalite.core.network.proto.thread.ThreadCommonReqLite
+import app.tiebalite.core.network.client.TbClientDevice
+import app.tiebalite.core.network.client.TbClientIdentity
+import app.tiebalite.core.network.proto.thread.PbListResponseLite
+import app.tiebalite.core.network.source.tbclient.ProtoWire
+import app.tiebalite.core.network.source.tbclient.TbClientScreen
+import app.tiebalite.core.network.source.tbclient.buildDataPart
+import app.tiebalite.core.network.source.tbclient.buildTbClientCookie
+import app.tiebalite.core.network.source.tbclient.commonReqFields
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.roundToInt
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
-import retrofit2.http.PartMap
 import retrofit2.http.Query
 
-interface PbPageApi {
+internal interface PbPageApi {
     @Multipart
     @POST("c/f/pb/page")
     suspend fun getPbPage(
@@ -39,71 +34,61 @@ interface PbPageApi {
         @Header("c3_aid") c3Aid: String,
         @Header("User-Agent") userAgent: String = NetworkDefaults.TBCLIENT_USER_AGENT,
         @Header("x_bd_data_type") xBdDataType: String = "protobuf",
-        @PartMap formParts: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Header("thread_id") threadId: String,
         @Part data: MultipartBody.Part,
     ): ResponseBody
 }
 
 data class PbPageRaw(
     val body: ByteArray,
-    val response: PbPageResponseLite,
+    val response: PbListResponseLite,
 )
 
-class PbPageNetworkSource(
+class PbPageNetworkSource internal constructor(
     private val api: PbPageApi,
+    private val device: TbClientDevice = TbClientDevice.current,
+    private val identity: TbClientIdentity = TbClientIdentity.default,
 ) {
-    private val identity = DeviceIdentity.create()
-
     suspend fun fetchPage(
         threadId: Long,
-        page: Int = 0,
-        postId: Long = 0L,
+        page: Int = 1,
         seeLz: Boolean = false,
         sortType: Int = 0,
-        forumId: Long? = null,
-        back: Boolean = false,
         lastPostId: Long? = null,
         cmd: Int = NetworkDefaults.PB_PAGE_CMD,
         clientUserToken: String? = null,
         bduss: String? = null,
         stoken: String? = null,
-        tbs: String? = null,
     ): Result<PbPageRaw> {
         return try {
+            require(threadId > 0L) { "threadId must be positive" }
             val requestBytes =
-                buildRequestBody(
+                buildPbPageRequestBody(
+                    identity = identity,
+                    device = device,
+                    screen = TbClientScreen.current(),
+                    timestamp = System.currentTimeMillis(),
                     threadId = threadId,
                     page = page,
-                    postId = postId,
                     seeLz = seeLz,
                     sortType = sortType,
-                    forumId = forumId,
-                    back = back,
                     lastPostId = lastPostId,
                     bduss = bduss,
                     stoken = stoken,
-                    tbs = tbs,
-                )
-            val formParts = buildFormParts(stoken)
-            val dataPart =
-                MultipartBody.Part.createFormData(
-                    "data",
-                    "file",
-                    requestBytes.toRequestBody(BinaryMediaType),
                 )
 
             val responseBytes =
                 api.getPbPage(
                     cmd = cmd,
                     clientUserToken = clientUserToken,
-                    cookie = buildCookie(identity.cuid),
+                    cookie = buildTbClientCookie(identity = identity, device = device),
                     cuid = identity.cuid,
                     cuidGalaxy2 = identity.cuidGalaxy2,
                     c3Aid = identity.c3Aid,
-                    formParts = formParts,
-                    data = dataPart,
+                    threadId = threadId.toString(),
+                    data = buildDataPart(requestBytes),
                 ).bytes()
-            val response = PbPageResponseLite.parseFrom(responseBytes)
+            val response = PbListResponseLite.parseFrom(responseBytes)
             val errorNo = response.error.errorno
             if (errorNo != 0) {
                 val errorMessage =
@@ -124,146 +109,57 @@ class PbPageNetworkSource(
             Result.failure(throwable)
         }
     }
-
-    private fun buildFormParts(
-        stoken: String?,
-    ): Map<String, RequestBody> {
-        val parts = linkedMapOf<String, RequestBody>()
-        stoken?.takeIf { it.isNotBlank() }?.let {
-            parts["stoken"] = it.toRequestBody(PlainTextMediaType)
-        }
-        return parts
-    }
-
-    private fun buildRequestBody(
-        threadId: Long,
-        page: Int,
-        postId: Long,
-        seeLz: Boolean,
-        sortType: Int,
-        forumId: Long?,
-        back: Boolean,
-        lastPostId: Long?,
-        bduss: String?,
-        stoken: String?,
-        tbs: String?,
-    ): ByteArray {
-        val metrics = Resources.getSystem().displayMetrics
-        val scrW = metrics.widthPixels.takeIf { it > 0 } ?: DefaultScrW
-        val scrH = metrics.heightPixels.takeIf { it > 0 } ?: DefaultScrH
-        val scrDip = metrics.density.takeIf { it > 0f }?.toDouble() ?: DefaultScrDip
-
-        val common =
-            ThreadCommonReqLite.newBuilder()
-                .setClientType(2)
-                .setClientVersion(NetworkDefaults.TBCLIENT_CLIENT_VERSION)
-                .setClientId(identity.clientId)
-                .setPhoneImei("")
-                .setFrom(From)
-                .setCuid(identity.cuid)
-                .setTimestamp(System.currentTimeMillis())
-                .setModel(Build.MODEL)
-                .setBduss(bduss.orEmpty())
-                .setTbs(tbs.orEmpty())
-                .setNetType(1)
-                .setPhoneNewimei("")
-                .setKa("open")
-                .setStoken(stoken.orEmpty())
-                .setCuidGalaxy2(identity.cuidGalaxy2)
-                .setCuidGid("")
-                .setOaid("")
-                .setC3Aid(identity.c3Aid)
-                .setScrW(scrW)
-                .setScrH(scrH)
-                .setScrDip(scrDip)
-                .setQType(0)
-                .setPersonalizedRecSwitch(1)
-                .build()
-
-        val appPos =
-            ThreadAppPosInfoLite.newBuilder()
-                .setApMac("02:00:00:00:00:00")
-                .setApConnected(true)
-                .setCoordinateType("BD09LL")
-                .setAddrTimestamp(0L)
-                .setAspShownInfo("")
-                .build()
-
-        val adParam =
-            ThreadAdParamLite.newBuilder()
-                .setLoadCount(0)
-                .setRefreshCount(1)
-                .setIsReqAd(1)
-                .build()
-
-        return PbPageRequestLite.newBuilder()
-            .setData(
-                PbPageRequestDataLite.newBuilder()
-                    .setPbRn(0)
-                    .setMark(0)
-                    .setBack(if (back) 1 else 0)
-                    .setKz(threadId)
-                    .setLz(if (seeLz) 1 else 0)
-                    .setR(sortType)
-                    .setPid(postId)
-                    .setWithFloor(1)
-                    .setFloorRn(4)
-                    .setRn(15)
-                    .setScrW(scrW)
-                    .setScrH(scrH)
-                    .setScrDip(scrDip)
-                    .setQType(2)
-                    .setPn(page.coerceAtLeast(0))
-                    .setCommon(common)
-                    .setIsCommReverse(0)
-                    .setObjSource("")
-                    .setObjLocate("")
-                    .setObjParam1("10")
-                    .setAppPos(appPos)
-                    .setForumId(forumId ?: 0L)
-                    .setAdParam(adParam)
-                    .setOriUgcType(0)
-                    .setFromPush(0)
-                    .setFloorSortType(1)
-                    .setSourceType(2)
-                    .setImmersionVideoCommentSource(0)
-                    .setIsFoldCommentReq(0)
-                    .setRequestTimes(0)
-                    .setLastPid(lastPostId ?: 0L)
-                    .build(),
-            ).build()
-            .toByteArray()
-    }
-
-    private fun buildCookie(cuid: String): String = "ka=open;CUID=$cuid;TBBRAND=${Build.MODEL};"
 }
 
-private val PlainTextMediaType = "text/plain".toMediaType()
-private val BinaryMediaType = "application/octet-stream".toMediaType()
-
-private const val From = "1020031h"
-private const val DefaultScrW = 1080
-private const val DefaultScrH = 2400
-private const val DefaultScrDip = 3.0
-
-private data class DeviceIdentity(
-    val clientId: String,
-    val cuid: String,
-    val cuidGalaxy2: String,
-    val c3Aid: String,
-) {
-    companion object {
-        fun create(): DeviceIdentity {
-            val initTime = System.currentTimeMillis()
-            val clientId = "wappc_${initTime}_${(Math.random() * 1000).roundToInt()}"
-            val cuid = java.util.UUID.randomUUID().toString().replace("-", "")
-            val c3Aid = java.util.UUID.randomUUID().toString().replace("-", "")
-            return DeviceIdentity(
-                clientId = clientId,
-                cuid = cuid,
-                cuidGalaxy2 = cuid,
-                c3Aid = c3Aid,
-            )
+internal fun buildPbPageRequestBody(
+    identity: TbClientIdentity,
+    device: TbClientDevice,
+    screen: TbClientScreen,
+    timestamp: Long,
+    threadId: Long,
+    page: Int,
+    seeLz: Boolean,
+    sortType: Int,
+    lastPostId: Long?,
+    bduss: String?,
+    stoken: String?,
+): ByteArray {
+    val latestPostAnchor = lastPostId?.takeIf { value -> value > 0L }
+    val common =
+        commonReqFields(
+            identity = identity,
+            device = device,
+            screen = screen,
+            timestamp = timestamp,
+            from = "tieba",
+            qType = 2,
+            bduss = bduss,
+            stoken = stoken,
+            includeApplist = true,
+        )
+    val adParam =
+        listOf(
+            ProtoWire.varint(4, 1),
+            ProtoWire.varint(1, 0),
+            ProtoWire.varint(2, 0),
+            ProtoWire.string(3, ""),
+        )
+    val data =
+        buildList {
+            add(ProtoWire.message(18, adParam))
+            add(ProtoWire.varint(6, 0))
+            add(ProtoWire.message(1, common))
+            add(ProtoWire.varint(2, threadId))
+            latestPostAnchor?.let { value ->
+                add(ProtoWire.varint(4, value))
+            }
+            if (seeLz) {
+                add(ProtoWire.varint(7, 1))
+            }
+            add(ProtoWire.varint(8, if (latestPostAnchor != null) 2 else 0))
+            add(ProtoWire.varint(3, page.coerceAtLeast(1)))
+            add(ProtoWire.varint(5, sortType))
+            add(ProtoWire.varint(36, 1))
         }
-    }
+    return ProtoWire.encode(listOf(ProtoWire.message(1, data)))
 }

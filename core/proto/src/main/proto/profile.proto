@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package tiebalite.profile;
+
+option java_multiple_files = true;
+option java_package = "app.tiebalite.core.network.proto.profile";
+
+message ProfileResponseLite {
+  ProfileErrorLite error = 1;
+  ProfileResponseDataLite data = 2;
+}
+
+message ProfileErrorLite {
+  int32 errorno = 1;
+  string errmsg = 2;
+  string usermsg = 3;
+}
+
+message ProfileResponseDataLite {
+  ProfileUserLite user = 1;
+  ProfileAntiLite anti_stat = 2;
+}
+
+message ProfileUserLite {
+  int64 id = 2;
+  string name = 3;
+  string name_show = 4;
+  string portrait = 5;
+}
+
+message ProfileAntiLite {
+  string tbs = 1;
+}

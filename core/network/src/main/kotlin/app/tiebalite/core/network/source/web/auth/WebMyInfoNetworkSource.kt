@@ -17,6 +17,8 @@ interface WebMyInfoApi {
     @GET("/mo/q/newmoindex?need_user=1")
     suspend fun getMyInfo(
         @Header("cookie") cookie: String? = null,
+        @Header("User-Agent") userAgent: String = WEBVIEW_USER_AGENT,
+        @Header("Referer") referer: String = WEB_REFERER,
     ): ResponseBody
 }
 
@@ -126,6 +128,12 @@ data class WebMyInfoRaw(
         val intro: String,
     )
 }
+
+const val WEBVIEW_USER_AGENT =
+    "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 " +
+        "(KHTML, like Gecko) Version/4.0 Chrome/125.0.0.0 Mobile Safari/537.36"
+
+private const val WEB_REFERER = "https://tieba.baidu.com/"
 
 private fun JSONObject.toRawMap(): Map<String, Any?> =
     keys().asSequence().associateWith { key ->

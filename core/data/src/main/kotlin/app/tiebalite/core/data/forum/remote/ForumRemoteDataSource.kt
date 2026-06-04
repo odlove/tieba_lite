@@ -12,7 +12,7 @@ class ForumRemoteDataSource(
         forumName: String,
         page: Int,
         loadType: Int,
-        sortType: Int = 0,
+        sortType: Int = DEFAULT_SORT_TYPE,
     ): Result<FrsPageRaw> {
         val session = sessionProvider()
         return frsPageNetworkSource.fetchPage(
@@ -22,7 +22,8 @@ class ForumRemoteDataSource(
             sortType = sortType,
             bduss = session?.bduss,
             stoken = session?.stoken,
-            tbs = session?.tbs,
         )
     }
 }
+
+private const val DEFAULT_SORT_TYPE = -1

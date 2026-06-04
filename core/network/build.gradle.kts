@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.squareup.retrofit)
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp.logging)
+    implementation(libs.kotlinx.coroutines.core)
     api(project(":core:proto"))
     testImplementation(libs.junit)
 }

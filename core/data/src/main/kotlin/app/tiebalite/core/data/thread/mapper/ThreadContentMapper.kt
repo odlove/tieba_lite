@@ -1,5 +1,6 @@
 package app.tiebalite.core.data.thread.mapper
 
+import app.tiebalite.core.data.common.mapper.normalizeUrl
 import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.network.proto.thread.ThreadPbContentLite
 

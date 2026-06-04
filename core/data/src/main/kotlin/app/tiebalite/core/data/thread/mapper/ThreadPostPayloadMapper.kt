@@ -1,10 +1,11 @@
 package app.tiebalite.core.data.thread.mapper
 
+import app.tiebalite.core.data.common.mapper.portraitToAvatarUrl
 import app.tiebalite.core.model.thread.ThreadSubPost
 import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.network.proto.thread.ThreadInlineSubPostsLite
 import app.tiebalite.core.network.proto.thread.ThreadPostLite
-import app.tiebalite.core.network.proto.thread.ThreadSubPostLite
+import app.tiebalite.core.network.proto.thread.ThreadSubPostListLite
 import app.tiebalite.core.network.proto.thread.ThreadUserLite
 
 internal class ThreadPostPayloadMapper(
@@ -21,7 +22,7 @@ internal class ThreadPostPayloadMapper(
             floor = post.floor,
             subPostCount = post.subPostNumber,
             subPosts = parseSubPosts(post = post, userMap = userMap),
-            agreeCount = ThreadAgreeParser.parseCount(post.agree),
+            agreeCount = post.agree.agreeNum,
             authorId =
                 author?.id
                     ?.takeIf { id -> id > 0L }
@@ -65,7 +66,7 @@ internal class ThreadPostPayloadMapper(
     }
 
     private fun resolveSubPostAuthor(
-        subPost: ThreadSubPostLite,
+        subPost: ThreadSubPostListLite,
         userMap: Map<Long, ThreadUserLite>,
     ): ThreadUserLite? {
         val embeddedAuthor =

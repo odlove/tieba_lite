@@ -9,7 +9,6 @@ object ThreadRepositoryFactory {
     fun create(
         baseUrl: String = NetworkDefaults.TBCLIENT_BASE_URL,
         sessionProvider: () -> AuthSession? = { null },
-        tbsProvider: () -> String? = { null },
     ): ThreadRepository {
         val pbPageNetworkSource = TbClientThreadNetwork.createPbPageNetworkSource(baseUrl = baseUrl)
         val pbFloorNetworkSource = TbClientThreadNetwork.createPbFloorNetworkSource(baseUrl = baseUrl)
@@ -18,7 +17,6 @@ object ThreadRepositoryFactory {
                 pbPageNetworkSource = pbPageNetworkSource,
                 pbFloorNetworkSource = pbFloorNetworkSource,
                 sessionProvider = sessionProvider,
-                tbsProvider = tbsProvider,
             )
         return ThreadRepositoryImpl(
             remoteDataSource = remoteDataSource,

@@ -1,6 +1,8 @@
 package app.tiebalite.core.data.recommend.mapper
 
-import app.tiebalite.core.model.recommend.RecommendImage
+import app.tiebalite.core.data.common.mapper.normalizeUrl
+import app.tiebalite.core.data.common.mapper.portraitToAvatarUrl
+import app.tiebalite.core.data.common.mapper.toRecommendImage
 import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedFeedRaw
 
@@ -21,15 +23,7 @@ class PersonalizedFeedMapper {
             val images =
                 thread.mediaList
                     .asSequence()
-                    .mapNotNull { media ->
-                        normalizeUrl(media.originPic)?.let { url ->
-                            RecommendImage(
-                                url = url,
-                                width = media.width.takeIf { it != 0 },
-                                height = media.height.takeIf { it != 0 },
-                            )
-                        }
-                    }
+                    .mapNotNull { media -> media.toRecommendImage() }
                     .distinctBy { image -> image.url }
                     .toList()
             val forumName =
@@ -60,28 +54,4 @@ class PersonalizedFeedMapper {
         }
     }
 
-    private fun portraitToAvatarUrl(portrait: String): String? {
-        val value = portrait.trim()
-        if (value.isBlank()) {
-            return null
-        }
-        return if (value.startsWith("http://") || value.startsWith("https://")) {
-            value
-        } else {
-            "http://tb.himg.baidu.com/sys/portrait/item/$value"
-        }
-    }
-
-    private fun normalizeUrl(raw: String): String? {
-        val value = raw.trim()
-        if (value.isBlank()) {
-            return null
-        }
-        return when {
-            value.startsWith("http://") -> "https://${value.removePrefix("http://")}"
-            value.startsWith("https://") -> value
-            value.startsWith("//") -> "https:$value"
-            else -> value
-        }
-    }
 }

@@ -4,6 +4,7 @@ import app.tiebalite.core.data.auth.store.AuthStore
 import app.tiebalite.core.model.auth.AuthSession
 import app.tiebalite.core.network.source.tbclient.auth.TbClientAuthNetwork
 import app.tiebalite.core.network.source.tbclient.auth.TbClientLoginNetworkSource
+import app.tiebalite.core.network.source.tbclient.auth.TbClientProfileNetworkSource
 import app.tiebalite.core.network.source.web.auth.WebAuthNetwork
 import app.tiebalite.core.network.source.web.auth.WebMyInfoNetworkSource
 
@@ -27,6 +28,7 @@ interface AuthService {
 internal class DefaultAuthService(
     private val authStore: AuthStore,
     private val tbClientLoginNetworkSource: TbClientLoginNetworkSource = TbClientAuthNetwork.createLoginNetworkSource(),
+    private val tbClientProfileNetworkSource: TbClientProfileNetworkSource = TbClientAuthNetwork.createProfileNetworkSource(),
     private val webMyInfoNetworkSource: WebMyInfoNetworkSource = WebAuthNetwork.createMyInfoNetworkSource(),
 ) : AuthService {
     override suspend fun loginWithWeb(
@@ -129,8 +131,21 @@ internal class DefaultAuthService(
             .login(
                 bduss = session.bduss,
                 stoken = session.stoken,
-            ).map { raw ->
-                raw.toProfilePayload()
+            ).mapCatching { loginRaw ->
+                val loginPayload = loginRaw.toProfilePayload()
+                val userId = loginRaw.user.id.toLongOrNull()
+                if (userId == null || userId <= 0L) {
+                    loginPayload
+                } else {
+                    tbClientProfileNetworkSource
+                        .fetchProfile(
+                            userId = userId,
+                            bduss = session.bduss,
+                            stoken = session.stoken,
+                        ).getOrNull()
+                        ?.toProfilePayload(fallbackTbs = loginPayload.tbs)
+                        ?: loginPayload
+                }
             }
 
     private suspend fun fetchProfilePayloadByActiveSession(): Result<AuthProfilePayload> {

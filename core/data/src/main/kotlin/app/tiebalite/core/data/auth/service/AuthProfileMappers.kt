@@ -1,7 +1,9 @@
 package app.tiebalite.core.data.auth.service
 
+import app.tiebalite.core.data.common.mapper.portraitToAvatarUrl
 import app.tiebalite.core.model.auth.AuthProfile
 import app.tiebalite.core.network.source.tbclient.auth.TbClientLoginRaw
+import app.tiebalite.core.network.source.tbclient.auth.TbClientProfileRaw
 import app.tiebalite.core.network.source.web.auth.WebMyInfoRaw
 
 internal fun TbClientLoginRaw.toAuthProfile(): AuthProfile =
@@ -9,16 +11,7 @@ internal fun TbClientLoginRaw.toAuthProfile(): AuthProfile =
         userId = user.id,
         userName = user.name,
         displayName = user.name,
-        avatarUrl =
-            user.portrait
-                .trim()
-                .let { portrait ->
-                    when {
-                        portrait.startsWith("http://") || portrait.startsWith("https://") -> portrait
-                        portrait.isBlank() -> ""
-                        else -> "http://tb.himg.baidu.com/sys/portrait/item/$portrait"
-                    }
-                },
+        avatarUrl = portraitToAvatarUrl(user.portrait).orEmpty(),
     )
 
 internal fun WebMyInfoRaw.toAuthProfile(): AuthProfile =
@@ -27,22 +20,33 @@ internal fun WebMyInfoRaw.toAuthProfile(): AuthProfile =
         userName = data.name,
         displayName = data.showName.ifBlank { data.name },
         avatarUrl =
-            data.portraitUrl
-                .trim()
-                .ifBlank { data.portrait.trim() }
-                .let { portrait ->
-                    when {
-                        portrait.startsWith("http://") || portrait.startsWith("https://") -> portrait
-                        portrait.isBlank() -> ""
-                        else -> "http://tb.himg.baidu.com/sys/portrait/item/$portrait"
-                    }
-                },
+            portraitToAvatarUrl(
+                data.portraitUrl
+                    .trim()
+                    .ifBlank { data.portrait.trim() },
+            ).orEmpty(),
     )
+
+internal fun TbClientProfileRaw.toAuthProfile(): AuthProfile =
+    response.data.user.let { user ->
+        AuthProfile(
+            userId = user.id.takeIf { it > 0L }?.toString().orEmpty(),
+            userName = user.name,
+            displayName = user.nameShow.ifBlank { user.name },
+            avatarUrl = portraitToAvatarUrl(user.portrait).orEmpty(),
+        )
+    }
 
 internal fun TbClientLoginRaw.toProfilePayload(): AuthProfilePayload =
     AuthProfilePayload(
         profile = toAuthProfile(),
         tbs = anti.tbs.takeIf { it.isNotBlank() },
+    )
+
+internal fun TbClientProfileRaw.toProfilePayload(fallbackTbs: String? = null): AuthProfilePayload =
+    AuthProfilePayload(
+        profile = toAuthProfile(),
+        tbs = response.data.antiStat.tbs.takeIf { it.isNotBlank() } ?: fallbackTbs?.takeIf { it.isNotBlank() },
     )
 
 internal fun WebMyInfoRaw.toProfilePayload(): AuthProfilePayload =

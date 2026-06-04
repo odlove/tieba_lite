@@ -7,6 +7,6 @@ interface ForumRepository {
         forumName: String,
         page: Int = 1,
         loadType: Int = 1,
-        sortType: Int = 0,
+        sortType: Int = -1,
     ): Result<ForumPage>
 }

@@ -7,49 +7,6 @@ import "recommend.proto";
 option java_multiple_files = true;
 option java_package = "app.tiebalite.core.network.proto.frs";
 
-message FrsPageRequestLite {
-  FrsPageRequestDataLite data = 1;
-}
-
-message FrsPageRequestDataLite {
-  string kw = 1;
-  int32 rn = 2;
-  int32 rn_need = 3;
-  int32 is_good = 4;
-  int32 cid = 5;
-  int32 with_group = 8;
-  int32 scr_w = 11;
-  int32 scr_h = 12;
-  double scr_dip = 13;
-  int32 q_type = 14;
-  int32 pn = 15;
-  string st_type = 16;
-  int32 net_error = 19;
-  tiebalite.recommend.CommonReqLite common = 39;
-  string lastids = 40;
-  int32 category_id = 44;
-  string yuelaou_locate = 45;
-  string yuelaou_params = 46;
-  int32 sort_type = 47;
-  uint64 last_click_tid = 48;
-  int32 load_type = 49;
-  tiebalite.recommend.AppPosInfoLite app_pos = 50;
-  FrsPageAdParamLite ad_param = 51;
-  string obj_locate = 52;
-  string obj_source = 53;
-  int32 call_from = 56;
-  string up_schema = 61;
-  int32 request_times = 69;
-  int32 is_newfeed = 71;
-  int32 is_newfrs = 73;
-}
-
-message FrsPageAdParamLite {
-  int32 load_count = 1;
-  int32 refresh_count = 2;
-  string yoga_lib_version = 3;
-}
-
 message FrsPageResponseLite {
   tiebalite.recommend.ErrorLite error = 1;
   FrsPageResponseDataLite data = 2;
@@ -58,28 +15,18 @@ message FrsPageResponseLite {
 message FrsPageResponseDataLite {
   FrsPageForumInfoLite forum = 2;
   FrsPageInfoLite page = 4;
-  tiebalite.recommend.AntiLite anti = 5;
-  repeated tiebalite.recommend.ThreadInfoLite thread_list = 7;
-  repeated int64 thread_id_list = 8;
-  int64 logid = 13;
   repeated tiebalite.recommend.UserLite user_list = 17;
+  FrsPageDataLite page_data = 126;
 }
 
 message FrsPageInfoLite {
-  int32 page_size = 1;
-  int32 offset = 2;
   int32 current_page = 3;
-  int32 total_count = 4;
-  int32 total_page = 5;
   int32 has_more = 6;
-  int32 has_prev = 7;
-  int32 cur_good_id = 8;
 }
 
 message FrsPageForumInfoLite {
   int64 id = 1;
   string name = 2;
-  int32 is_exists = 5;
   int32 is_like = 6;
   int32 user_level = 7;
   string level_name = 8;
@@ -89,34 +36,79 @@ message FrsPageForumInfoLite {
   int32 cur_score = 13;
   int32 levelup_score = 14;
   FrsPageSignInfoLite sign_in_info = 15;
-  repeated FrsPageClassifyLite good_classify = 21;
   string avatar = 24;
   string slogan = 25;
 }
 
 message FrsPageSignInfoLite {
   FrsPageSignUserLite user_info = 1;
-  FrsPageSignForumLite forum_info = 2;
 }
 
 message FrsPageSignUserLite {
-  int64 user_id = 1;
   int32 is_sign_in = 2;
-  int32 user_sign_rank = 3;
-  int32 sign_time = 4;
   int32 cont_sign_num = 5;
-  int32 cout_total_sign_num = 6;
 }
 
-message FrsPageSignForumLite {
-  int32 is_on = 1;
-  int32 is_filter = 2;
-  int64 forum_id = 10;
+message FrsPageDataLite {
+  repeated FrsLayoutLite feed_list = 2;
 }
 
-message FrsPageClassifyLite {
-  string name = 1;
-  int64 id = 2;
-  int32 class_id = 3;
-  string class_name = 4;
+message FrsLayoutLite {
+  string layout = 1;
+  FrsFeedLite feed = 2;
+}
+
+message FrsFeedLite {
+  repeated FrsComponentLite components = 1;
+  string schema = 2;
+  repeated FrsKeyValueLite business_info = 5;
+  repeated FrsKeyValueLite log_param = 7;
+}
+
+message FrsComponentLite {
+  string component = 1;
+  FrsTextGroupLite feed_title = 3;
+  FrsTextGroupLite feed_abstract = 4;
+  FrsPicGroupLite feed_pic = 7;
+  FrsSocialLite feed_social = 8;
+}
+
+message FrsTextGroupLite {
+  repeated FrsTextResourceLite data = 1;
+}
+
+message FrsTextResourceLite {
+  FrsTextLite text_info = 8;
+}
+
+message FrsTextLite {
+  string text = 1;
+}
+
+message FrsPicGroupLite {
+  repeated FrsPicLite pics = 1;
+}
+
+message FrsPicLite {
+  string small_pic_url = 1;
+  string big_pic_url = 2;
+  string origin_pic_url = 3;
+  uint32 width = 4;
+  uint32 height = 5;
+}
+
+message FrsSocialLite {
+  FrsAgreeLite agree = 1;
+  int32 comment_num = 2;
+  int32 share_num = 3;
+  uint64 tid = 4;
+}
+
+message FrsAgreeLite {
+  int64 agree_num = 1;
+}
+
+message FrsKeyValueLite {
+  string key = 1;
+  string value = 2;
 }

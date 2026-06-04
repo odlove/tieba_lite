@@ -30,4 +30,19 @@ object TbClientAuthNetwork {
         val api = retrofit.create(TbClientLoginApi::class.java)
         return TbClientLoginNetworkSource(api = api)
     }
+
+    fun createProfileNetworkSource(
+        baseUrl: String = NetworkDefaults.TBCLIENT_BASE_URL,
+        okHttpClient: OkHttpClient = NetworkClientFactory.createOkHttpClient(),
+    ): TbClientProfileNetworkSource =
+        createProfileNetworkSource(
+            retrofit = NetworkClientFactory.createRetrofit(baseUrl = baseUrl, okHttpClient = okHttpClient),
+        )
+
+    private fun createProfileNetworkSource(
+        retrofit: Retrofit,
+    ): TbClientProfileNetworkSource {
+        val api = retrofit.create(TbClientProfileApi::class.java)
+        return TbClientProfileNetworkSource(api = api)
+    }
 }

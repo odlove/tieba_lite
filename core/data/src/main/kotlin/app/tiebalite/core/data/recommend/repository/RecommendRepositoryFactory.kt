@@ -9,7 +9,6 @@ object RecommendRepositoryFactory {
     fun create(
         baseUrl: String = NetworkDefaults.TBCLIENT_BASE_URL,
         sessionProvider: () -> AuthSession? = { null },
-        tbsProvider: () -> String? = { null },
     ): RecommendRepository {
         val personalizedNetworkSource =
             TbClientRecommendNetwork.createPersonalizedNetworkSource(baseUrl = baseUrl)
@@ -17,7 +16,6 @@ object RecommendRepositoryFactory {
             RecommendRemoteDataSource(
                 personalizedNetworkSource = personalizedNetworkSource,
                 sessionProvider = sessionProvider,
-                tbsProvider = tbsProvider,
             )
         return RecommendRepositoryImpl(
             remoteDataSource = remoteDataSource,

@@ -1,7 +1,7 @@
-package app.tiebalite.core.data.thread.mapper
+package app.tiebalite.core.data.common.mapper
 
-internal fun normalizeUrl(raw: String): String? {
-    val value = raw.trim()
+internal fun normalizeUrl(raw: String?): String? {
+    val value = raw?.trim().orEmpty()
     if (value.isBlank()) {
         return null
     }
@@ -13,8 +13,8 @@ internal fun normalizeUrl(raw: String): String? {
     }
 }
 
-internal fun portraitToAvatarUrl(portrait: String): String? {
-    val value = portrait.trim()
+internal fun portraitToAvatarUrl(portrait: String?): String? {
+    val value = portrait?.trim().orEmpty()
     if (value.isBlank()) {
         return null
     }

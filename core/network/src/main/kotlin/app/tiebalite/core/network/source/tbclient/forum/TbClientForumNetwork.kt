@@ -14,7 +14,7 @@ object TbClientForumNetwork {
             retrofit = NetworkClientFactory.createRetrofit(baseUrl = baseUrl, okHttpClient = okHttpClient),
         )
 
-    fun createFrsPageNetworkSource(
+    private fun createFrsPageNetworkSource(
         retrofit: Retrofit,
     ): FrsPageNetworkSource {
         val api = retrofit.create(FrsPageApi::class.java)
@@ -29,7 +29,7 @@ object TbClientForumNetwork {
             retrofit = NetworkClientFactory.createRetrofit(baseUrl = baseUrl, okHttpClient = okHttpClient),
         )
 
-    fun createForumGuideNetworkSource(
+    private fun createForumGuideNetworkSource(
         retrofit: Retrofit,
     ): ForumGuideNetworkSource {
         val api = retrofit.create(ForumGuideApi::class.java)
