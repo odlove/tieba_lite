@@ -27,7 +27,6 @@ internal class ThreadSubPostsPageMapper(
             }
 
         val currentPage = page.currentPage.takeIf { value -> value > 0 } ?: 1
-        val totalPage = page.totalPage.takeIf { value -> value > 0 } ?: currentPage
 
         return ThreadSubPostsPage(
             threadId =
@@ -43,7 +42,7 @@ internal class ThreadSubPostsPageMapper(
                     ?: data.thread.author.id.takeIf { id -> id > 0L },
             post = post,
             currentPage = currentPage,
-            hasMore = currentPage < totalPage,
+            hasMore = page.hasMore != 0,
             totalCount = page.totalCount.takeIf { count -> count >= 0 } ?: subPosts.size,
             subPosts = subPosts,
         )
