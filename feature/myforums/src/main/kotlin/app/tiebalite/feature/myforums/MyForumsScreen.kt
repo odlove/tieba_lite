@@ -21,10 +21,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,34 +37,43 @@ import androidx.compose.ui.unit.dp
 import app.tiebalite.core.ui.components.AppTopBar
 import coil3.compose.AsyncImage
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyForumsScreen(
     paddingValues: PaddingValues,
     state: MyForumsUiState,
+    onRefresh: () -> Unit,
     onRetry: () -> Unit,
     onOpenForum: (String) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppTopBar(title = "我的吧")
-        when {
-            state.isLoading -> LoadingState(paddingValues = paddingValues)
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = onRefresh,
+            state = rememberPullToRefreshState(),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            when {
+                state.isLoading -> LoadingState(paddingValues = paddingValues)
 
-            !state.isLoggedIn -> LoggedOutState(paddingValues = paddingValues)
+                !state.isLoggedIn -> LoggedOutState(paddingValues = paddingValues)
 
-            state.errorMessage != null ->
-                ErrorState(
+                state.errorMessage != null ->
+                    ErrorState(
+                        paddingValues = paddingValues,
+                        message = state.errorMessage,
+                        onRetry = onRetry,
+                    )
+
+                state.items.isEmpty() -> EmptyState(paddingValues = paddingValues)
+
+                else -> MyForumsList(
                     paddingValues = paddingValues,
-                    message = state.errorMessage,
-                    onRetry = onRetry,
+                    state = state,
+                    onOpenForum = onOpenForum,
                 )
-
-            state.items.isEmpty() -> EmptyState(paddingValues = paddingValues)
-
-            else -> MyForumsList(
-                paddingValues = paddingValues,
-                state = state,
-                onOpenForum = onOpenForum,
-            )
+            }
         }
     }
 }

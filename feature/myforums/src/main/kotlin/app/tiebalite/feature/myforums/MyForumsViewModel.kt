@@ -11,9 +11,12 @@ import app.tiebalite.core.data.auth.service.AuthReader
 import app.tiebalite.core.data.myforums.repository.MyForumsRepository
 import app.tiebalite.core.data.myforums.repository.MyForumsRepositoryFactory
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -26,6 +29,8 @@ class MyForumsViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MyForumsUiState())
     val uiState: StateFlow<MyForumsUiState> = _uiState.asStateFlow()
+    private val _uiEvents = MutableSharedFlow<MyForumsUiEvent>(extraBufferCapacity = 1)
+    val uiEvents: SharedFlow<MyForumsUiEvent> = _uiEvents.asSharedFlow()
 
     private var requestJob: Job? = null
 
@@ -50,28 +55,36 @@ class MyForumsViewModel(
                                 isLoading = false,
                             )
                     } else {
-                        refresh()
+                        loadMyForums(showRefreshWhenContent = false)
                     }
                 }
         }
     }
 
     fun refresh() {
+        loadMyForums(showRefreshWhenContent = true)
+    }
+
+    private fun loadMyForums(showRefreshWhenContent: Boolean) {
         if (!authReader.state.value.isLoggedIn) {
             requestJob?.cancel()
             _uiState.value =
                 MyForumsUiState(
                     isLoggedIn = false,
                     isLoading = false,
+                    isRefreshing = false,
                 )
             return
         }
 
         requestJob?.cancel()
         _uiState.update { current ->
+            val showRefreshing = showRefreshWhenContent && current.items.isNotEmpty()
             current.copy(
                 isLoggedIn = true,
-                isLoading = true,
+                isLoading = !showRefreshing,
+                isRefreshing = showRefreshing,
+                items = if (showRefreshWhenContent) current.items else emptyList(),
                 errorMessage = null,
             )
         }
@@ -84,15 +97,21 @@ class MyForumsViewModel(
                             MyForumsUiState(
                                 isLoggedIn = true,
                                 isLoading = false,
+                                isRefreshing = false,
                                 items = items,
                             )
+                        if (showRefreshWhenContent) {
+                            _uiEvents.tryEmit(MyForumsUiEvent.ShowToast(REFRESH_SUCCESS_MESSAGE))
+                        }
                     },
                     onFailure = {
+                        val hasItems = _uiState.value.items.isNotEmpty()
                         _uiState.update { current ->
                             current.copy(
                                 isLoggedIn = true,
                                 isLoading = false,
-                                errorMessage = NETWORK_ERROR_MESSAGE,
+                                isRefreshing = false,
+                                errorMessage = if (hasItems) null else NETWORK_ERROR_MESSAGE,
                             )
                         }
                     },
@@ -102,6 +121,7 @@ class MyForumsViewModel(
 
     companion object {
         private const val NETWORK_ERROR_MESSAGE = "加载失败，请重试"
+        private const val REFRESH_SUCCESS_MESSAGE = "刷新成功"
 
         val Factory: ViewModelProvider.Factory =
             viewModelFactory {
