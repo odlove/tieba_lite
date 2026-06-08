@@ -6,6 +6,8 @@ import app.tiebalite.core.model.forum.ForumHeader
 import app.tiebalite.core.model.forum.ForumPage
 import app.tiebalite.core.model.recommend.RecommendImage
 import app.tiebalite.core.model.recommend.RecommendItem
+import app.tiebalite.core.model.text.RichText
+import app.tiebalite.core.model.text.RichTextPart
 import app.tiebalite.core.network.proto.frs.FrsFeedLite
 import app.tiebalite.core.network.proto.frs.FrsPicLite
 import app.tiebalite.core.network.proto.frs.FrsTextGroupLite
@@ -71,10 +73,12 @@ class ForumPageMapper {
                 ?: return null
         val author = businessInfo["user_id"]?.toLongOrNull()?.let(userMap::get)
         val title =
-            feed.componentText(TITLE_COMPONENT)
-                ?: businessInfo["title"]
+            feed.componentRichText(TITLE_COMPONENT)
+                ?: businessInfo["title"]?.let(RichText::text)
                 ?: return null
-        val snippet = feed.componentText(ABSTRACT_COMPONENT) ?: businessInfo["abstract"]
+        val snippet =
+            feed.componentRichText(ABSTRACT_COMPONENT)
+                ?: businessInfo["abstract"]?.let(RichText::text)
         val images =
             feed.componentsList
                 .asSequence()
@@ -108,7 +112,7 @@ class ForumPageMapper {
         return author.nameShow.ifBlank { author.name }.ifBlank { null }
     }
 
-    private fun FrsFeedLite.componentText(componentName: String): String? =
+    private fun FrsFeedLite.componentRichText(componentName: String): RichText? =
         componentsList
             .asSequence()
             .firstOrNull { component -> component.component == componentName }
@@ -119,15 +123,47 @@ class ForumPageMapper {
                     else -> null
                 }
             }
-            ?.text()
+            ?.richText()
 
-    private fun FrsTextGroupLite.text(): String? =
-        dataList
-            .asSequence()
-            .map { item -> item.textInfo.text.trim() }
-            .filter { text -> text.isNotBlank() }
-            .joinToString(separator = "")
-            .ifBlank { null }
+    private fun FrsTextGroupLite.richText(): RichText? {
+        val parts =
+            dataList
+                .mapNotNull { item ->
+                    when (item.type) {
+                        FEED_TEXT_TYPE, FEED_TAG_TEXT_TYPE ->
+                            item.textInfo.text
+                                .takeIf { text -> text.isNotEmpty() }
+                                ?.let(RichTextPart::Text)
+
+                        FEED_EMOTICON_TYPE -> {
+                            val emoticonId =
+                                item.emojiInfo.name
+                                    .trim()
+                                    .takeIf { name -> name.isNotEmpty() }
+                                    ?.let(::normalizeEmoticonId)
+                            val emoticonName =
+                                item.emojiInfo.c
+                                    .trim()
+                                    .takeIf { name -> name.isNotEmpty() }
+                                    ?.let(::normalizeEmoticonName)
+                            if (emoticonId == null && emoticonName == null) {
+                                null
+                            } else {
+                                RichTextPart.Emoticon(
+                                    id = emoticonId,
+                                    name = emoticonName ?: emoticonId.orEmpty(),
+                                )
+                            }
+                        }
+
+                        else ->
+                            item.textInfo.text
+                                .takeIf { text -> text.isNotEmpty() }
+                                ?.let(RichTextPart::Text)
+                    }
+                }
+        return RichText(parts).takeIf { text -> text.isNotBlank() }
+    }
 
     private fun FrsPicLite.toRecommendImage(): RecommendImage? {
         val url =
@@ -152,6 +188,9 @@ class ForumPageMapper {
 
     private companion object {
         private const val FEED_LAYOUT = "feed"
+        private const val FEED_TEXT_TYPE = 1
+        private const val FEED_EMOTICON_TYPE = 3
+        private const val FEED_TAG_TEXT_TYPE = 6
         private const val TITLE_COMPONENT = "feed_title"
         private const val ABSTRACT_COMPONENT = "feed_abstract"
         private const val PIC_COMPONENT = "feed_pic"
@@ -159,4 +198,13 @@ class ForumPageMapper {
         private val THREAD_ID_PATTERN = Regex("""(?:%22(?:tid|threadId|thread_id)%22%3A|["?&](?:tid|threadId|thread_id)["=:%]+)(\d+)""")
     }
 
+}
+
+private fun normalizeEmoticonId(rawId: String): String = if (rawId == "image_emoticon") "image_emoticon1" else rawId
+
+private fun normalizeEmoticonName(rawName: String): String {
+    val name = rawName.trim()
+    return name
+        .removeSurrounding("#(", ")")
+        .ifBlank { name }
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.tiebalite.core.model.text.RichTextPart
 import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.model.thread.ThreadSubPost
 import app.tiebalite.feature.thread.common.post.ThreadPostRichText
@@ -91,10 +92,10 @@ private fun ThreadPostBody.inlineTrailingText(): String {
 private fun ThreadPostBody.hasVisibleInlineContent(): Boolean =
     inline.any { part ->
         when (part) {
-            is ThreadPostBody.InlinePart.Text -> part.text.isNotBlank()
-            is ThreadPostBody.InlinePart.Link -> part.text.isNotBlank() || part.url.isNotBlank()
-            is ThreadPostBody.InlinePart.Mention -> part.text.isNotBlank()
-            is ThreadPostBody.InlinePart.Emoticon -> true
-            is ThreadPostBody.InlinePart.Unknown -> part.text.isNotBlank() || part.link.isNotBlank()
+            is RichTextPart.Text -> part.text.isNotBlank()
+            is RichTextPart.Link -> part.text.isNotBlank() || part.url.isNotBlank()
+            is RichTextPart.Mention -> part.text.isNotBlank()
+            is RichTextPart.Emoticon -> true
+            is RichTextPart.Unknown -> part.text.isNotBlank() || part.link.isNotBlank()
         }
     }

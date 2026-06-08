@@ -270,7 +270,7 @@ private fun ForumStickyThreadItem(
             )
         }
         Text(
-            text = item.title,
+            text = item.titleText,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,

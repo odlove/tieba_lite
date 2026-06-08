@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.imageviewer.ImageViewerItem
+import app.tiebalite.core.model.text.RichTextPart
 import app.tiebalite.core.model.thread.ThreadPostBody
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -177,7 +178,7 @@ private fun ThreadPostImageGrid(
 
 private sealed interface ThreadPostContentBlock {
     data class Text(
-        val inline: List<ThreadPostBody.InlinePart>,
+        val inline: List<RichTextPart>,
     ) : ThreadPostContentBlock
 
     data class ImageGroup(

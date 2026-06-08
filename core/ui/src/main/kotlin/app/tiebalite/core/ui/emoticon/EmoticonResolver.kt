@@ -42,7 +42,7 @@ object DefaultEmoticonResolver : EmoticonResolver {
             return EmoticonAsset.Remote(url = buildEmoticonUrl(normalizedId))
         }
 
-        val normalizedName = name.trim()
+        val normalizedName = normalizeEmoticonName(name)
         val fallbackId = fallbackIdByName[normalizedName]
         if (fallbackId != null) {
             val localRes = localResById[fallbackId]
@@ -52,12 +52,19 @@ object DefaultEmoticonResolver : EmoticonResolver {
             return EmoticonAsset.Remote(url = buildEmoticonUrl(fallbackId))
         }
 
-        return EmoticonAsset.FallbackText(text = fallbackText(name))
+        return EmoticonAsset.FallbackText(text = fallbackText(normalizedName))
     }
 
     private fun buildEmoticonUrl(id: String): String = "$EmoticonBaseUrl/$id.png"
 
     private fun normalizeEmoticonId(rawId: String): String = if (rawId == "image_emoticon") "image_emoticon1" else rawId
+
+    private fun normalizeEmoticonName(rawName: String): String {
+        val name = rawName.trim()
+        return name
+            .removeSurrounding("#(", ")")
+            .ifBlank { name }
+    }
 
     @DrawableRes
     private fun localResId(id: String): Int? = localResById[id]

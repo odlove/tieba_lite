@@ -1,36 +1,11 @@
 package app.tiebalite.core.model.thread
 
+import app.tiebalite.core.model.text.RichTextPart
+
 data class ThreadPostBody(
-    val inline: List<InlinePart> = emptyList(),
+    val inline: List<RichTextPart> = emptyList(),
     val media: List<MediaPart> = emptyList(),
 ) {
-    sealed interface InlinePart {
-        data class Text(
-            val text: String,
-        ) : InlinePart
-
-        data class Link(
-            val text: String,
-            val url: String,
-        ) : InlinePart
-
-        data class Mention(
-            val text: String,
-            val uid: Long? = null,
-        ) : InlinePart
-
-        data class Emoticon(
-            val name: String,
-            val id: String? = null,
-        ) : InlinePart
-
-        data class Unknown(
-            val type: Int,
-            val text: String,
-            val link: String,
-        ) : InlinePart
-    }
-
     sealed interface MediaPart {
         data class Image(
             val url: String,

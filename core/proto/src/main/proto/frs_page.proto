@@ -78,11 +78,18 @@ message FrsTextGroupLite {
 }
 
 message FrsTextResourceLite {
+  uint32 type = 1;
   FrsTextLite text_info = 8;
+  FrsEmojiLite emoji_info = 10;
 }
 
 message FrsTextLite {
   string text = 1;
+}
+
+message FrsEmojiLite {
+  string name = 1;
+  string c = 2;
 }
 
 message FrsPicGroupLite {

@@ -4,6 +4,7 @@ import app.tiebalite.core.data.common.mapper.normalizeUrl
 import app.tiebalite.core.data.common.mapper.portraitToAvatarUrl
 import app.tiebalite.core.data.common.mapper.toRecommendImage
 import app.tiebalite.core.model.recommend.RecommendItem
+import app.tiebalite.core.model.text.RichText
 import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedFeedRaw
 
 class PersonalizedFeedMapper {
@@ -32,10 +33,10 @@ class PersonalizedFeedMapper {
                     .ifBlank { null }
             RecommendItem(
                 id = threadId.toString(),
-                title = thread.title.ifBlank { "(无标题)" },
+                title = RichText.text(thread.title.ifBlank { "(无标题)" }),
                 forumName = forumName,
                 forumAvatarUrl = normalizeUrl(thread.forumInfo.avatar),
-                snippet = snippet,
+                snippet = snippet?.let(RichText::text),
                 authorName = authorName.ifBlank { null },
                 authorAvatarUrl = portraitToAvatarUrl(thread.author.portrait),
                 images = images,

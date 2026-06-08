@@ -1,12 +1,13 @@
 package app.tiebalite.core.data.thread.mapper
 
 import app.tiebalite.core.data.common.mapper.normalizeUrl
+import app.tiebalite.core.model.text.RichTextPart
 import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.network.proto.thread.ThreadPbContentLite
 
 internal class ThreadContentMapper {
     fun map(contentList: List<ThreadPbContentLite>): ThreadPostBody {
-        val inline = mutableListOf<ThreadPostBody.InlinePart>()
+        val inline = mutableListOf<RichTextPart>()
         val media = mutableListOf<ThreadPostBody.MediaPart>()
         contentList.forEach { content ->
             mapInline(content)?.let(inline::add)
@@ -18,29 +19,29 @@ internal class ThreadContentMapper {
         )
     }
 
-    private fun mapInline(content: ThreadPbContentLite): ThreadPostBody.InlinePart? {
+    private fun mapInline(content: ThreadPbContentLite): RichTextPart? {
         val type = content.type
         val text = content.text
         val link = content.link
         return when (type) {
             0, 9, 27, 35, 40 -> {
-                text.takeIf { it.isNotEmpty() }?.let(ThreadPostBody.InlinePart::Text)
+                text.takeIf { it.isNotEmpty() }?.let(RichTextPart::Text)
             }
 
             1 -> {
                 val normalizedLink = normalizeUrl(link.trim()) ?: link.takeIf { it.isNotBlank() }
                 when {
-                    normalizedLink != null -> ThreadPostBody.InlinePart.Link(
+                    normalizedLink != null -> RichTextPart.Link(
                         text = text.ifEmpty { normalizedLink },
                         url = normalizedLink,
                     )
 
-                    text.isNotEmpty() -> ThreadPostBody.InlinePart.Text(text)
+                    text.isNotEmpty() -> RichTextPart.Text(text)
                     else -> null
                 }
             }
 
-            2 -> {
+            2, 11 -> {
                 val emoticonId =
                     content.text
                         .trim()
@@ -50,19 +51,20 @@ internal class ThreadContentMapper {
                     content.c
                         .trim()
                         .takeIf { it.isNotEmpty() }
+                        ?.let(::normalizeEmoticonName)
                 if (emoticonId == null && emoticonName == null) {
                     null
                 } else {
-                    ThreadPostBody.InlinePart.Emoticon(
-                        name = emoticonName ?: emoticonId.orEmpty(),
+                    RichTextPart.Emoticon(
                         id = emoticonId,
+                        name = emoticonName ?: emoticonId.orEmpty(),
                     )
                 }
             }
 
             4 -> {
                 text.takeIf { it.isNotEmpty() }?.let {
-                    ThreadPostBody.InlinePart.Mention(
+                    RichTextPart.Mention(
                         text = it,
                         uid = content.uid.takeIf { uid -> uid > 0L },
                     )
@@ -73,7 +75,7 @@ internal class ThreadContentMapper {
                 if (type in MediaTypes || (text.isEmpty() && link.isEmpty())) {
                     null
                 } else {
-                    ThreadPostBody.InlinePart.Unknown(
+                    RichTextPart.Unknown(
                         type = type,
                         text = text,
                         link = link,
@@ -128,6 +130,13 @@ internal class ThreadContentMapper {
         }
 
     private fun normalizeEmoticonId(rawId: String): String = if (rawId == "image_emoticon") "image_emoticon1" else rawId
+
+    private fun normalizeEmoticonName(rawName: String): String {
+        val name = rawName.trim()
+        return name
+            .removeSurrounding("#(", ")")
+            .ifBlank { name }
+    }
 
     private fun parseImageSize(rawSize: String): Pair<Int, Int>? {
         val values = rawSize.split(',')
