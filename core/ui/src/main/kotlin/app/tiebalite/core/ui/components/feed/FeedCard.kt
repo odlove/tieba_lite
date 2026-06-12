@@ -14,9 +14,12 @@ import app.tiebalite.core.model.recommend.RecommendItem
 fun FeedCard(
     item: RecommendItem,
     modifier: Modifier = Modifier,
+    isVideoPlaying: Boolean = false,
+    videoPlayerContent: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onOpenForum: ((String) -> Unit)? = null,
     onOpenMedia: (() -> Unit)? = null,
+    onPlayVideo: (() -> Unit)? = null,
 ) {
     Column(
         modifier =
@@ -33,7 +36,10 @@ fun FeedCard(
         FeedCardBody(item = item)
         FeedCardMedia(
             item = item,
+            isVideoPlaying = isVideoPlaying,
+            videoPlayerContent = videoPlayerContent,
             onClick = onOpenMedia,
+            onPlayVideo = onPlayVideo,
         )
         FeedCardActions(item = item)
     }
