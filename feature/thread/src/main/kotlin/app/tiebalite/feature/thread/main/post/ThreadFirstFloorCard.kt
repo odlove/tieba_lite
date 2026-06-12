@@ -28,6 +28,7 @@ internal fun ThreadFirstFloorCard(
     onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
     playingVideoKey: String? = null,
     videoKeyForVideo: ((Int, ThreadPostBody.MediaPart.Video) -> String)? = null,
+    hasRenderedFirstFrame: ((String) -> Boolean)? = null,
     videoPlayerContent: (@Composable (String) -> Unit)? = null,
     onPlayVideo: ((String, String) -> Unit)? = null,
 ) {
@@ -90,6 +91,7 @@ internal fun ThreadFirstFloorCard(
             onOpenImageViewer = onOpenImageViewer,
             playingVideoKey = playingVideoKey,
             videoKeyForVideo = videoKeyForVideo,
+            hasRenderedFirstFrame = hasRenderedFirstFrame,
             videoPlayerContent = videoPlayerContent,
             onPlayVideo = onPlayVideo,
         )

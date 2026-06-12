@@ -37,6 +37,7 @@ import coil3.request.crossfade
 internal fun FeedCardMedia(
     item: RecommendItem,
     isVideoPlaying: Boolean = false,
+    hasRenderedFirstFrame: Boolean = false,
     videoPlayerContent: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onPlayVideo: (() -> Unit)? = null,
@@ -46,6 +47,7 @@ internal fun FeedCardMedia(
         FeedCardVideoMedia(
             video = video,
             isPlaying = isVideoPlaying,
+            hasRenderedFirstFrame = hasRenderedFirstFrame,
             videoPlayerContent = videoPlayerContent,
             onPlayVideo = onPlayVideo,
         )
@@ -92,6 +94,7 @@ internal fun FeedCardMedia(
 private fun FeedCardVideoMedia(
     video: RecommendVideo,
     isPlaying: Boolean,
+    hasRenderedFirstFrame: Boolean,
     videoPlayerContent: (@Composable () -> Unit)?,
     onPlayVideo: (() -> Unit)?,
 ) {
@@ -101,7 +104,8 @@ private fun FeedCardVideoMedia(
             Box(modifier = Modifier.matchParentSize()) {
                 videoPlayerContent()
             }
-        } else {
+        }
+        if (!isPlaying || !hasRenderedFirstFrame) {
             AsyncImage(
                 model =
                     ImageRequest
@@ -124,7 +128,7 @@ private fun FeedCardVideoMedia(
                         )
                         .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f)),
             ) {
-                if (onPlayVideo != null) {
+                if (!isPlaying && onPlayVideo != null) {
                     Box(
                         modifier =
                             Modifier

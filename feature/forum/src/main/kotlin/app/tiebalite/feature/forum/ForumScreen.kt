@@ -210,6 +210,7 @@ private fun ForumContent(
             FeedCard(
                 item = item,
                 isVideoPlaying = isVideoPlaying,
+                hasRenderedFirstFrame = videoPlayback.hasRenderedFirstFrame(item.id),
                 videoPlayerContent =
                     if (isVideoPlaying) {
                         {

@@ -15,6 +15,7 @@ fun FeedCard(
     item: RecommendItem,
     modifier: Modifier = Modifier,
     isVideoPlaying: Boolean = false,
+    hasRenderedFirstFrame: Boolean = false,
     videoPlayerContent: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onOpenForum: ((String) -> Unit)? = null,
@@ -37,6 +38,7 @@ fun FeedCard(
         FeedCardMedia(
             item = item,
             isVideoPlaying = isVideoPlaying,
+            hasRenderedFirstFrame = hasRenderedFirstFrame,
             videoPlayerContent = videoPlayerContent,
             onClick = onOpenMedia,
             onPlayVideo = onPlayVideo,

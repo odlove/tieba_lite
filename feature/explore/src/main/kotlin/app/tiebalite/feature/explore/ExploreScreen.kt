@@ -192,6 +192,7 @@ private fun ExploreList(
             FeedCard(
                 item = item,
                 isVideoPlaying = isVideoPlaying,
+                hasRenderedFirstFrame = videoPlayback.hasRenderedFirstFrame(item.id),
                 videoPlayerContent =
                     if (isVideoPlaying) {
                         {

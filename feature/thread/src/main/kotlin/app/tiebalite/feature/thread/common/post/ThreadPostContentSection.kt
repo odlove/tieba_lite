@@ -48,6 +48,7 @@ internal fun ThreadPostContentSection(
     onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
     playingVideoKey: String? = null,
     videoKeyForVideo: ((Int, ThreadPostBody.MediaPart.Video) -> String)? = null,
+    hasRenderedFirstFrame: ((String) -> Boolean)? = null,
     videoPlayerContent: (@Composable (String) -> Unit)? = null,
     onPlayVideo: ((String, String) -> Unit)? = null,
 ) {
@@ -85,6 +86,7 @@ internal fun ThreadPostContentSection(
                         ThreadPostVideoBlock(
                             video = block.video,
                             isPlaying = playingVideoKey == videoKey,
+                            hasRenderedFirstFrame = hasRenderedFirstFrame?.invoke(videoKey) == true,
                             videoPlayerContent = { videoPlayerContent(videoKey) },
                             onPlayVideo = { videoUrl ->
                                 onPlayVideo(videoKey, videoUrl)
@@ -148,6 +150,7 @@ private fun buildThreadPostContentBlocks(
 private fun ThreadPostVideoBlock(
     video: ThreadPostBody.MediaPart.Video,
     isPlaying: Boolean,
+    hasRenderedFirstFrame: Boolean,
     videoPlayerContent: @Composable () -> Unit,
     onPlayVideo: (String) -> Unit,
 ) {
@@ -169,7 +172,8 @@ private fun ThreadPostVideoBlock(
     ) {
         if (isPlaying) {
             videoPlayerContent()
-        } else {
+        }
+        if (!isPlaying || !hasRenderedFirstFrame) {
             if (coverUrl != null) {
                 AsyncImage(
                     model =
@@ -196,20 +200,22 @@ private fun ThreadPostVideoBlock(
                         .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(54.dp)
-                            .clip(RoundedCornerShape(100))
-                            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.58f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(34.dp),
-                        tint = Color.White,
-                    )
+                if (!isPlaying) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(54.dp)
+                                .clip(RoundedCornerShape(100))
+                                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.58f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(34.dp),
+                            tint = Color.White,
+                        )
+                    }
                 }
             }
         }

@@ -117,6 +117,7 @@ internal fun ThreadPostList(
                         onOpenImageViewer = onOpenImageViewer,
                         playingVideoKey = videoPlayback.playingItemId,
                         videoKeyForVideo = ::firstFloorVideoKey,
+                        hasRenderedFirstFrame = videoPlayback::hasRenderedFirstFrame,
                         videoPlayerContent = { videoKey ->
                             InlineVideoPlayer(
                                 player = videoPlayback.player,

@@ -55,19 +55,35 @@ class InlineVideoPlayback internal constructor(
 
     private var playingVideoUrl: String? = null
 
+    private var renderedFirstFrameItemId by mutableStateOf<String?>(null)
+
+    private val listener =
+        object : Player.Listener {
+            override fun onRenderedFirstFrame() {
+                renderedFirstFrameItemId = playingItemId
+            }
+        }
+
+    init {
+        exoPlayer.addListener(listener)
+    }
+
     fun play(
         itemId: String,
         videoUrl: String,
     ) {
         if (playingItemId != itemId || playingVideoUrl != videoUrl) {
             exoPlayer.stop()
+            renderedFirstFrameItemId = null
+            playingItemId = itemId
             exoPlayer.setMediaItem(MediaItem.fromUri(videoUrl))
             exoPlayer.prepare()
             playingVideoUrl = videoUrl
         }
         exoPlayer.playWhenReady = true
-        playingItemId = itemId
     }
+
+    fun hasRenderedFirstFrame(itemId: String): Boolean = renderedFirstFrameItemId == itemId
 
     fun pause() {
         exoPlayer.pause()
@@ -84,9 +100,12 @@ class InlineVideoPlayback internal constructor(
         exoPlayer.clearMediaItems()
         playingItemId = null
         playingVideoUrl = null
+        renderedFirstFrameItemId = null
     }
 
     internal fun release() {
+        exoPlayer.removeListener(listener)
+        renderedFirstFrameItemId = null
         exoPlayer.release()
     }
 }
