@@ -33,6 +33,7 @@ message ThreadInfoLite {
   string fname = 28;
   int32 create_time = 45;
   int64 author_id = 56;
+  VideoInfoLite video_info = 79;
   int32 agree_num = 124;
   int64 share_num = 135;
   SimpleForumLite forum_info = 155;
@@ -50,11 +51,20 @@ message AbstractLite {
 }
 
 message MediaLite {
+  int32 type = 1;
   string big_pic = 3;
   string src_pic = 8;
   uint32 width = 10;
   uint32 height = 11;
   string origin_pic = 15;
+}
+
+message VideoInfoLite {
+  string video_url = 2;
+  uint32 video_duration = 3;
+  uint32 video_width = 4;
+  uint32 video_height = 5;
+  string thumbnail_url = 6;
 }
 
 message SimpleForumLite {

@@ -11,6 +11,7 @@ data class RecommendItem(
     val authorName: String? = null,
     val authorAvatarUrl: String? = null,
     val images: List<RecommendImage> = emptyList(),
+    val video: RecommendVideo? = null,
     val replyCount: Int = 0,
     val agreeCount: Int = 0,
     val shareCount: Long = 0,
@@ -31,4 +32,12 @@ data class RecommendImage(
     val url: String,
     val width: Int? = null,
     val height: Int? = null,
+)
+
+data class RecommendVideo(
+    val url: String,
+    val coverUrl: String,
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationSeconds: Int? = null,
 )

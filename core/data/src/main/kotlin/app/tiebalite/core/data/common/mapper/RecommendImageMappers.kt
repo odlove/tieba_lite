@@ -4,6 +4,9 @@ import app.tiebalite.core.model.recommend.RecommendImage
 import app.tiebalite.core.network.proto.recommend.MediaLite
 
 internal fun MediaLite.toRecommendImage(): RecommendImage? {
+    if (type != 0 && type != RecommendMediaTypeImage) {
+        return null
+    }
     val url =
         normalizeUrl(originPic)
             ?: normalizeUrl(bigPic)
@@ -15,3 +18,5 @@ internal fun MediaLite.toRecommendImage(): RecommendImage? {
         height = height.takeIf { it > 0 },
     )
 }
+
+private const val RecommendMediaTypeImage = 3

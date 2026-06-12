@@ -4,7 +4,9 @@ import app.tiebalite.core.data.common.mapper.normalizeUrl
 import app.tiebalite.core.data.common.mapper.portraitToAvatarUrl
 import app.tiebalite.core.data.common.mapper.toRecommendImage
 import app.tiebalite.core.model.recommend.RecommendItem
+import app.tiebalite.core.model.recommend.RecommendVideo
 import app.tiebalite.core.model.text.RichText
+import app.tiebalite.core.network.proto.recommend.VideoInfoLite
 import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedFeedRaw
 
 class PersonalizedFeedMapper {
@@ -27,6 +29,7 @@ class PersonalizedFeedMapper {
                     .mapNotNull { media -> media.toRecommendImage() }
                     .distinctBy { image -> image.url }
                     .toList()
+            val video = thread.videoInfo.toRecommendVideo()
             val forumName =
                 thread.forumInfo.name
                     .ifBlank { thread.fname }
@@ -40,6 +43,7 @@ class PersonalizedFeedMapper {
                 authorName = authorName.ifBlank { null },
                 authorAvatarUrl = portraitToAvatarUrl(thread.author.portrait),
                 images = images,
+                video = video,
                 replyCount = thread.replyNum,
                 agreeCount = thread.agreeNum,
                 shareCount = thread.shareNum,
@@ -54,5 +58,16 @@ class PersonalizedFeedMapper {
             )
         }
     }
+}
 
+private fun VideoInfoLite.toRecommendVideo(): RecommendVideo? {
+    val url = normalizeUrl(videoUrl) ?: return null
+    val coverUrl = normalizeUrl(thumbnailUrl) ?: return null
+    return RecommendVideo(
+        url = url,
+        coverUrl = coverUrl,
+        width = videoWidth.takeIf { it > 0 },
+        height = videoHeight.takeIf { it > 0 },
+        durationSeconds = videoDuration.takeIf { it > 0 },
+    )
 }
