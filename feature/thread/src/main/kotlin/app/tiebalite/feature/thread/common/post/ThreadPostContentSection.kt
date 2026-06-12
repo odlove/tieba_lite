@@ -6,19 +6,27 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.imageviewer.ImageViewerItem
@@ -38,6 +46,10 @@ internal fun ThreadPostContentSection(
     body: ThreadPostBody,
     modifier: Modifier = Modifier,
     onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
+    playingVideoKey: String? = null,
+    videoKeyForVideo: ((Int, ThreadPostBody.MediaPart.Video) -> String)? = null,
+    videoPlayerContent: (@Composable (String) -> Unit)? = null,
+    onPlayVideo: ((String, String) -> Unit)? = null,
 ) {
     val blocks =
         remember(body) {
@@ -67,12 +79,24 @@ internal fun ThreadPostContentSection(
                     )
                 }
 
+                is ThreadPostContentBlock.Video -> {
+                    val videoKey = videoKeyForVideo?.invoke(block.index, block.video)
+                    if (videoKey != null && videoPlayerContent != null && onPlayVideo != null) {
+                        ThreadPostVideoBlock(
+                            video = block.video,
+                            isPlaying = playingVideoKey == videoKey,
+                            videoPlayerContent = { videoPlayerContent(videoKey) },
+                            onPlayVideo = { videoUrl ->
+                                onPlayVideo(videoKey, videoUrl)
+                            },
+                        )
+                    } else {
+                        ThreadPostMediaHint(text = "视频")
+                    }
+                }
+
                 is ThreadPostContentBlock.MediaHint -> {
-                    Text(
-                        text = block.text,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    ThreadPostMediaHint(text = block.text)
                 }
             }
         }
@@ -99,11 +123,13 @@ private fun buildThreadPostContentBlocks(
         blocks += ThreadPostContentBlock.ImageGroup(images = images)
     }
 
+    var videoIndex = 0
     body.media.forEach { part ->
         when (part) {
             is ThreadPostBody.MediaPart.Image -> Unit
             is ThreadPostBody.MediaPart.Video -> {
-                blocks += ThreadPostContentBlock.MediaHint(text = "视频")
+                blocks += ThreadPostContentBlock.Video(index = videoIndex, video = part)
+                videoIndex += 1
             }
 
             is ThreadPostBody.MediaPart.Voice -> {
@@ -116,6 +142,87 @@ private fun buildThreadPostContentBlocks(
     }
 
     return blocks
+}
+
+@Composable
+private fun ThreadPostVideoBlock(
+    video: ThreadPostBody.MediaPart.Video,
+    isPlaying: Boolean,
+    videoPlayerContent: @Composable () -> Unit,
+    onPlayVideo: (String) -> Unit,
+) {
+    val videoUrl = video.videoUrl?.takeIf { url -> url.isNotBlank() }
+    val coverUrl = video.coverUrl?.takeIf { url -> url.isNotBlank() }
+    if (videoUrl == null) {
+        ThreadPostMediaHint(text = "视频")
+        return
+    }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(ThreadVideoAspectRatio)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (isPlaying) {
+            videoPlayerContent()
+        } else {
+            if (coverUrl != null) {
+                AsyncImage(
+                    model =
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(coverUrl)
+                            .transitionFactory(AlwaysCrossfadeTransitionFactory)
+                            .build(),
+                    contentDescription = null,
+                    modifier = Modifier.matchParentSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            }
+            Box(
+                modifier =
+                    Modifier
+                        .matchParentSize()
+                        .clickable(
+                            onClickLabel = "播放视频",
+                            role = Role.Button,
+                        ) {
+                            onPlayVideo(videoUrl)
+                        }
+                        .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(54.dp)
+                            .clip(RoundedCornerShape(100))
+                            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.58f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(34.dp),
+                        tint = Color.White,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThreadPostMediaHint(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
@@ -185,12 +292,18 @@ private sealed interface ThreadPostContentBlock {
         val images: List<ThreadPostBody.MediaPart.Image>,
     ) : ThreadPostContentBlock
 
+    data class Video(
+        val index: Int,
+        val video: ThreadPostBody.MediaPart.Video,
+    ) : ThreadPostContentBlock
+
     data class MediaHint(
         val text: String,
     ) : ThreadPostContentBlock
 }
 
 private const val ThreadImageDebugTag = "ThreadImageDebug"
+private const val ThreadVideoAspectRatio = 16f / 9f
 
 private val AlwaysCrossfadeTransitionFactory =
     object : Transition.Factory {

@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,7 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
+import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.model.thread.ThreadPost
+import app.tiebalite.core.ui.components.video.InlineVideoPlayer
+import app.tiebalite.core.ui.components.video.rememberInlineVideoPlayback
 import app.tiebalite.feature.thread.R
 import app.tiebalite.feature.thread.main.post.ThreadFirstFloorCard
 import app.tiebalite.feature.thread.main.post.ThreadReplyListItem
@@ -54,6 +58,7 @@ internal fun ThreadPostList(
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val videoPlayback = rememberInlineVideoPlayback()
     val isReplyHeaderPinned =
         remember(listState, firstFloorPost) {
             derivedStateOf {
@@ -75,6 +80,17 @@ internal fun ThreadPostList(
             onTriggered = onLoadMore,
         )
 
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            videoPlayback.stop()
+        }
+    }
+    LaunchedEffect(firstFloorPost, videoPlayback.playingItemId) {
+        val playingId = videoPlayback.playingItemId
+        if (playingId != null && !firstFloorPost.hasFirstFloorVideoKey(playingId)) {
+            videoPlayback.stop()
+        }
+    }
     ThreadLoadMoreEffect(
         listState = listState,
         isRefreshing = isRefreshing,
@@ -99,6 +115,28 @@ internal fun ThreadPostList(
                     ThreadFirstFloorCard(
                         item = firstFloorPost,
                         onOpenImageViewer = onOpenImageViewer,
+                        playingVideoKey = videoPlayback.playingItemId,
+                        videoKeyForVideo = ::firstFloorVideoKey,
+                        videoPlayerContent = { videoKey ->
+                            InlineVideoPlayer(
+                                player = videoPlayback.player,
+                                modifier = Modifier.fillMaxSize(),
+                                onVisibilityChanged = { isVisible ->
+                                    if (!isVisible) {
+                                        videoPlayback.pauseIfPlaying(videoKey)
+                                    }
+                                },
+                                onViewReleased = {
+                                    videoPlayback.pauseIfPlaying(videoKey)
+                                },
+                            )
+                        },
+                        onPlayVideo = { videoKey, videoUrl ->
+                            videoPlayback.play(
+                                itemId = videoKey,
+                                videoUrl = videoUrl,
+                            )
+                        },
                     )
                 }
                 item(key = "first_floor_post_divider") {
@@ -192,6 +230,22 @@ internal fun ThreadPostList(
         }
     }
 }
+
+private fun ThreadFirstFloorPost?.hasFirstFloorVideoKey(videoKey: String): Boolean {
+    this ?: return false
+    return body.media
+        .asSequence()
+        .filterIsInstance<ThreadPostBody.MediaPart.Video>()
+        .mapIndexedNotNull { index, video ->
+            if (video.videoUrl.isNullOrBlank()) null else firstFloorVideoKey(index, video)
+        }
+        .any { key -> key == videoKey }
+}
+
+private fun firstFloorVideoKey(
+    index: Int,
+    video: ThreadPostBody.MediaPart.Video,
+): String = "first-floor-video-$index-${video.videoUrl}"
 
 @Composable
 private fun ReplySeeLzToggle(
