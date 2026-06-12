@@ -23,11 +23,11 @@ fun InlineVideoPlayer(
     player: Player,
     modifier: Modifier = Modifier,
     onVisibilityChanged: (Boolean) -> Unit = {},
-    onRelease: () -> Unit = {},
+    onViewReleased: () -> Unit = {},
 ) {
     var lastVisible by remember { mutableStateOf<Boolean?>(null) }
     val currentOnVisibilityChanged by rememberUpdatedState(onVisibilityChanged)
-    val currentOnRelease by rememberUpdatedState(onRelease)
+    val currentOnViewReleased by rememberUpdatedState(onViewReleased)
 
     AndroidView(
         modifier =
@@ -55,7 +55,7 @@ fun InlineVideoPlayer(
             playerView.player = player
         },
         onRelease = { playerView ->
-            currentOnRelease()
+            currentOnViewReleased()
             playerView.player = null
         },
     )

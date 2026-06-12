@@ -21,17 +21,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
@@ -39,12 +35,8 @@ import app.tiebalite.core.model.imageviewer.ImageViewerItem
 import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.feed.FeedCard
+import app.tiebalite.core.ui.components.video.rememberInlineVideoPlayback
 import app.tiebalite.core.ui.components.video.InlineVideoPlayer
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,7 +163,7 @@ private fun ExploreList(
     onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
-    val videoPlayback = rememberExploreVideoPlayback()
+    val videoPlayback = rememberInlineVideoPlayback()
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
             videoPlayback.stop()
@@ -211,7 +203,7 @@ private fun ExploreList(
                                         videoPlayback.pauseIfPlaying(item.id)
                                     }
                                 },
-                                onRelease = {
+                                onViewReleased = {
                                     videoPlayback.pauseIfPlaying(item.id)
                                 },
                             )
@@ -253,75 +245,6 @@ private fun ExploreList(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun rememberExploreVideoPlayback(): ExploreVideoPlayback {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val playback =
-        remember(context) {
-            ExploreVideoPlayback(ExoPlayer.Builder(context).build())
-        }
-    DisposableEffect(lifecycleOwner, playback) {
-        val observer =
-            LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_PAUSE -> playback.pause()
-                    else -> Unit
-                }
-            }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-    DisposableEffect(playback) {
-        onDispose {
-            playback.release()
-        }
-    }
-    return playback
-}
-
-private class ExploreVideoPlayback(
-    val player: ExoPlayer,
-) {
-    var playingItemId by mutableStateOf<String?>(null)
-        private set
-
-    fun play(
-        itemId: String,
-        videoUrl: String,
-    ) {
-        if (playingItemId != itemId) {
-            player.stop()
-            player.setMediaItem(MediaItem.fromUri(videoUrl))
-            player.prepare()
-        }
-        player.playWhenReady = true
-        playingItemId = itemId
-    }
-
-    fun pause() {
-        player.pause()
-    }
-
-    fun pauseIfPlaying(itemId: String) {
-        if (playingItemId == itemId) {
-            player.pause()
-        }
-    }
-
-    fun stop() {
-        player.stop()
-        player.clearMediaItems()
-        playingItemId = null
-    }
-
-    fun release() {
-        player.release()
     }
 }
 
