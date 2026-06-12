@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package tiebalite.recommend;
 
+import "feed.proto";
+
 option java_multiple_files = true;
 option java_package = "app.tiebalite.core.network.proto.recommend";
 
@@ -17,26 +19,11 @@ message ErrorLite {
 }
 
 message PersonalizedResponseDataLite {
-  repeated ThreadInfoLite thread_list = 2;
+  PersonalizedPageDataLite page_data = 27;
 }
 
-message ThreadInfoLite {
-  int64 id = 1;
-  int64 tid = 2;
-  string title = 3;
-  int32 reply_num = 4;
-  int32 last_time_int = 7;
-  int32 is_top = 9;
-  UserLite author = 18;
-  repeated AbstractLite abstract_items = 21;
-  repeated MediaLite media = 22;
-  string fname = 28;
-  int32 create_time = 45;
-  int64 author_id = 56;
-  VideoInfoLite video_info = 79;
-  int32 agree_num = 124;
-  int64 share_num = 135;
-  SimpleForumLite forum_info = 155;
+message PersonalizedPageDataLite {
+  repeated tiebalite.feed.FeedLayoutLite feed_list = 1;
 }
 
 message UserLite {
@@ -44,30 +31,4 @@ message UserLite {
   string name = 3;
   string name_show = 4;
   string portrait = 5;
-}
-
-message AbstractLite {
-  string text = 2;
-}
-
-message MediaLite {
-  int32 type = 1;
-  string big_pic = 3;
-  string src_pic = 8;
-  uint32 width = 10;
-  uint32 height = 11;
-  string origin_pic = 15;
-}
-
-message VideoInfoLite {
-  string video_url = 2;
-  uint32 video_duration = 3;
-  uint32 video_width = 4;
-  uint32 video_height = 5;
-  string thumbnail_url = 6;
-}
-
-message SimpleForumLite {
-  string name = 2;
-  string avatar = 4;
 }

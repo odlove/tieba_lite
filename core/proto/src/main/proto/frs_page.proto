@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package tiebalite.frs;
 
+import "feed.proto";
 import "recommend.proto";
 
 option java_multiple_files = true;
@@ -50,72 +51,5 @@ message FrsPageSignUserLite {
 }
 
 message FrsPageDataLite {
-  repeated FrsLayoutLite feed_list = 2;
-}
-
-message FrsLayoutLite {
-  string layout = 1;
-  FrsFeedLite feed = 2;
-}
-
-message FrsFeedLite {
-  repeated FrsComponentLite components = 1;
-  string schema = 2;
-  repeated FrsKeyValueLite business_info = 5;
-  repeated FrsKeyValueLite log_param = 7;
-}
-
-message FrsComponentLite {
-  string component = 1;
-  FrsTextGroupLite feed_title = 3;
-  FrsTextGroupLite feed_abstract = 4;
-  FrsPicGroupLite feed_pic = 7;
-  FrsSocialLite feed_social = 8;
-}
-
-message FrsTextGroupLite {
-  repeated FrsTextResourceLite data = 1;
-}
-
-message FrsTextResourceLite {
-  uint32 type = 1;
-  FrsTextLite text_info = 8;
-  FrsEmojiLite emoji_info = 10;
-}
-
-message FrsTextLite {
-  string text = 1;
-}
-
-message FrsEmojiLite {
-  string name = 1;
-  string c = 2;
-}
-
-message FrsPicGroupLite {
-  repeated FrsPicLite pics = 1;
-}
-
-message FrsPicLite {
-  string small_pic_url = 1;
-  string big_pic_url = 2;
-  string origin_pic_url = 3;
-  uint32 width = 4;
-  uint32 height = 5;
-}
-
-message FrsSocialLite {
-  FrsAgreeLite agree = 1;
-  int32 comment_num = 2;
-  int32 share_num = 3;
-  uint64 tid = 4;
-}
-
-message FrsAgreeLite {
-  int64 agree_num = 1;
-}
-
-message FrsKeyValueLite {
-  string key = 1;
-  string value = 2;
+  repeated tiebalite.feed.FeedLayoutLite feed_list = 2;
 }

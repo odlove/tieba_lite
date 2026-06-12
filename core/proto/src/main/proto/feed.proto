@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package tiebalite.feed;
+
+option java_multiple_files = true;
+option java_package = "app.tiebalite.core.network.proto.feed";
+
+message FeedLayoutLite {
+  string layout = 1;
+  FeedLite feed = 2;
+}
+
+message FeedLite {
+  repeated FeedComponentLite components = 1;
+  string schema = 2;
+  repeated FeedKeyValueLite business_info = 5;
+  repeated FeedKeyValueLite log_param = 7;
+}
+
+message FeedComponentLite {
+  string component = 1;
+  FeedTextGroupLite feed_title = 3;
+  FeedTextGroupLite feed_abstract = 4;
+  FeedHeadLite feed_head = 5;
+  FeedPicGroupLite feed_pic = 7;
+  FeedSocialLite feed_social = 8;
+  FeedVideoLite feed_video = 9;
+}
+
+message FeedTextGroupLite {
+  repeated FeedTextResourceLite data = 1;
+}
+
+message FeedTextResourceLite {
+  uint32 type = 1;
+  FeedTextLite text_info = 8;
+  FeedEmojiLite emoji_info = 10;
+}
+
+message FeedTextLite {
+  string text = 1;
+}
+
+message FeedEmojiLite {
+  string name = 1;
+  string c = 2;
+}
+
+message FeedHeadLite {
+  FeedHeadImageLite image_data = 1;
+  repeated FeedHeadSymbolLite main_data = 2;
+  repeated FeedHeadSymbolLite extra_data = 3;
+  string schema = 4;
+  FeedHeadButtonLite button = 5;
+}
+
+message FeedHeadImageLite {
+  string img_url = 1;
+}
+
+message FeedHeadButtonLite {
+  uint32 type = 1;
+  repeated FeedKeyValueLite business_info = 2;
+}
+
+message FeedHeadSymbolLite {
+  uint32 type = 2;
+  FeedHeadTextLite text = 3;
+}
+
+message FeedHeadTextLite {
+  string text = 1;
+}
+
+message FeedPicGroupLite {
+  repeated FeedPicLite pics = 1;
+}
+
+message FeedPicLite {
+  string small_pic_url = 1;
+  string big_pic_url = 2;
+  string origin_pic_url = 3;
+  uint32 width = 4;
+  uint32 height = 5;
+}
+
+message FeedSocialLite {
+  FeedAgreeLite agree = 1;
+  int32 comment_num = 2;
+  int32 share_num = 3;
+  uint64 tid = 4;
+}
+
+message FeedAgreeLite {
+  int64 agree_num = 1;
+}
+
+message FeedVideoLite {
+  FeedVideoInfoLite video_info = 1;
+  string schema = 2;
+  repeated FeedKeyValueLite business_info = 3;
+  int32 preload = 5;
+}
+
+message FeedVideoInfoLite {
+  string url = 1;
+  uint32 duration = 2;
+  uint32 width = 3;
+  uint32 height = 4;
+  uint32 play_count = 5;
+  FeedThumbnailLite thumbnail = 6;
+  int32 is_vertical = 7;
+  string md5 = 8;
+  FeedThumbnailLite first_frame_thumbnail = 9;
+}
+
+message FeedThumbnailLite {
+  string url = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+}
+
+message FeedKeyValueLite {
+  string key = 1;
+  string value = 2;
+}

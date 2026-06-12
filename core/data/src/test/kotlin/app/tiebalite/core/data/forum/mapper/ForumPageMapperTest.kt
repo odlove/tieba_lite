@@ -1,28 +1,36 @@
 package app.tiebalite.core.data.forum.mapper
 
-import app.tiebalite.core.network.proto.frs.FrsAgreeLite
-import app.tiebalite.core.network.proto.frs.FrsComponentLite
-import app.tiebalite.core.network.proto.frs.FrsEmojiLite
-import app.tiebalite.core.network.proto.frs.FrsFeedLite
-import app.tiebalite.core.network.proto.frs.FrsKeyValueLite
-import app.tiebalite.core.network.proto.frs.FrsLayoutLite
+import app.tiebalite.core.model.text.RichTextPart
+import app.tiebalite.core.network.proto.feed.FeedAgreeLite
+import app.tiebalite.core.network.proto.feed.FeedComponentLite
+import app.tiebalite.core.network.proto.feed.FeedEmojiLite
+import app.tiebalite.core.network.proto.feed.FeedHeadImageLite
+import app.tiebalite.core.network.proto.feed.FeedHeadLite
+import app.tiebalite.core.network.proto.feed.FeedHeadSymbolLite
+import app.tiebalite.core.network.proto.feed.FeedHeadTextLite
+import app.tiebalite.core.network.proto.feed.FeedKeyValueLite
+import app.tiebalite.core.network.proto.feed.FeedLayoutLite
+import app.tiebalite.core.network.proto.feed.FeedLite
+import app.tiebalite.core.network.proto.feed.FeedPicGroupLite
+import app.tiebalite.core.network.proto.feed.FeedPicLite
+import app.tiebalite.core.network.proto.feed.FeedSocialLite
+import app.tiebalite.core.network.proto.feed.FeedTextGroupLite
+import app.tiebalite.core.network.proto.feed.FeedTextLite
+import app.tiebalite.core.network.proto.feed.FeedTextResourceLite
+import app.tiebalite.core.network.proto.feed.FeedThumbnailLite
+import app.tiebalite.core.network.proto.feed.FeedVideoInfoLite
+import app.tiebalite.core.network.proto.feed.FeedVideoLite
 import app.tiebalite.core.network.proto.frs.FrsPageDataLite
 import app.tiebalite.core.network.proto.frs.FrsPageForumInfoLite
 import app.tiebalite.core.network.proto.frs.FrsPageInfoLite
-import app.tiebalite.core.network.proto.frs.FrsPageResponseLite
 import app.tiebalite.core.network.proto.frs.FrsPageResponseDataLite
-import app.tiebalite.core.network.proto.frs.FrsPicGroupLite
-import app.tiebalite.core.network.proto.frs.FrsPicLite
-import app.tiebalite.core.network.proto.frs.FrsSocialLite
-import app.tiebalite.core.network.proto.frs.FrsTextGroupLite
-import app.tiebalite.core.network.proto.frs.FrsTextLite
-import app.tiebalite.core.network.proto.frs.FrsTextResourceLite
+import app.tiebalite.core.network.proto.frs.FrsPageResponseLite
 import app.tiebalite.core.network.proto.recommend.UserLite
 import app.tiebalite.core.network.source.tbclient.forum.FrsPageRaw
-import app.tiebalite.core.model.text.RichTextPart
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -54,10 +62,13 @@ class ForumPageMapperTest {
         assertEquals("「AI 点亮你的超能力」创作大赛", firstItem.titleText)
         assertFalse(firstItem.snippet?.isBlank() ?: true)
         assertEquals("吧吧惊喜官", firstItem.authorName)
+        assertEquals(AUTHOR_AVATAR_URL, firstItem.authorAvatarUrl)
         assertEquals(48, firstItem.replyCount)
         assertEquals(109, firstItem.agreeCount)
         assertEquals(20L, firstItem.shareCount)
         assertNotNull(firstItem.lastTimeTimestampSeconds)
+        assertNull(firstItem.forumName)
+        assertNull(firstItem.forumAvatarUrl)
         assertEquals("https://example.com/origin.jpg", firstItem.images.single().url)
         assertEquals(560, firstItem.images.single().width)
         assertEquals(337, firstItem.images.single().height)
@@ -86,7 +97,29 @@ class ForumPageMapperTest {
         )
     }
 
-    private fun buildResponse(feed: FrsFeedLite = buildFeed()): FrsPageResponseLite =
+    @Test
+    fun mapReadsVideoFromFeedVideoComponent() {
+        val response = buildResponse(feed = buildFeed(includeVideo = true))
+        val page =
+            mapper.map(
+                raw =
+                    FrsPageRaw(
+                        body = response.toByteArray(),
+                        response = response,
+                    ),
+                requestedForumName = "java",
+                fallbackCurrentPage = 1,
+            )
+        val video = page.items.single().video ?: error("video missing")
+
+        assertEquals("https://example.com/video.mp4", video.url)
+        assertEquals("https://example.com/thumb.jpg", video.coverUrl)
+        assertEquals(960, video.width)
+        assertEquals(720, video.height)
+        assertEquals(51, video.durationSeconds)
+    }
+
+    private fun buildResponse(feed: FeedLite = buildFeed()): FrsPageResponseLite =
         FrsPageResponseLite
             .newBuilder()
             .setData(
@@ -117,7 +150,7 @@ class ForumPageMapperTest {
                         FrsPageDataLite
                             .newBuilder()
                             .addFeedList(
-                                FrsLayoutLite
+                                FeedLayoutLite
                                     .newBuilder()
                                     .setLayout("feed")
                                     .setFeed(feed),
@@ -125,99 +158,152 @@ class ForumPageMapperTest {
                     ),
             ).build()
 
-    private fun buildFeed(title: FrsTextGroupLite = textGroup("「AI 点亮你的超能力」创作大赛")): FrsFeedLite =
-        FrsFeedLite
-            .newBuilder()
-            .setSchema("tiebaapp://router/portal?params=%7B%22pageParams%22%3A%7B%22tid%22%3A10751626484%7D%7D")
-            .addComponents(
-                FrsComponentLite
-                    .newBuilder()
-                    .setComponent("feed_title")
-                    .setFeedTitle(title),
-            ).addComponents(
-                FrsComponentLite
-                    .newBuilder()
-                    .setComponent("feed_abstract")
-                    .setFeedAbstract(textGroup("2026年被称为智能体深度共生的元年")),
-            ).addComponents(
-                FrsComponentLite
-                    .newBuilder()
-                    .setComponent("feed_pic")
-                    .setFeedPic(
-                        FrsPicGroupLite
-                            .newBuilder()
-                            .addPics(
-                                FrsPicLite
-                                    .newBuilder()
-                                    .setSmallPicUrl("//example.com/small.jpg")
-                                    .setBigPicUrl("//example.com/big.jpg")
-                                    .setOriginPicUrl("//example.com/origin.jpg")
-                                    .setWidth(560)
-                                    .setHeight(337),
-                            ),
-                    ),
-            ).addComponents(
-                FrsComponentLite
-                    .newBuilder()
-                    .setComponent("feed_social")
-                    .setFeedSocial(
-                        FrsSocialLite
-                            .newBuilder()
-                            .setTid(10751626484)
-                            .setCommentNum(48)
-                            .setShareNum(20)
-                            .setAgree(
-                                FrsAgreeLite
-                                    .newBuilder()
-                                    .setAgreeNum(109),
-                            ),
-                    ),
-            ).addBusinessInfo(keyValue("thread_id", "10751626484"))
-            .addBusinessInfo(keyValue("user_id", "154453178"))
-            .addBusinessInfo(keyValue("create_time", "1779965093"))
-            .build()
+    private fun buildFeed(
+        title: FeedTextGroupLite = textGroup("「AI 点亮你的超能力」创作大赛"),
+        includeVideo: Boolean = false,
+    ): FeedLite {
+        val builder =
+            FeedLite
+                .newBuilder()
+                .setSchema("tiebaapp://router/portal?params=%7B%22pageParams%22%3A%7B%22tid%22%3A10751626484%7D%7D")
+                .addComponents(
+                    FeedComponentLite
+                        .newBuilder()
+                        .setComponent("feed_head")
+                        .setFeedHead(
+                            FeedHeadLite
+                                .newBuilder()
+                                .setImageData(
+                                    FeedHeadImageLite
+                                        .newBuilder()
+                                        .setImgUrl(AUTHOR_AVATAR_URL),
+                                ).addMainData(
+                                    FeedHeadSymbolLite
+                                        .newBuilder()
+                                        .setText(
+                                            FeedHeadTextLite
+                                                .newBuilder()
+                                                .setText("吧吧惊喜官"),
+                                        ),
+                                ),
+                        ),
+                ).addComponents(
+                    FeedComponentLite
+                        .newBuilder()
+                        .setComponent("feed_title")
+                        .setFeedTitle(title),
+                ).addComponents(
+                    FeedComponentLite
+                        .newBuilder()
+                        .setComponent("feed_abstract")
+                        .setFeedAbstract(textGroup("2026年被称为智能体深度共生的元年")),
+                ).addComponents(
+                    FeedComponentLite
+                        .newBuilder()
+                        .setComponent("feed_pic")
+                        .setFeedPic(
+                            FeedPicGroupLite
+                                .newBuilder()
+                                .addPics(
+                                    FeedPicLite
+                                        .newBuilder()
+                                        .setSmallPicUrl("//example.com/small.jpg")
+                                        .setBigPicUrl("//example.com/big.jpg")
+                                        .setOriginPicUrl("//example.com/origin.jpg")
+                                        .setWidth(560)
+                                        .setHeight(337),
+                                ),
+                        ),
+                ).addComponents(
+                    FeedComponentLite
+                        .newBuilder()
+                        .setComponent("feed_social")
+                        .setFeedSocial(
+                            FeedSocialLite
+                                .newBuilder()
+                                .setTid(10751626484)
+                                .setCommentNum(48)
+                                .setShareNum(20)
+                                .setAgree(
+                                    FeedAgreeLite
+                                        .newBuilder()
+                                        .setAgreeNum(109),
+                                ),
+                        ),
+                ).addBusinessInfo(keyValue("thread_id", "10751626484"))
+                .addBusinessInfo(keyValue("user_id", "154453178"))
+                .addBusinessInfo(keyValue("create_time", "1779965093"))
+                .addBusinessInfo(keyValue("forum_name", "java"))
+                .addBusinessInfo(keyValue("forum_avatar", "//example.com/forum.jpg"))
 
-    private fun textGroup(text: String): FrsTextGroupLite =
-        FrsTextGroupLite
+        if (includeVideo) {
+            builder.addComponents(
+                FeedComponentLite
+                    .newBuilder()
+                    .setComponent("feed_video")
+                    .setFeedVideo(
+                        FeedVideoLite
+                            .newBuilder()
+                            .setVideoInfo(
+                                FeedVideoInfoLite
+                                    .newBuilder()
+                                    .setUrl("//example.com/video.mp4")
+                                    .setDuration(51)
+                                    .setWidth(960)
+                                    .setHeight(720)
+                                    .setThumbnail(
+                                        FeedThumbnailLite
+                                            .newBuilder()
+                                            .setUrl("//example.com/thumb.jpg"),
+                                    ),
+                            ),
+                    ),
+            )
+        }
+        return builder.build()
+    }
+
+    private fun textGroup(text: String): FeedTextGroupLite =
+        FeedTextGroupLite
             .newBuilder()
             .addData(
-                FrsTextResourceLite
+                FeedTextResourceLite
                     .newBuilder()
                     .setTextInfo(
-                        FrsTextLite
+                        FeedTextLite
                             .newBuilder()
                             .setText(text),
                     ),
             ).build()
 
-    private fun richTextGroup(): FrsTextGroupLite =
-        FrsTextGroupLite
+    private fun richTextGroup(): FeedTextGroupLite =
+        FeedTextGroupLite
             .newBuilder()
             .addData(
-                FrsTextResourceLite
+                FeedTextResourceLite
                     .newBuilder()
                     .setType(1)
                     .setTextInfo(
-                        FrsTextLite
+                        FeedTextLite
                             .newBuilder()
                             .setText("标题"),
                     ),
             ).addData(
-                FrsTextResourceLite
+                FeedTextResourceLite
                     .newBuilder()
                     .setType(3)
                     .setEmojiInfo(
-                        FrsEmojiLite
+                        FeedEmojiLite
                             .newBuilder()
                             .setName("image_emoticon9")
                             .setC("#(泪)"),
                     ),
             ).addData(
-                FrsTextResourceLite
+                FeedTextResourceLite
                     .newBuilder()
                     .setType(1)
                     .setTextInfo(
-                        FrsTextLite
+                        FeedTextLite
                             .newBuilder()
                             .setText("后缀"),
                     ),
@@ -226,10 +312,12 @@ class ForumPageMapperTest {
     private fun keyValue(
         key: String,
         value: String,
-    ): FrsKeyValueLite =
-        FrsKeyValueLite
+    ): FeedKeyValueLite =
+        FeedKeyValueLite
             .newBuilder()
             .setKey(key)
             .setValue(value)
             .build()
 }
+
+private const val AUTHOR_AVATAR_URL = "http://tb.himg.baidu.com/sys/portrait/item/tb.1.author"
