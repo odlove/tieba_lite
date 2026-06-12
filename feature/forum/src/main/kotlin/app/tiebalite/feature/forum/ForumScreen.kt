@@ -54,6 +54,8 @@ import app.tiebalite.core.model.imageviewer.ImageViewerItem
 import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.feed.FeedCard
+import app.tiebalite.core.ui.components.video.InlineVideoPlayer
+import app.tiebalite.core.ui.components.video.rememberInlineVideoPlayback
 import coil3.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,10 +121,22 @@ private fun ForumContent(
     onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val videoPlayback = rememberInlineVideoPlayback()
     val (stickyItems, regularItems) =
         remember(state.items) {
             state.items.partition { item -> item.isTop }
         }
+    LaunchedEffect(state.isRefreshing) {
+        if (state.isRefreshing) {
+            videoPlayback.stop()
+        }
+    }
+    LaunchedEffect(regularItems, videoPlayback.playingItemId) {
+        val playingId = videoPlayback.playingItemId
+        if (playingId != null && regularItems.none { item -> item.id == playingId }) {
+            videoPlayback.stop()
+        }
+    }
     ForumLoadMoreEffect(
         listState = listState,
         isRefreshing = state.isRefreshing,
@@ -192,11 +206,39 @@ private fun ForumContent(
             items = regularItems,
             key = { _, item -> item.id },
         ) { index, item ->
+            val isVideoPlaying = videoPlayback.playingItemId == item.id
             FeedCard(
                 item = item,
+                isVideoPlaying = isVideoPlaying,
+                videoPlayerContent =
+                    if (isVideoPlaying) {
+                        {
+                            InlineVideoPlayer(
+                                player = videoPlayback.player,
+                                modifier = Modifier.fillMaxSize(),
+                                onVisibilityChanged = { isVisible ->
+                                    if (!isVisible) {
+                                        videoPlayback.pauseIfPlaying(item.id)
+                                    }
+                                },
+                                onViewReleased = {
+                                    videoPlayback.pauseIfPlaying(item.id)
+                                },
+                            )
+                        }
+                    } else {
+                        null
+                    },
                 onClick = { onOpenThread(item.id) },
                 onOpenMedia = {
                     item.toImageViewerArgs()?.let(onOpenImageViewer)
+                },
+                onPlayVideo = {
+                    val videoUrl = item.video?.url ?: return@FeedCard
+                    videoPlayback.play(
+                        itemId = item.id,
+                        videoUrl = videoUrl,
+                    )
                 },
             )
             if (index < regularItems.lastIndex || state.isLoadingMore) {
