@@ -2,18 +2,18 @@ package app.tiebalite.feature.thread.common.post
 
 import android.content.pm.ApplicationInfo
 import android.util.Log
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,10 +28,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Player
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.imageviewer.ImageViewerItem
 import app.tiebalite.core.model.text.RichTextPart
 import app.tiebalite.core.model.thread.ThreadPostBody
+import app.tiebalite.core.ui.components.video.InlineVideoControlLayer
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.ImageResult
@@ -46,16 +48,19 @@ internal fun ThreadPostContentSection(
     body: ThreadPostBody,
     modifier: Modifier = Modifier,
     onOpenImageViewer: ((ImageViewerArgs) -> Unit)? = null,
+    hideBlankInlineBeforeVideo: Boolean = false,
     playingVideoKey: String? = null,
     videoKeyForVideo: ((Int, ThreadPostBody.MediaPart.Video) -> String)? = null,
     hasRenderedFirstFrame: ((String) -> Boolean)? = null,
+    videoPlayer: Player? = null,
     videoPlayerContent: (@Composable (String) -> Unit)? = null,
     onPlayVideo: ((String, String) -> Unit)? = null,
 ) {
     val blocks =
-        remember(body) {
+        remember(body, hideBlankInlineBeforeVideo) {
             buildThreadPostContentBlocks(
                 body = body,
+                hideBlankInlineBeforeVideo = hideBlankInlineBeforeVideo,
             )
         }
     if (blocks.isEmpty()) {
@@ -87,6 +92,8 @@ internal fun ThreadPostContentSection(
                             video = block.video,
                             isPlaying = playingVideoKey == videoKey,
                             hasRenderedFirstFrame = hasRenderedFirstFrame?.invoke(videoKey) == true,
+                            player = videoPlayer,
+                            videoKey = videoKey,
                             videoPlayerContent = { videoPlayerContent(videoKey) },
                             onPlayVideo = { videoUrl ->
                                 onPlayVideo(videoKey, videoUrl)
@@ -107,10 +114,11 @@ internal fun ThreadPostContentSection(
 
 private fun buildThreadPostContentBlocks(
     body: ThreadPostBody,
+    hideBlankInlineBeforeVideo: Boolean,
 ): List<ThreadPostContentBlock> {
     val blocks = mutableListOf<ThreadPostContentBlock>()
 
-    if (body.inline.isNotEmpty()) {
+    if (body.inline.isNotEmpty() && !shouldHideInlineBeforeVideo(body, hideBlankInlineBeforeVideo)) {
         blocks += ThreadPostContentBlock.Text(inline = body.inline)
     }
 
@@ -146,16 +154,27 @@ private fun buildThreadPostContentBlocks(
     return blocks
 }
 
+private fun shouldHideInlineBeforeVideo(
+    body: ThreadPostBody,
+    hideBlankInlineBeforeVideo: Boolean,
+): Boolean =
+    hideBlankInlineBeforeVideo &&
+        body.media.any { part -> part is ThreadPostBody.MediaPart.Video } &&
+        body.inline.all { part -> part is RichTextPart.Text && part.text.isBlank() }
+
 @Composable
 private fun ThreadPostVideoBlock(
     video: ThreadPostBody.MediaPart.Video,
     isPlaying: Boolean,
     hasRenderedFirstFrame: Boolean,
+    player: Player?,
+    videoKey: String,
     videoPlayerContent: @Composable () -> Unit,
     onPlayVideo: (String) -> Unit,
 ) {
     val videoUrl = video.videoUrl?.takeIf { url -> url.isNotBlank() }
     val coverUrl = video.coverUrl?.takeIf { url -> url.isNotBlank() }
+    val aspectRatio = video.aspectRatioOrDefault()
     if (videoUrl == null) {
         ThreadPostMediaHint(text = "视频")
         return
@@ -165,7 +184,7 @@ private fun ThreadPostVideoBlock(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .aspectRatio(ThreadVideoAspectRatio)
+                .aspectRatio(aspectRatio)
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center,
@@ -218,6 +237,13 @@ private fun ThreadPostVideoBlock(
                     }
                 }
             }
+        }
+        if (isPlaying && hasRenderedFirstFrame && player != null) {
+            InlineVideoControlLayer(
+                player = player,
+                videoUrl = videoUrl,
+                modifier = Modifier.matchParentSize(),
+            )
         }
     }
 }
@@ -354,4 +380,13 @@ private fun ThreadPostBody.MediaPart.Image.aspectRatioOrDefault(defaultRatio: Fl
         return defaultRatio
     }
     return imageWidth.toFloat() / imageHeight.toFloat()
+}
+
+private fun ThreadPostBody.MediaPart.Video.aspectRatioOrDefault(defaultRatio: Float = ThreadVideoAspectRatio): Float {
+    val videoWidth = width ?: return defaultRatio
+    val videoHeight = height ?: return defaultRatio
+    if (videoWidth <= 0 || videoHeight <= 0) {
+        return defaultRatio
+    }
+    return videoWidth.toFloat() / videoHeight.toFloat()
 }

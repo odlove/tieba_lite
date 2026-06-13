@@ -17,6 +17,8 @@ data class ThreadPostBody(
             val coverUrl: String? = null,
             val videoUrl: String? = null,
             val webUrl: String? = null,
+            val width: Int? = null,
+            val height: Int? = null,
         ) : MediaPart
 
         data class Voice(

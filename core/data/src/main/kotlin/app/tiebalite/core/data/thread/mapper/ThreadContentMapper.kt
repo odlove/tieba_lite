@@ -105,6 +105,7 @@ internal class ThreadContentMapper {
                 val coverUrl = normalizeUrl(content.src)
                 val videoUrl = normalizeUrl(link) ?: link.takeIf { it.isNotBlank() }
                 val webUrl = normalizeUrl(text) ?: text.takeIf { it.isNotBlank() }
+                val parsedVideoSize = parseContentSize(content.width, content.height)
                 if (coverUrl == null && videoUrl == null && webUrl == null) {
                     null
                 } else {
@@ -112,6 +113,8 @@ internal class ThreadContentMapper {
                         coverUrl = coverUrl,
                         videoUrl = videoUrl,
                         webUrl = webUrl,
+                        width = parsedVideoSize?.first,
+                        height = parsedVideoSize?.second,
                     )
                 }
             }
@@ -150,6 +153,16 @@ internal class ThreadContentMapper {
         }
         return width to height
     }
+
+    private fun parseContentSize(
+        width: Int,
+        height: Int,
+    ): Pair<Int, Int>? =
+        if (width > 0 && height > 0) {
+            width to height
+        } else {
+            null
+        }
 
     private fun pickImageUrl(content: ThreadPbContentLite): String? =
         sequenceOf(

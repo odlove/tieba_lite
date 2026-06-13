@@ -2,33 +2,37 @@ package app.tiebalite.core.ui.components.feed
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.Player
 import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.model.recommend.RecommendVideo
+import app.tiebalite.core.ui.components.video.InlineVideoControlLayer
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -38,6 +42,7 @@ internal fun FeedCardMedia(
     item: RecommendItem,
     isVideoPlaying: Boolean = false,
     hasRenderedFirstFrame: Boolean = false,
+    videoPlayer: Player? = null,
     videoPlayerContent: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onPlayVideo: (() -> Unit)? = null,
@@ -48,6 +53,7 @@ internal fun FeedCardMedia(
             video = video,
             isPlaying = isVideoPlaying,
             hasRenderedFirstFrame = hasRenderedFirstFrame,
+            player = videoPlayer,
             videoPlayerContent = videoPlayerContent,
             onPlayVideo = onPlayVideo,
         )
@@ -95,6 +101,7 @@ private fun FeedCardVideoMedia(
     video: RecommendVideo,
     isPlaying: Boolean,
     hasRenderedFirstFrame: Boolean,
+    player: Player?,
     videoPlayerContent: (@Composable () -> Unit)?,
     onPlayVideo: (() -> Unit)?,
 ) {
@@ -103,6 +110,26 @@ private fun FeedCardVideoMedia(
         if (isPlaying && videoPlayerContent != null) {
             Box(modifier = Modifier.matchParentSize()) {
                 videoPlayerContent()
+            }
+        }
+        if (isPlaying && hasRenderedFirstFrame) {
+            if (player != null) {
+                InlineVideoControlLayer(
+                    player = player,
+                    videoUrl = video.url,
+                    modifier = Modifier.matchParentSize(),
+                )
+            } else {
+                Box(
+                    modifier =
+                        Modifier
+                            .matchParentSize()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                            ),
+                )
             }
         }
         if (!isPlaying || !hasRenderedFirstFrame) {

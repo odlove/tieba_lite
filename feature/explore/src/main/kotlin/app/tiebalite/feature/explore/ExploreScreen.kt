@@ -35,8 +35,8 @@ import app.tiebalite.core.model.imageviewer.ImageViewerItem
 import app.tiebalite.core.model.recommend.RecommendItem
 import app.tiebalite.core.ui.components.AppTopBar
 import app.tiebalite.core.ui.components.feed.FeedCard
-import app.tiebalite.core.ui.components.video.rememberInlineVideoPlayback
 import app.tiebalite.core.ui.components.video.InlineVideoPlayer
+import app.tiebalite.core.ui.components.video.rememberInlineVideoPlayback
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -164,6 +164,7 @@ private fun ExploreList(
 ) {
     val listState = rememberLazyListState()
     val videoPlayback = rememberInlineVideoPlayback()
+
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
             videoPlayback.stop()
@@ -193,6 +194,7 @@ private fun ExploreList(
                 item = item,
                 isVideoPlaying = isVideoPlaying,
                 hasRenderedFirstFrame = videoPlayback.hasRenderedFirstFrame(item.id),
+                videoPlayer = if (isVideoPlaying) videoPlayback.player else null,
                 videoPlayerContent =
                     if (isVideoPlaying) {
                         {

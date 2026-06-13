@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Player
 import app.tiebalite.core.model.recommend.RecommendItem
 
 @Composable
@@ -16,6 +17,7 @@ fun FeedCard(
     modifier: Modifier = Modifier,
     isVideoPlaying: Boolean = false,
     hasRenderedFirstFrame: Boolean = false,
+    videoPlayer: Player? = null,
     videoPlayerContent: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onOpenForum: ((String) -> Unit)? = null,
@@ -39,6 +41,7 @@ fun FeedCard(
             item = item,
             isVideoPlaying = isVideoPlaying,
             hasRenderedFirstFrame = hasRenderedFirstFrame,
+            videoPlayer = videoPlayer,
             videoPlayerContent = videoPlayerContent,
             onClick = onOpenMedia,
             onPlayVideo = onPlayVideo,

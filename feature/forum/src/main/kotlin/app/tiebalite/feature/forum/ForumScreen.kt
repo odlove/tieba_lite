@@ -126,6 +126,7 @@ private fun ForumContent(
         remember(state.items) {
             state.items.partition { item -> item.isTop }
         }
+
     LaunchedEffect(state.isRefreshing) {
         if (state.isRefreshing) {
             videoPlayback.stop()
@@ -211,6 +212,7 @@ private fun ForumContent(
                 item = item,
                 isVideoPlaying = isVideoPlaying,
                 hasRenderedFirstFrame = videoPlayback.hasRenderedFirstFrame(item.id),
+                videoPlayer = if (isVideoPlaying) videoPlayback.player else null,
                 videoPlayerContent =
                     if (isVideoPlaying) {
                         {

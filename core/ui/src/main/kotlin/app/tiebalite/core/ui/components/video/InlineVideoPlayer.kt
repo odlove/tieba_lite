@@ -22,6 +22,7 @@ import androidx.media3.ui.PlayerView
 fun InlineVideoPlayer(
     player: Player,
     modifier: Modifier = Modifier,
+    useController: Boolean = false,
     onVisibilityChanged: (Boolean) -> Unit = {},
     onViewReleased: () -> Unit = {},
 ) {
@@ -47,7 +48,7 @@ fun InlineVideoPlayer(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT,
                     )
-                useController = true
+                this.useController = useController
                 this.player = player
             }
         },

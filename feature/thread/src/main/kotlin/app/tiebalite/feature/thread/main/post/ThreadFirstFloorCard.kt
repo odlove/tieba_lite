@@ -13,13 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Player
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
 import app.tiebalite.core.model.thread.ThreadPostBody
-import app.tiebalite.feature.thread.common.post.ThreadPostContentSection
-import app.tiebalite.feature.thread.common.post.ThreadAgreeStat
 import app.tiebalite.feature.thread.common.post.AuthorAvatar
 import app.tiebalite.feature.thread.common.post.AuthorNameWithLevel
+import app.tiebalite.feature.thread.common.post.ThreadAgreeStat
+import app.tiebalite.feature.thread.common.post.ThreadPostContentSection
 import app.tiebalite.feature.thread.common.post.formatPostMeta
 
 @Composable
@@ -29,6 +30,7 @@ internal fun ThreadFirstFloorCard(
     playingVideoKey: String? = null,
     videoKeyForVideo: ((Int, ThreadPostBody.MediaPart.Video) -> String)? = null,
     hasRenderedFirstFrame: ((String) -> Boolean)? = null,
+    videoPlayer: Player? = null,
     videoPlayerContent: (@Composable (String) -> Unit)? = null,
     onPlayVideo: ((String, String) -> Unit)? = null,
 ) {
@@ -89,9 +91,11 @@ internal fun ThreadFirstFloorCard(
         ThreadPostContentSection(
             body = item.body,
             onOpenImageViewer = onOpenImageViewer,
+            hideBlankInlineBeforeVideo = true,
             playingVideoKey = playingVideoKey,
             videoKeyForVideo = videoKeyForVideo,
             hasRenderedFirstFrame = hasRenderedFirstFrame,
+            videoPlayer = videoPlayer,
             videoPlayerContent = videoPlayerContent,
             onPlayVideo = onPlayVideo,
         )

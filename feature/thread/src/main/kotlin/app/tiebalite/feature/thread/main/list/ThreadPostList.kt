@@ -1,7 +1,7 @@
 package app.tiebalite.feature.thread.main.list
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +21,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,8 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
 import app.tiebalite.core.model.thread.ThreadFirstFloorPost
-import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.model.thread.ThreadPost
+import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.ui.components.video.InlineVideoPlayer
 import app.tiebalite.core.ui.components.video.rememberInlineVideoPlayback
 import app.tiebalite.feature.thread.R
@@ -118,6 +119,7 @@ internal fun ThreadPostList(
                         playingVideoKey = videoPlayback.playingItemId,
                         videoKeyForVideo = ::firstFloorVideoKey,
                         hasRenderedFirstFrame = videoPlayback::hasRenderedFirstFrame,
+                        videoPlayer = videoPlayback.player,
                         videoPlayerContent = { videoKey ->
                             InlineVideoPlayer(
                                 player = videoPlayback.player,
