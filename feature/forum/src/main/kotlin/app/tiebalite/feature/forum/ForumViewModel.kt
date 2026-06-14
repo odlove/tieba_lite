@@ -9,6 +9,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import app.tiebalite.core.data.auth.di.AuthGraphProvider
 import app.tiebalite.core.data.forum.repository.ForumRepository
 import app.tiebalite.core.data.forum.repository.ForumRepositoryFactory
+import app.tiebalite.core.model.error.userVisibleMessageOrNull
+import app.tiebalite.core.model.forum.ForumHeader
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,8 @@ class ForumViewModel(
     val uiEvents: SharedFlow<ForumUiEvent> = _uiEvents.asSharedFlow()
 
     private var requestJob: Job? = null
+    private var followJob: Job? = null
+    private var followRevision = 0L
 
     init {
         refreshInternal(initial = true)
@@ -48,6 +52,7 @@ class ForumViewModel(
             return
         }
 
+        val requestFollowRevision = followRevision
         requestJob?.cancel()
         _uiState.update { current ->
             current.copy(
@@ -66,7 +71,12 @@ class ForumViewModel(
                     onSuccess = { page ->
                         _uiState.update { current ->
                             current.copy(
-                                header = page.header,
+                                header =
+                                    mergePageHeader(
+                                        pageHeader = page.header,
+                                        currentHeader = current.header,
+                                        requestFollowRevision = requestFollowRevision,
+                                    ),
                                 items = (current.items + page.items).distinctBy { item -> item.id },
                                 isLoadingMore = false,
                                 currentPage = page.currentPage.coerceAtLeast(current.currentPage + 1),
@@ -88,8 +98,68 @@ class ForumViewModel(
             }
     }
 
+    fun toggleForumLike() {
+        val state = _uiState.value
+        val header = state.header ?: return
+        if (state.isFollowUpdating || header.forumId <= 0L) {
+            return
+        }
+
+        followJob?.cancel()
+        _uiState.update { current ->
+            current.copy(isFollowUpdating = true)
+        }
+        followJob =
+            viewModelScope.launch {
+                val result =
+                    if (header.isLiked) {
+                        repository.unfollowForum(
+                            forumId = header.forumId,
+                            forumName = header.forumName,
+                        )
+                    } else {
+                        repository.followForum(
+                            forumId = header.forumId,
+                            forumName = header.forumName,
+                        )
+                    }
+                result.fold(
+                    onSuccess = {
+                        val liked = !header.isLiked
+                        followRevision += 1
+                        _uiState.update { current ->
+                            current.copy(
+                                header =
+                                    current.header?.copy(
+                                        isLiked = liked,
+                                        isSigned = if (liked) current.header.isSigned else false,
+                                        continuousSignDays = if (liked) current.header.continuousSignDays else 0,
+                                    ),
+                                isFollowUpdating = false,
+                            )
+                        }
+                        _uiEvents.tryEmit(ForumUiEvent.ShowToast(if (liked) FOLLOW_SUCCESS_MESSAGE else UNFOLLOW_SUCCESS_MESSAGE))
+                    },
+                    onFailure = { throwable ->
+                        _uiState.update { current ->
+                            current.copy(isFollowUpdating = false)
+                        }
+                        _uiEvents.tryEmit(
+                            ForumUiEvent.ShowToast(
+                                forumLikeFailureMessage(
+                                    isUnfollow = header.isLiked,
+                                    throwable = throwable,
+                                ),
+                            ),
+                        )
+                    },
+                )
+            }
+    }
+
     private fun refreshInternal(initial: Boolean) {
         requestJob?.cancel()
+        val requestFollowRevision = followRevision
         _uiState.update { current ->
             current.copy(
                 isInitialLoading = initial && current.items.isEmpty() && current.header == null,
@@ -107,9 +177,14 @@ class ForumViewModel(
                     loadType = LOAD_TYPE_REFRESH,
                 ).fold(
                     onSuccess = { page ->
-                        _uiState.value =
-                            ForumUiState(
-                                header = page.header,
+                        _uiState.update { current ->
+                            current.copy(
+                                header =
+                                    mergePageHeader(
+                                        pageHeader = page.header,
+                                        currentHeader = current.header,
+                                        requestFollowRevision = requestFollowRevision,
+                                    ),
                                 items = page.items,
                                 isInitialLoading = false,
                                 isRefreshing = false,
@@ -118,6 +193,7 @@ class ForumViewModel(
                                 hasMore = page.hasMore,
                                 errorMessage = null,
                             )
+                        }
                     },
                     onFailure = {
                         val hasContent = _uiState.value.header != null || _uiState.value.items.isNotEmpty()
@@ -141,11 +217,43 @@ class ForumViewModel(
         _uiEvents.tryEmit(ForumUiEvent.ShowToast(NETWORK_ERROR_MESSAGE))
     }
 
+    private fun mergePageHeader(
+        pageHeader: ForumHeader,
+        currentHeader: ForumHeader?,
+        requestFollowRevision: Long,
+    ): ForumHeader =
+        if (currentHeader != null && requestFollowRevision != followRevision) {
+            pageHeader.copy(
+                isLiked = currentHeader.isLiked,
+                isSigned = currentHeader.isSigned,
+                continuousSignDays = currentHeader.continuousSignDays,
+            )
+        } else {
+            pageHeader
+        }
+
+    private fun forumLikeFailureMessage(
+        isUnfollow: Boolean,
+        throwable: Throwable,
+    ): String {
+        val action = if (isUnfollow) UNFOLLOW_ACTION_NAME else FOLLOW_ACTION_NAME
+        val reason = throwable.userVisibleMessageOrNull()
+        return if (reason.isNullOrBlank()) {
+            "${action}失败，请稍后重试"
+        } else {
+            "${action}失败：$reason"
+        }
+    }
+
     companion object {
         private const val FIRST_PAGE = 1
         private const val LOAD_TYPE_REFRESH = 1
         private const val LOAD_TYPE_MORE = 2
         private const val NETWORK_ERROR_MESSAGE = "网络错误"
+        private const val FOLLOW_ACTION_NAME = "关注"
+        private const val UNFOLLOW_ACTION_NAME = "取消关注"
+        private const val FOLLOW_SUCCESS_MESSAGE = "关注成功"
+        private const val UNFOLLOW_SUCCESS_MESSAGE = "已取消关注"
 
         fun factory(forumName: String): ViewModelProvider.Factory =
             viewModelFactory {
@@ -159,7 +267,7 @@ class ForumViewModel(
                         forumName = forumName,
                         repository =
                             ForumRepositoryFactory.create(
-                                sessionProvider = { authReader.currentSession() },
+                                accountProvider = { authReader.currentAccount() },
                             ),
                     )
                 }

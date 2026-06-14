@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.stateIn
 interface AuthReader {
     val state: StateFlow<AuthReaderState>
 
+    fun currentAccount(): AuthAccount?
+
     fun currentSession(): AuthSession?
 
     fun currentCookie(): String?
@@ -32,8 +34,11 @@ internal class DefaultAuthReader(
             initialValue = authStore.state.value.toReaderState(),
         )
 
+    override fun currentAccount(): AuthAccount? =
+        authStore.state.value.activeAccount
+
     override fun currentSession(): AuthSession? =
-        authStore.state.value.activeAccount?.session
+        currentAccount()?.session
 
     override fun currentCookie(): String? {
         val activeAccountId =

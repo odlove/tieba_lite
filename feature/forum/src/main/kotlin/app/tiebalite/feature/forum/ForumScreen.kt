@@ -68,6 +68,7 @@ fun ForumScreen(
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
+    onToggleForumLike: () -> Unit,
     onOpenThread: (String) -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
 ) {
@@ -103,6 +104,7 @@ fun ForumScreen(
                 else -> ForumContent(
                     contentPadding = contentPadding,
                     state = state,
+                    onToggleForumLike = onToggleForumLike,
                     onOpenThread = onOpenThread,
                     onOpenImageViewer = onOpenImageViewer,
                     onLoadMore = onLoadMore,
@@ -116,6 +118,7 @@ fun ForumScreen(
 private fun ForumContent(
     contentPadding: PaddingValues,
     state: ForumUiState,
+    onToggleForumLike: () -> Unit,
     onOpenThread: (String) -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
     onLoadMore: () -> Unit,
@@ -155,6 +158,8 @@ private fun ForumContent(
             item(key = "forum_header") {
                 ForumHeaderCard(
                     header = header,
+                    isFollowUpdating = state.isFollowUpdating,
+                    onToggleForumLike = onToggleForumLike,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
                 )
             }
@@ -328,6 +333,8 @@ private fun ForumStickyThreadItem(
 @Composable
 private fun ForumHeaderCard(
     header: ForumHeader,
+    isFollowUpdating: Boolean,
+    onToggleForumLike: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -359,7 +366,17 @@ private fun ForumHeaderCard(
                     )
                 }
             }
-            ForumStatusBadge(header = header)
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ForumStatusBadge(header = header)
+                ForumFollowButton(
+                    isLiked = header.isLiked,
+                    isLoading = isFollowUpdating,
+                    onClick = onToggleForumLike,
+                )
+            }
         }
 
         if (header.isLiked && (header.userLevel > 0 || header.nextLevelScore > 0 || !header.levelName.isNullOrBlank())) {
@@ -367,6 +384,28 @@ private fun ForumHeaderCard(
         }
 
         ForumStatsPanel(header = header)
+    }
+}
+
+@Composable
+private fun ForumFollowButton(
+    isLiked: Boolean,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        enabled = !isLoading,
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        Text(text = if (isLiked) "取消关注" else "关注")
     }
 }
 

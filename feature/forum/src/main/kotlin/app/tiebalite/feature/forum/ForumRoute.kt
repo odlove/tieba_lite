@@ -43,6 +43,7 @@ fun ForumRoute(
         onRefresh = viewModel::refresh,
         onLoadMore = viewModel::loadMore,
         onRetry = viewModel::refresh,
+        onToggleForumLike = viewModel::toggleForumLike,
         onOpenThread = onOpenThread,
         onOpenImageViewer = onOpenImageViewer,
     )

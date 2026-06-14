@@ -34,8 +34,9 @@ class TbClientFormInterceptorTest {
         assertEquals("Android", params["model"])
         assertEquals("1", params["net_type"])
         assertEquals("", params["_phone_imei"])
-        assertEquals("3E9867D50CF1E25849A474DC05EA9382", params["sign"])
-        assertEquals("3E9867D50CF1E25849A474DC05EA9382", TbClientFormInterceptor.calculateSign(params))
+        assertEquals("0", params["stErrorNums"])
+        assertEquals("1CBBA3FF316A113E6F3B53ECF70B77F2", params["sign"])
+        assertEquals("1CBBA3FF316A113E6F3B53ECF70B77F2", TbClientFormInterceptor.calculateSign(params))
         assertEquals(
             listOf(
                 "_client_id",
@@ -48,6 +49,7 @@ class TbClientFormInterceptorTest {
                 "model",
                 "net_type",
                 "sign",
+                "stErrorNums",
                 "stoken",
             ),
             signed.names(),

@@ -9,6 +9,7 @@ data class ForumUiState(
     val isInitialLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
+    val isFollowUpdating: Boolean = false,
     val currentPage: Int = 1,
     val hasMore: Boolean = true,
     val errorMessage: String? = null,

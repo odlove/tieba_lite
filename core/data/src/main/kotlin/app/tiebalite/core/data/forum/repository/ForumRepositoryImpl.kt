@@ -4,7 +4,7 @@ import app.tiebalite.core.data.forum.mapper.ForumPageMapper
 import app.tiebalite.core.data.forum.remote.ForumRemoteDataSource
 import app.tiebalite.core.model.forum.ForumPage
 
-class ForumRepositoryImpl(
+internal class ForumRepositoryImpl(
     private val remoteDataSource: ForumRemoteDataSource,
     private val mapper: ForumPageMapper = ForumPageMapper(),
 ) : ForumRepository {
@@ -26,4 +26,22 @@ class ForumRepositoryImpl(
                 fallbackCurrentPage = page,
             )
         }
+
+    override suspend fun followForum(
+        forumId: Long,
+        forumName: String,
+    ): Result<Unit> =
+        remoteDataSource.followForum(
+            forumId = forumId,
+            forumName = forumName,
+        )
+
+    override suspend fun unfollowForum(
+        forumId: Long,
+        forumName: String,
+    ): Result<Unit> =
+        remoteDataSource.unfollowForum(
+            forumId = forumId,
+            forumName = forumName,
+        )
 }

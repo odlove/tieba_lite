@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp.logging)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(project(":core:model"))
     api(project(":core:proto"))
     testImplementation(libs.junit)
 }

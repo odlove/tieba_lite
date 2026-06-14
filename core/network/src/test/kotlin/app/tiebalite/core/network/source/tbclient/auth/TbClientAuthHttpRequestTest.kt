@@ -61,7 +61,8 @@ class TbClientAuthHttpRequestTest {
         assertTrue(body.contains("model=Android"))
         assertTrue(body.contains("net_type=1"))
         assertTrue(body.contains("_phone_imei="))
-        assertTrue(body.contains("sign=B639EBEF5AA5569FB800DC1BE329F36C"))
+        assertTrue(body.contains("stErrorNums=0"))
+        assertTrue(body.contains("sign=3ED438F4F4CECEA768E79E815FEE34E5"))
     }
 
     @Test

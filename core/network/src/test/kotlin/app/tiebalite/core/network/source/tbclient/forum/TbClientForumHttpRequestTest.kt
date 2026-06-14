@@ -1,6 +1,7 @@
 package app.tiebalite.core.network.source.tbclient.forum
 
 import app.tiebalite.core.network.client.NetworkDefaults
+import app.tiebalite.core.network.client.TbClientFormInterceptor
 import app.tiebalite.core.network.source.tbclient.CapturingInterceptor
 import app.tiebalite.core.network.source.tbclient.buildDataPart
 import app.tiebalite.core.network.source.tbclient.buildTextParts
@@ -65,4 +66,79 @@ class TbClientForumHttpRequestTest {
         assertTrue(body.contains("name=\"stoken\""))
         assertTrue(body.contains("name=\"data\"; filename=\"file\""))
     }
+
+    @Test
+    fun forumLikeRequestUsesOfficialSignedFormShape() {
+        val capture = CapturingInterceptor(responseBody = """{"error_code":"0"}""".toByteArray())
+        val api = signedRetrofitForCapture(capture).create(ForumLikeApi::class.java)
+
+        runSuspend {
+            api.likeForum(
+                bduss = "BDUSS",
+                tbs = "TBS",
+                forumName = "python",
+                forumId = "155829",
+                duplicatedForumName = "python",
+                userId = "1",
+                userName = "name",
+            ).close()
+        }
+
+        val request = capture.request
+        val body = requestBodyText(request)
+        assertEquals("/c/c/forum/like", request.url.encodedPath)
+        assertEquals(NetworkDefaults.TBCLIENT_USER_AGENT, request.header("User-Agent"))
+        assertEquals("ka=open", request.header("Cookie"))
+        assertTrue(body.contains("BDUSS=BDUSS"))
+        assertTrue(body.contains("tbs=TBS"))
+        assertTrue(body.contains("kw=python"))
+        assertTrue(body.contains("fid=155829"))
+        assertTrue(body.contains("forum_name=python"))
+        assertTrue(body.contains("has_head=0"))
+        assertTrue(body.contains("user_id=1"))
+        assertTrue(body.contains("user_name=name"))
+        assertTrue(body.contains("_phone_imei="))
+        assertTrue(body.contains("stErrorNums=0"))
+        assertTrue(body.contains("sign=6258194D4C7DBBD165778E49A31490AA"))
+    }
+
+    @Test
+    fun forumUnlikeRequestUsesOfficialSignedFormShape() {
+        val capture = CapturingInterceptor(responseBody = """{"error_code":"0"}""".toByteArray())
+        val api = signedRetrofitForCapture(capture).create(ForumLikeApi::class.java)
+
+        runSuspend {
+            api.unlikeForum(
+                bduss = "BDUSS",
+                tbs = "TBS",
+                forumName = "python",
+                forumId = "155829",
+            ).close()
+        }
+
+        val request = capture.request
+        val body = requestBodyText(request)
+        assertEquals("/c/c/forum/unfavolike", request.url.encodedPath)
+        assertTrue(body.contains("BDUSS=BDUSS"))
+        assertTrue(body.contains("tbs=TBS"))
+        assertTrue(body.contains("kw=python"))
+        assertTrue(body.contains("fid=155829"))
+        assertTrue(body.contains("favo_type=1"))
+        assertTrue(body.contains("st_type=$DEFAULT_UNLIKE_ST_TYPE"))
+        assertTrue(body.contains("_phone_imei="))
+        assertTrue(body.contains("stErrorNums=0"))
+        assertTrue(body.contains("sign=AD2AC6F7FE7498E06DE7A1384BCE6F91"))
+    }
+
+    private fun signedRetrofitForCapture(capture: CapturingInterceptor) =
+        retrofitForCapture(capture) {
+            addInterceptor(
+                TbClientFormInterceptor(
+                    clientIdProvider = { "wappc_1_2" },
+                    timestampProvider = { 1234L },
+                    modelProvider = { "Android" },
+                    osVersionProvider = { "15" },
+                ),
+            )
+        }
 }

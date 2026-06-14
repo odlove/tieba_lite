@@ -58,6 +58,7 @@ class TbClientFormInterceptor(
             putIfAbsent(params, "model", model)
             putIfAbsent(params, "net_type", "1")
             putIfAbsent(params, "_phone_imei", "")
+            putIfAbsent(params, "stErrorNums", "0")
 
             params[SIGN_PARAM] = calculateSign(params)
 
