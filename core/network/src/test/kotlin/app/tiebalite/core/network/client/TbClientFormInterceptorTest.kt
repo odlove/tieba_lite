@@ -2,7 +2,6 @@ package app.tiebalite.core.network.client
 
 import okhttp3.FormBody
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class TbClientFormInterceptorTest {
@@ -34,9 +33,25 @@ class TbClientFormInterceptorTest {
         assertEquals("1234", params["_timestamp"])
         assertEquals("Android", params["model"])
         assertEquals("1", params["net_type"])
-        assertEquals("", params["phone_imei"])
-        assertEquals("5a6b031aa34759f0cb4922bc07d6794b", params["sign"])
-        assertEquals("5a6b031aa34759f0cb4922bc07d6794b", TbClientFormInterceptor.calculateSign(params))
+        assertEquals("", params["_phone_imei"])
+        assertEquals("3E9867D50CF1E25849A474DC05EA9382", params["sign"])
+        assertEquals("3E9867D50CF1E25849A474DC05EA9382", TbClientFormInterceptor.calculateSign(params))
+        assertEquals(
+            listOf(
+                "_client_id",
+                "_client_type",
+                "_client_version",
+                "_os_version",
+                "_phone_imei",
+                "_timestamp",
+                "bdusstoken",
+                "model",
+                "net_type",
+                "sign",
+                "stoken",
+            ),
+            signed.names(),
+        )
     }
 }
 
@@ -45,4 +60,9 @@ private fun FormBody.toParamMap(): Map<String, String> =
         repeat(this@toParamMap.size) { index ->
             put(name(index), value(index))
         }
+    }
+
+private fun FormBody.names(): List<String> =
+    List(size) { index ->
+        name(index)
     }

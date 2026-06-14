@@ -57,13 +57,13 @@ class TbClientFormInterceptor(
             putIfAbsent(params, "_timestamp", timestampMillis.toString())
             putIfAbsent(params, "model", model)
             putIfAbsent(params, "net_type", "1")
-            putIfAbsent(params, "phone_imei", "")
+            putIfAbsent(params, "_phone_imei", "")
 
             params[SIGN_PARAM] = calculateSign(params)
 
             return FormBody.Builder()
                 .apply {
-                    params.forEach { (name, value) ->
+                    params.toSortedMap().forEach { (name, value) ->
                         add(name, value)
                     }
                 }.build()
@@ -103,7 +103,7 @@ class TbClientFormInterceptor(
 
         private fun md5(value: String): String {
             val digest = MessageDigest.getInstance("MD5").digest(value.toByteArray())
-            return digest.joinToString(separator = "") { byte -> "%02x".format(byte) }
+            return digest.joinToString(separator = "") { byte -> "%02X".format(byte) }
         }
     }
 }

@@ -10,7 +10,6 @@ import app.tiebalite.core.network.source.tbclient.retrofitForCapture
 import app.tiebalite.core.network.source.tbclient.runSuspend
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -61,8 +60,8 @@ class TbClientAuthHttpRequestTest {
         assertTrue(body.contains("_timestamp=1234"))
         assertTrue(body.contains("model=Android"))
         assertTrue(body.contains("net_type=1"))
-        assertTrue(body.contains("phone_imei="))
-        assertNotNull(body.substringAfter("sign=", missingDelimiterValue = "").takeIf { it.length >= 32 })
+        assertTrue(body.contains("_phone_imei="))
+        assertTrue(body.contains("sign=B639EBEF5AA5569FB800DC1BE329F36C"))
     }
 
     @Test
