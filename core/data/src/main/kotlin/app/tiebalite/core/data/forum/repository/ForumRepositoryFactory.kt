@@ -3,6 +3,7 @@ package app.tiebalite.core.data.forum.repository
 import app.tiebalite.core.data.forum.remote.ForumRemoteDataSource
 import app.tiebalite.core.data.forum.remote.NetworkForumLikeRemoteClient
 import app.tiebalite.core.data.forum.remote.NetworkForumPageRemoteClient
+import app.tiebalite.core.data.forum.remote.NetworkForumSignRemoteClient
 import app.tiebalite.core.model.auth.AuthAccount
 import app.tiebalite.core.network.client.NetworkDefaults
 import app.tiebalite.core.network.source.tbclient.forum.TbClientForumNetwork
@@ -14,11 +15,13 @@ object ForumRepositoryFactory {
     ): ForumRepository {
         val frsPageNetworkSource = TbClientForumNetwork.createFrsPageNetworkSource(baseUrl = baseUrl)
         val forumLikeNetworkSource = TbClientForumNetwork.createForumLikeNetworkSource(baseUrl = baseUrl)
+        val forumSignNetworkSource = TbClientForumNetwork.createForumSignNetworkSource(baseUrl = baseUrl)
         return ForumRepositoryImpl(
             remoteDataSource =
                 ForumRemoteDataSource(
                     frsPageClient = NetworkForumPageRemoteClient(frsPageNetworkSource),
                     forumLikeClient = NetworkForumLikeRemoteClient(forumLikeNetworkSource),
+                    forumSignClient = NetworkForumSignRemoteClient(forumSignNetworkSource),
                     accountProvider = accountProvider,
                 ),
         )

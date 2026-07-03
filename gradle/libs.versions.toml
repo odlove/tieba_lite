@@ -36,6 +36,7 @@ dataStore = "1.2.1"
 zoomImage = "1.4.0"
 room = "2.8.4"
 ksp = "2.3.9"
+json = "20250517"
 
 [libraries]
 
@@ -78,6 +79,7 @@ squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref
 squareup-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
+org-json = { group = "org.json", name = "json", version.ref = "json" }
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "dataStore" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }

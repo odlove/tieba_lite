@@ -23,4 +23,5 @@ dependencies {
     implementation(project(":core:model"))
     api(project(":core:proto"))
     testImplementation(libs.junit)
+    testImplementation(libs.org.json)
 }

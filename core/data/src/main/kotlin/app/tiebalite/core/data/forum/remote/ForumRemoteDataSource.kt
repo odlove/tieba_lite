@@ -3,12 +3,14 @@ package app.tiebalite.core.data.forum.remote
 import app.tiebalite.core.model.auth.AuthAccount
 import app.tiebalite.core.model.error.UserVisibleException
 import app.tiebalite.core.network.source.tbclient.forum.ForumLikeNetworkSource
+import app.tiebalite.core.network.source.tbclient.forum.ForumSignNetworkSource
 import app.tiebalite.core.network.source.tbclient.forum.FrsPageNetworkSource
 import app.tiebalite.core.network.source.tbclient.forum.FrsPageRaw
 
 internal class ForumRemoteDataSource(
     private val frsPageClient: ForumPageRemoteClient,
     private val forumLikeClient: ForumLikeRemoteClient,
+    private val forumSignClient: ForumSignRemoteClient,
     private val accountProvider: () -> AuthAccount? = { null },
 ) {
     suspend fun loadForumPage(
@@ -63,6 +65,22 @@ internal class ForumRemoteDataSource(
             forumId = forumId,
         )
     }
+
+    suspend fun signInForum(
+        forumId: Long,
+        forumName: String,
+    ): Result<Unit> {
+        val account = accountProvider()
+            ?: return Result.failure(UserVisibleException("请先登录"))
+        val tbs = account.session.tbs
+            ?: return Result.failure(UserVisibleException("登录状态不完整，请重新登录"))
+        return forumSignClient.signInForum(
+            bduss = account.session.bduss,
+            tbs = tbs,
+            forumName = forumName,
+            forumId = forumId,
+        )
+    }
 }
 
 internal interface ForumPageRemoteClient {
@@ -87,6 +105,15 @@ internal interface ForumLikeRemoteClient {
     ): Result<Unit>
 
     suspend fun unfollowForum(
+        bduss: String,
+        tbs: String,
+        forumName: String,
+        forumId: Long,
+    ): Result<Unit>
+}
+
+internal interface ForumSignRemoteClient {
+    suspend fun signInForum(
         bduss: String,
         tbs: String,
         forumName: String,
@@ -142,6 +169,23 @@ internal class NetworkForumLikeRemoteClient(
         forumId: Long,
     ): Result<Unit> =
         source.unfollowForum(
+            bduss = bduss,
+            tbs = tbs,
+            forumName = forumName,
+            forumId = forumId,
+        )
+}
+
+internal class NetworkForumSignRemoteClient(
+    private val source: ForumSignNetworkSource,
+) : ForumSignRemoteClient {
+    override suspend fun signInForum(
+        bduss: String,
+        tbs: String,
+        forumName: String,
+        forumId: Long,
+    ): Result<Unit> =
+        source.signInForum(
             bduss = bduss,
             tbs = tbs,
             forumName = forumName,

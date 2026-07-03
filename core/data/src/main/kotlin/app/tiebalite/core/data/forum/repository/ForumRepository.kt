@@ -19,4 +19,9 @@ interface ForumRepository {
         forumId: Long,
         forumName: String,
     ): Result<Unit>
+
+    suspend fun signInForum(
+        forumId: Long,
+        forumName: String,
+    ): Result<Unit>
 }

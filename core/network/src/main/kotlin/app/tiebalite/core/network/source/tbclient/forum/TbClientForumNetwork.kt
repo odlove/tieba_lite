@@ -58,4 +58,26 @@ object TbClientForumNetwork {
         val api = retrofit.create(ForumLikeApi::class.java)
         return ForumLikeNetworkSource(api = api)
     }
+
+    fun createForumSignNetworkSource(
+        baseUrl: String = NetworkDefaults.TBCLIENT_BASE_URL,
+        okHttpClient: OkHttpClient = NetworkClientFactory.createOkHttpClient(),
+    ): ForumSignNetworkSource {
+        val signedOkHttpClient =
+            okHttpClient
+                .newBuilder()
+                .apply {
+                    interceptors().add(0, TbClientFormInterceptor())
+                }.build()
+        return createForumSignNetworkSource(
+            retrofit = NetworkClientFactory.createRetrofit(baseUrl = baseUrl, okHttpClient = signedOkHttpClient),
+        )
+    }
+
+    private fun createForumSignNetworkSource(
+        retrofit: Retrofit,
+    ): ForumSignNetworkSource {
+        val api = retrofit.create(ForumSignApi::class.java)
+        return ForumSignNetworkSource(api = api)
+    }
 }

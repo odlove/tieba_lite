@@ -44,4 +44,13 @@ internal class ForumRepositoryImpl(
             forumId = forumId,
             forumName = forumName,
         )
+
+    override suspend fun signInForum(
+        forumId: Long,
+        forumName: String,
+    ): Result<Unit> =
+        remoteDataSource.signInForum(
+            forumId = forumId,
+            forumName = forumName,
+        )
 }

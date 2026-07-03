@@ -19,6 +19,7 @@ class ForumRemoteDataSourceTest {
             ForumRemoteDataSource(
                 frsPageClient = FakeForumPageRemoteClient(),
                 forumLikeClient = forumLikeClient,
+                forumSignClient = FakeForumSignRemoteClient(),
                 accountProvider = { account() },
             )
 
@@ -46,6 +47,7 @@ class ForumRemoteDataSourceTest {
             ForumRemoteDataSource(
                 frsPageClient = FakeForumPageRemoteClient(),
                 forumLikeClient = forumLikeClient,
+                forumSignClient = FakeForumSignRemoteClient(),
                 accountProvider = { account(profile = null) },
             )
 
@@ -70,6 +72,7 @@ class ForumRemoteDataSourceTest {
             ForumRemoteDataSource(
                 frsPageClient = FakeForumPageRemoteClient(),
                 forumLikeClient = forumLikeClient,
+                forumSignClient = FakeForumSignRemoteClient(),
                 accountProvider = { null },
             )
 
@@ -94,6 +97,7 @@ class ForumRemoteDataSourceTest {
             ForumRemoteDataSource(
                 frsPageClient = FakeForumPageRemoteClient(),
                 forumLikeClient = forumLikeClient,
+                forumSignClient = FakeForumSignRemoteClient(),
                 accountProvider = { account(profile = null) },
             )
 
@@ -119,6 +123,7 @@ class ForumRemoteDataSourceTest {
             ForumRemoteDataSource(
                 frsPageClient = FakeForumPageRemoteClient(),
                 forumLikeClient = forumLikeClient,
+                forumSignClient = FakeForumSignRemoteClient(),
                 accountProvider = { account(session = AuthSession(bduss = "BDUSS", stoken = "STOKEN")) },
             )
 
@@ -134,6 +139,82 @@ class ForumRemoteDataSourceTest {
         val throwable = result.exceptionOrNull() as UserVisibleException
         assertEquals("登录状态不完整，请重新登录", throwable.userMessage)
         assertFalse(forumLikeClient.hasCalls)
+    }
+
+    @Test
+    fun signInForumForwardsAccountFieldsAndDoesNotRequireProfile() {
+        val forumSignClient = FakeForumSignRemoteClient()
+        val dataSource =
+            ForumRemoteDataSource(
+                frsPageClient = FakeForumPageRemoteClient(),
+                forumLikeClient = FakeForumLikeRemoteClient(),
+                forumSignClient = forumSignClient,
+                accountProvider = { account(profile = null) },
+            )
+
+        val result =
+            runBlocking {
+                dataSource.signInForum(
+                    forumId = 155829,
+                    forumName = "python",
+                )
+            }
+
+        assertTrue(result.isSuccess)
+        assertEquals("BDUSS", forumSignClient.signCall?.bduss)
+        assertEquals("TBS", forumSignClient.signCall?.tbs)
+        assertEquals("python", forumSignClient.signCall?.forumName)
+        assertEquals(155829L, forumSignClient.signCall?.forumId)
+    }
+
+    @Test
+    fun signInForumFailsWithoutAccountAndDoesNotCallNetwork() {
+        val forumSignClient = FakeForumSignRemoteClient()
+        val dataSource =
+            ForumRemoteDataSource(
+                frsPageClient = FakeForumPageRemoteClient(),
+                forumLikeClient = FakeForumLikeRemoteClient(),
+                forumSignClient = forumSignClient,
+                accountProvider = { null },
+            )
+
+        val result =
+            runBlocking {
+                dataSource.signInForum(
+                    forumId = 155829,
+                    forumName = "python",
+                )
+            }
+
+        assertTrue(result.isFailure)
+        val throwable = result.exceptionOrNull() as UserVisibleException
+        assertEquals("请先登录", throwable.userMessage)
+        assertFalse(forumSignClient.hasCalls)
+    }
+
+    @Test
+    fun signInForumFailsWithoutTbsAndDoesNotCallNetwork() {
+        val forumSignClient = FakeForumSignRemoteClient()
+        val dataSource =
+            ForumRemoteDataSource(
+                frsPageClient = FakeForumPageRemoteClient(),
+                forumLikeClient = FakeForumLikeRemoteClient(),
+                forumSignClient = forumSignClient,
+                accountProvider = { account(session = AuthSession(bduss = "BDUSS", stoken = "STOKEN")) },
+            )
+
+        val result =
+            runBlocking {
+                dataSource.signInForum(
+                    forumId = 155829,
+                    forumName = "python",
+                )
+            }
+
+        assertTrue(result.isFailure)
+        val throwable = result.exceptionOrNull() as UserVisibleException
+        assertEquals("登录状态不完整，请重新登录", throwable.userMessage)
+        assertFalse(forumSignClient.hasCalls)
     }
 
     private fun account(
@@ -221,6 +302,37 @@ private data class FollowCall(
 )
 
 private data class UnfollowCall(
+    val bduss: String,
+    val tbs: String,
+    val forumName: String,
+    val forumId: Long,
+)
+
+private class FakeForumSignRemoteClient : ForumSignRemoteClient {
+    var signCall: SignCall? = null
+        private set
+
+    val hasCalls: Boolean
+        get() = signCall != null
+
+    override suspend fun signInForum(
+        bduss: String,
+        tbs: String,
+        forumName: String,
+        forumId: Long,
+    ): Result<Unit> {
+        signCall =
+            SignCall(
+                bduss = bduss,
+                tbs = tbs,
+                forumName = forumName,
+                forumId = forumId,
+            )
+        return Result.success(Unit)
+    }
+}
+
+private data class SignCall(
     val bduss: String,
     val tbs: String,
     val forumName: String,
