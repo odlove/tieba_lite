@@ -32,7 +32,8 @@ class ForumViewModel(
 
     private var requestJob: Job? = null
     private var followJob: Job? = null
-    private var followRevision = 0L
+    private var signJob: Job? = null
+    private var headerMutationRevision = 0L
 
     init {
         refreshInternal(initial = true)
@@ -52,7 +53,7 @@ class ForumViewModel(
             return
         }
 
-        val requestFollowRevision = followRevision
+        val requestHeaderMutationRevision = headerMutationRevision
         requestJob?.cancel()
         _uiState.update { current ->
             current.copy(
@@ -75,7 +76,7 @@ class ForumViewModel(
                                     mergePageHeader(
                                         pageHeader = page.header,
                                         currentHeader = current.header,
-                                        requestFollowRevision = requestFollowRevision,
+                                        requestHeaderMutationRevision = requestHeaderMutationRevision,
                                     ),
                                 items = (current.items + page.items).distinctBy { item -> item.id },
                                 isLoadingMore = false,
@@ -101,7 +102,7 @@ class ForumViewModel(
     fun toggleForumLike() {
         val state = _uiState.value
         val header = state.header ?: return
-        if (state.isFollowUpdating || header.forumId <= 0L) {
+        if (state.isFollowUpdating || state.isSignUpdating || header.forumId <= 0L) {
             return
         }
 
@@ -126,14 +127,12 @@ class ForumViewModel(
                 result.fold(
                     onSuccess = {
                         val liked = !header.isLiked
-                        followRevision += 1
+                        headerMutationRevision += 1
                         _uiState.update { current ->
                             current.copy(
                                 header =
                                     current.header?.copy(
                                         isLiked = liked,
-                                        isSigned = if (liked) current.header.isSigned else false,
-                                        continuousSignDays = if (liked) current.header.continuousSignDays else 0,
                                     ),
                                 isFollowUpdating = false,
                             )
@@ -157,9 +156,60 @@ class ForumViewModel(
             }
     }
 
+    fun signInForum() {
+        val state = _uiState.value
+        val header = state.header ?: return
+        if (
+            state.isSignUpdating ||
+            state.isFollowUpdating ||
+            !header.isLiked ||
+            header.isSigned ||
+            header.forumId <= 0L
+        ) {
+            return
+        }
+
+        signJob?.cancel()
+        _uiState.update { current ->
+            current.copy(isSignUpdating = true)
+        }
+        signJob =
+            viewModelScope.launch {
+                repository.signInForum(
+                    forumId = header.forumId,
+                    forumName = header.forumName,
+                ).fold(
+                    onSuccess = {
+                        headerMutationRevision += 1
+                        _uiState.update { current ->
+                            current.copy(
+                                header =
+                                    current.header?.copy(
+                                        isSigned = true,
+                                        continuousSignDays = (current.header.continuousSignDays + 1).coerceAtLeast(1),
+                                    ),
+                                isSignUpdating = false,
+                            )
+                        }
+                        _uiEvents.tryEmit(ForumUiEvent.ShowToast(SIGN_SUCCESS_MESSAGE))
+                    },
+                    onFailure = { throwable ->
+                        _uiState.update { current ->
+                            current.copy(isSignUpdating = false)
+                        }
+                        _uiEvents.tryEmit(
+                            ForumUiEvent.ShowToast(
+                                forumSignFailureMessage(throwable),
+                            ),
+                        )
+                    },
+                )
+            }
+    }
+
     private fun refreshInternal(initial: Boolean) {
         requestJob?.cancel()
-        val requestFollowRevision = followRevision
+        val requestHeaderMutationRevision = headerMutationRevision
         _uiState.update { current ->
             current.copy(
                 isInitialLoading = initial && current.items.isEmpty() && current.header == null,
@@ -183,7 +233,7 @@ class ForumViewModel(
                                     mergePageHeader(
                                         pageHeader = page.header,
                                         currentHeader = current.header,
-                                        requestFollowRevision = requestFollowRevision,
+                                        requestHeaderMutationRevision = requestHeaderMutationRevision,
                                     ),
                                 items = page.items,
                                 isInitialLoading = false,
@@ -220,9 +270,9 @@ class ForumViewModel(
     private fun mergePageHeader(
         pageHeader: ForumHeader,
         currentHeader: ForumHeader?,
-        requestFollowRevision: Long,
+        requestHeaderMutationRevision: Long,
     ): ForumHeader =
-        if (currentHeader != null && requestFollowRevision != followRevision) {
+        if (currentHeader != null && requestHeaderMutationRevision != headerMutationRevision) {
             pageHeader.copy(
                 isLiked = currentHeader.isLiked,
                 isSigned = currentHeader.isSigned,
@@ -245,6 +295,15 @@ class ForumViewModel(
         }
     }
 
+    private fun forumSignFailureMessage(throwable: Throwable): String {
+        val reason = throwable.userVisibleMessageOrNull()
+        return if (reason.isNullOrBlank()) {
+            "${SIGN_ACTION_NAME}失败，请稍后重试"
+        } else {
+            "${SIGN_ACTION_NAME}失败：$reason"
+        }
+    }
+
     companion object {
         private const val FIRST_PAGE = 1
         private const val LOAD_TYPE_REFRESH = 1
@@ -252,8 +311,10 @@ class ForumViewModel(
         private const val NETWORK_ERROR_MESSAGE = "网络错误"
         private const val FOLLOW_ACTION_NAME = "关注"
         private const val UNFOLLOW_ACTION_NAME = "取消关注"
+        private const val SIGN_ACTION_NAME = "签到"
         private const val FOLLOW_SUCCESS_MESSAGE = "关注成功"
         private const val UNFOLLOW_SUCCESS_MESSAGE = "已取消关注"
+        private const val SIGN_SUCCESS_MESSAGE = "签到成功"
 
         fun factory(forumName: String): ViewModelProvider.Factory =
             viewModelFactory {

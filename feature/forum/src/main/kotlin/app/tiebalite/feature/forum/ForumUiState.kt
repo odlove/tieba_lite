@@ -10,6 +10,7 @@ data class ForumUiState(
     val isRefreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
     val isFollowUpdating: Boolean = false,
+    val isSignUpdating: Boolean = false,
     val currentPage: Int = 1,
     val hasMore: Boolean = true,
     val errorMessage: String? = null,

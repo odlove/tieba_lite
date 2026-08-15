@@ -33,6 +33,7 @@ fun AppTopBar(
     modifier: Modifier = Modifier,
     navigationIcon: ImageVector? = null,
     onNavigationClick: (() -> Unit)? = null,
+    actions: @Composable () -> Unit = {},
 ) {
     val contentPadding = PaddingValues(0.dp)
     val windowInsets = TopAppBarDefaults.windowInsets
@@ -75,7 +76,9 @@ fun AppTopBar(
                         modifier = Modifier
                             .layoutId("actionIcons")
                             .padding(end = TopAppBarHorizontalPadding)
-                    )
+                    ) {
+                        actions()
+                    }
                 }
             ) { measurables, constraints ->
                 val navigationIconPlaceable =

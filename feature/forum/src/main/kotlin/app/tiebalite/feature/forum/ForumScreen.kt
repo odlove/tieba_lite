@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,21 +27,30 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,6 +79,7 @@ fun ForumScreen(
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
     onToggleForumLike: () -> Unit,
+    onSignInForum: () -> Unit,
     onOpenThread: (String) -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
 ) {
@@ -85,6 +96,14 @@ fun ForumScreen(
             title = (state.header?.forumName ?: forumName) + "吧",
             navigationIcon = Icons.AutoMirrored.Rounded.ArrowBack,
             onNavigationClick = onBack,
+            actions = {
+                if (state.header?.isLiked == true) {
+                    ForumMoreMenu(
+                        enabled = !state.isFollowUpdating && !state.isSignUpdating,
+                        onUnfollow = onToggleForumLike,
+                    )
+                }
+            },
         )
 
         PullToRefreshBox(
@@ -105,6 +124,7 @@ fun ForumScreen(
                     contentPadding = contentPadding,
                     state = state,
                     onToggleForumLike = onToggleForumLike,
+                    onSignInForum = onSignInForum,
                     onOpenThread = onOpenThread,
                     onOpenImageViewer = onOpenImageViewer,
                     onLoadMore = onLoadMore,
@@ -119,6 +139,7 @@ private fun ForumContent(
     contentPadding: PaddingValues,
     state: ForumUiState,
     onToggleForumLike: () -> Unit,
+    onSignInForum: () -> Unit,
     onOpenThread: (String) -> Unit,
     onOpenImageViewer: (ImageViewerArgs) -> Unit,
     onLoadMore: () -> Unit,
@@ -159,7 +180,9 @@ private fun ForumContent(
                 ForumHeaderCard(
                     header = header,
                     isFollowUpdating = state.isFollowUpdating,
+                    isSignUpdating = state.isSignUpdating,
                     onToggleForumLike = onToggleForumLike,
+                    onSignInForum = onSignInForum,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
                 )
             }
@@ -334,7 +357,9 @@ private fun ForumStickyThreadItem(
 private fun ForumHeaderCard(
     header: ForumHeader,
     isFollowUpdating: Boolean,
+    isSignUpdating: Boolean,
     onToggleForumLike: () -> Unit,
+    onSignInForum: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -366,15 +391,16 @@ private fun ForumHeaderCard(
                     )
                 }
             }
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+            Box(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                contentAlignment = Alignment.CenterEnd,
             ) {
-                ForumStatusBadge(header = header)
-                ForumFollowButton(
-                    isLiked = header.isLiked,
-                    isLoading = isFollowUpdating,
-                    onClick = onToggleForumLike,
+                ForumHeaderAction(
+                    header = header,
+                    isFollowUpdating = isFollowUpdating,
+                    isSignUpdating = isSignUpdating,
+                    onFollow = onToggleForumLike,
+                    onSignIn = onSignInForum,
                 )
             }
         }
@@ -388,14 +414,60 @@ private fun ForumHeaderCard(
 }
 
 @Composable
-private fun ForumFollowButton(
-    isLiked: Boolean,
+private fun ForumHeaderAction(
+    header: ForumHeader,
+    isFollowUpdating: Boolean,
+    isSignUpdating: Boolean,
+    onFollow: () -> Unit,
+    onSignIn: () -> Unit,
+) {
+    when {
+        !header.isLiked ->
+            ForumActionButton(
+                text = "关注",
+                isLoading = isFollowUpdating,
+                enabled = !isSignUpdating,
+                onClick = onFollow,
+            )
+        !header.isSigned ->
+            ForumActionButton(
+                text = "签到",
+                isLoading = isSignUpdating,
+                enabled = !isFollowUpdating,
+                onClick = onSignIn,
+            )
+        else -> ForumSignedStatusAction(header = header)
+    }
+}
+
+@Composable
+private fun ForumSignedStatusAction(
+    header: ForumHeader,
+) {
+    Box(
+        modifier = Modifier
+            .minimumInteractiveComponentSize()
+            .defaultMinSize(
+                minWidth = ButtonDefaults.MinWidth,
+                minHeight = ButtonDefaults.MinHeight,
+            )
+            .padding(ButtonDefaults.ContentPadding),
+        contentAlignment = Alignment.Center,
+    ) {
+        ForumStatusBadge(header = header)
+    }
+}
+
+@Composable
+private fun ForumActionButton(
+    text: String,
     isLoading: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     Button(
         onClick = onClick,
-        enabled = !isLoading,
+        enabled = enabled && !isLoading,
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -405,7 +477,51 @@ private fun ForumFollowButton(
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
-        Text(text = if (isLiked) "取消关注" else "关注")
+        Text(text = text)
+    }
+}
+
+@Composable
+private fun ForumMoreMenu(
+    enabled: Boolean,
+    onUnfollow: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Rounded.MoreVert,
+                contentDescription = "更多选项",
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 0.dp,
+            shadowElevation = 6.dp,
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = "取消关注",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                },
+                onClick = {
+                    expanded = false
+                    onUnfollow()
+                },
+                enabled = enabled,
+                colors =
+                    MenuDefaults.itemColors(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 2.dp),
+            )
+        }
     }
 }
 
