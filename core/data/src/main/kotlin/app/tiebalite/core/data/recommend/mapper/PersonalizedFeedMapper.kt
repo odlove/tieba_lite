@@ -7,8 +7,17 @@ import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedFeedRaw
 
 class PersonalizedFeedMapper {
     fun map(raw: PersonalizedFeedRaw): List<RecommendItem> {
-        val context = FeedItemMappingContext(includeForum = true)
-        return raw.response.data.pageData.feedListList.mapNotNull { layout ->
+        val data = raw.response.data
+        val context =
+            FeedItemMappingContext(
+                threadAuthorMap =
+                    data.threadListList.mapNotNull { thread ->
+                        val threadId = thread.tid.takeIf { it > 0L } ?: thread.id.takeIf { it > 0L }
+                        threadId?.let { it to thread.author }
+                    }.toMap(),
+                includeForum = true,
+            )
+        return data.pageData.feedListList.mapNotNull { layout ->
             if (layout.layout != FEED_LAYOUT) {
                 return@mapNotNull null
             }

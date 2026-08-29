@@ -13,6 +13,7 @@ import app.tiebalite.core.network.proto.recommend.UserLite
 
 internal data class FeedItemMappingContext(
     val userMap: Map<Long, UserLite> = emptyMap(),
+    val threadAuthorMap: Map<Long, UserLite> = emptyMap(),
     val includeForum: Boolean = false,
 )
 
@@ -30,20 +31,9 @@ internal fun FeedLite.toRecommendItem(context: FeedItemMappingContext = FeedItem
             ?: businessInfo["thread_id"]?.toLongOrNull()
             ?: schema.threadIdFromSchema()
             ?: return null
-    val feedHead =
-        componentsList
-            .asSequence()
-            .firstOrNull { component -> component.component == HEAD_COMPONENT }
-            ?.feedHead
-    val userId =
-        feedHead
-            ?.button
-            ?.businessInfoList
-            ?.firstOrNull { item -> item.key == "user_id" }
-            ?.value
-            ?.toLongOrNull()
-            ?: businessInfo["user_id"]?.toLongOrNull()
-    val author = userId?.let(context.userMap::get)
+    val author =
+        context.threadAuthorMap[threadId]
+            ?: businessInfo["user_id"]?.toLongOrNull()?.let(context.userMap::get)
     val title =
         componentRichText(TITLE_COMPONENT)
             ?: businessInfo["title"]?.let(RichText::text)
@@ -72,16 +62,8 @@ internal fun FeedLite.toRecommendItem(context: FeedItemMappingContext = FeedItem
         forumName = businessInfo["forum_name"]?.takeIf { context.includeForum },
         forumAvatarUrl = normalizeUrl(businessInfo["forum_avatar"])?.takeIf { context.includeForum },
         snippet = snippet,
-        authorName =
-            feedHead
-                ?.mainDataList
-                ?.asSequence()
-                ?.map { item -> item.text.text.trim() }
-                ?.firstOrNull { it.isNotEmpty() }
-                ?: resolveAuthorName(author),
-        authorAvatarUrl =
-            portraitToAvatarUrl(feedHead?.imageData?.imgUrl)
-                ?: portraitToAvatarUrl(author?.portrait),
+        authorName = resolveAuthorName(author),
+        authorAvatarUrl = portraitToAvatarUrl(author?.portrait),
         images = images,
         video = video,
         replyCount = social?.commentNum ?: 0,
@@ -203,7 +185,6 @@ private fun normalizeEmoticonName(rawName: String): String {
 private const val FEED_TEXT_TYPE = 1
 private const val FEED_EMOTICON_TYPE = 3
 private const val FEED_TAG_TEXT_TYPE = 6
-private const val HEAD_COMPONENT = "feed_head"
 private const val TITLE_COMPONENT = "feed_title"
 private const val ABSTRACT_COMPONENT = "feed_abstract"
 private const val PIC_COMPONENT = "feed_pic"

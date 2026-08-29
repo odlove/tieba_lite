@@ -19,11 +19,18 @@ message ErrorLite {
 }
 
 message PersonalizedResponseDataLite {
+  repeated ThreadInfoLite thread_list = 2;
   PersonalizedPageDataLite page_data = 27;
 }
 
 message PersonalizedPageDataLite {
   repeated tiebalite.feed.FeedLayoutLite feed_list = 1;
+}
+
+message ThreadInfoLite {
+  int64 id = 1;
+  int64 tid = 2;
+  UserLite author = 18;
 }
 
 message UserLite {

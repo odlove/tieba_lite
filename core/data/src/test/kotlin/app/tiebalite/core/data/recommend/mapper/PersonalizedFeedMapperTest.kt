@@ -22,8 +22,11 @@ import app.tiebalite.core.network.proto.feed.FeedVideoLite
 import app.tiebalite.core.network.proto.recommend.PersonalizedPageDataLite
 import app.tiebalite.core.network.proto.recommend.PersonalizedResponseDataLite
 import app.tiebalite.core.network.proto.recommend.PersonalizedResponseLite
+import app.tiebalite.core.network.proto.recommend.ThreadInfoLite
+import app.tiebalite.core.network.proto.recommend.UserLite
 import app.tiebalite.core.network.source.tbclient.recommend.PersonalizedFeedRaw
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -63,6 +66,14 @@ class PersonalizedFeedMapperTest {
     }
 
     @Test
+    fun mapDoesNotTreatFeedHeadAsAuthorWhenThreadAuthorIsMissing() {
+        val item = mapper.map(rawWithFeed(buildFeed(), includeThreadAuthor = false)).single()
+
+        assertNull(item.authorName)
+        assertNull(item.authorAvatarUrl)
+    }
+
+    @Test
     fun mapReturnsEmptyWhenPageDataIsMissing() {
         val raw =
             PersonalizedFeedRaw(
@@ -78,7 +89,10 @@ class PersonalizedFeedMapperTest {
         assertTrue(mapper.map(raw).isEmpty())
     }
 
-    private fun rawWithFeed(feed: FeedLite): PersonalizedFeedRaw =
+    private fun rawWithFeed(
+        feed: FeedLite,
+        includeThreadAuthor: Boolean = true,
+    ): PersonalizedFeedRaw =
         PersonalizedFeedRaw(
             body = ByteArray(0),
             response =
@@ -87,6 +101,23 @@ class PersonalizedFeedMapperTest {
                     .setData(
                         PersonalizedResponseDataLite
                             .newBuilder()
+                            .apply {
+                                if (includeThreadAuthor) {
+                                    addThreadList(
+                                        ThreadInfoLite
+                                            .newBuilder()
+                                            .setTid(10781732851)
+                                            .setAuthor(
+                                                UserLite
+                                                    .newBuilder()
+                                                    .setId(3460690406)
+                                                    .setName("tieba_user")
+                                                    .setNameShow("Garam1314")
+                                                    .setPortrait("tb.1.author"),
+                                            ),
+                                    )
+                                }
+                            }
                             .setPageData(
                                 PersonalizedPageDataLite
                                     .newBuilder()
@@ -115,19 +146,19 @@ class PersonalizedFeedMapperTest {
                                 .setImageData(
                                     FeedHeadImageLite
                                         .newBuilder()
-                                        .setImgUrl(AUTHOR_AVATAR_URL),
+                                        .setImgUrl("//example.com/forum.jpg"),
                                 ).addMainData(
                                     FeedHeadSymbolLite
                                         .newBuilder()
                                         .setText(
                                             FeedHeadTextLite
                                                 .newBuilder()
-                                                .setText("Garam1314"),
+                                                .setText("minecraft吧"),
                                         ),
                                 ).setButton(
                                     FeedHeadButtonLite
                                         .newBuilder()
-                                        .addBusinessInfo(keyValue("user_id", "3460690406")),
+                                        .addBusinessInfo(keyValue("forum_name", "minecraft")),
                                 ),
                         ),
                 ).addComponents(
@@ -176,6 +207,7 @@ class PersonalizedFeedMapperTest {
                 ).addBusinessInfo(keyValue("forum_name", "minecraft"))
                 .addBusinessInfo(keyValue("forum_avatar", "//example.com/forum.jpg"))
                 .addBusinessInfo(keyValue("thread_id", "10781732851"))
+                .addBusinessInfo(keyValue("user_id", "3460690406"))
                 .addBusinessInfo(keyValue("create_time", "1781075943"))
 
         if (includeVideo) {
