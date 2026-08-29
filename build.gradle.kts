@@ -80,10 +80,6 @@ subprojects {
                         minorApiLevel = unifiedCompileSdkMinor
                     }
             }
-            lint {
-                textReport = true
-                htmlReport = true
-            }
         }
     }
 
@@ -94,10 +90,6 @@ subprojects {
                     release(unifiedCompileSdkMajor) {
                         minorApiLevel = unifiedCompileSdkMinor
                     }
-            }
-            lint {
-                textReport = true
-                htmlReport = true
             }
         }
     }

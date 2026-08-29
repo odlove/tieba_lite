@@ -19,7 +19,6 @@ val keystoreProperties =
 
 android {
     namespace = "app.tiebalite"
-    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         applicationId = "app.tiebalite"
