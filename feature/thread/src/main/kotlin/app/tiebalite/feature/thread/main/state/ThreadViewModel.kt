@@ -240,7 +240,6 @@ class ThreadViewModel(
                 }
             }
         }
-        super.onCleared()
     }
 
     private suspend fun recordThreadEnteredIfNeeded(page: ThreadPage) {
