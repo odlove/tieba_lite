@@ -146,6 +146,8 @@ fun TiebaliteApp(
                     exitTransition = { fadeOut(animationSpec = tween(320)) },
                     popEnterTransition = { fadeIn(animationSpec = tween(260)) },
                     popExitTransition = { fadeOut(animationSpec = tween(260)) },
+                    predictivePopEnterTransition = { fadeIn(animationSpec = tween(260)) },
+                    predictivePopExitTransition = { fadeOut(animationSpec = tween(260)) },
                 ) {
                     mainGraph(
                         navController = navController,
