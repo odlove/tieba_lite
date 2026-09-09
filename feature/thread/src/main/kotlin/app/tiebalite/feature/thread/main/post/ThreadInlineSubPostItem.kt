@@ -1,6 +1,7 @@
 package app.tiebalite.feature.thread.main.post
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,6 +16,7 @@ import app.tiebalite.core.model.text.RichTextPart
 import app.tiebalite.core.model.thread.ThreadPostBody
 import app.tiebalite.core.model.thread.ThreadSubPost
 import app.tiebalite.feature.thread.common.post.ThreadPostRichText
+import app.tiebalite.feature.thread.common.post.originalPosterInlineContent
 
 @Composable
 internal fun ThreadInlineSubPostItem(
@@ -36,14 +38,7 @@ internal fun ThreadInlineSubPostItem(
             pop()
             if (isThreadAuthor) {
                 append(" ")
-                pushStyle(
-                    SpanStyle(
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                )
-                append("楼主")
-                pop()
+                appendInlineContent(OriginalPosterInlineId, "楼主")
             }
             append(": ")
         }
@@ -63,8 +58,16 @@ internal fun ThreadInlineSubPostItem(
         maxLines = 4,
         overflow = TextOverflow.Ellipsis,
         onClick = onClick,
+        inlineContent =
+            if (isThreadAuthor) {
+                mapOf(OriginalPosterInlineId to originalPosterInlineContent())
+            } else {
+                emptyMap()
+            },
     )
 }
+
+private const val OriginalPosterInlineId = "thread:original-poster"
 
 private fun ThreadPostBody.inlineTrailingText(): String {
     val mediaText =

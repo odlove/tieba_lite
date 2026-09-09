@@ -75,8 +75,9 @@ fun buildRichInlineContent(
     prefix: AnnotatedString = AnnotatedString(""),
     suffix: AnnotatedString = AnnotatedString(""),
     urlAnnotationTag: String? = null,
+    additionalInlineContent: Map<String, InlineTextContent> = emptyMap(),
 ): RichInlineContent {
-    val inlineContent = mutableMapOf<String, InlineTextContent>()
+    val inlineContent = additionalInlineContent.toMutableMap()
     val text =
         buildAnnotatedString {
             append(prefix)

@@ -24,7 +24,14 @@ internal class ThreadContentMapper {
         val text = content.text
         val link = content.link
         return when (type) {
-            0, 9, 27, 35, 40 -> {
+            0 -> {
+                text.takeIf { it.isNotEmpty() }?.let {
+                    // Reply targets use type 0 with a uid rather than the usual mention type 4.
+                    if (content.uid > 0L) RichTextPart.Mention(it, content.uid) else RichTextPart.Text(it)
+                }
+            }
+
+            9, 27, 35, 40 -> {
                 text.takeIf { it.isNotEmpty() }?.let(RichTextPart::Text)
             }
 

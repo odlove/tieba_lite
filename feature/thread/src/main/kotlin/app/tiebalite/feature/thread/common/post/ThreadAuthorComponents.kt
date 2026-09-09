@@ -4,6 +4,7 @@ import android.util.Log
 import android.content.pm.ApplicationInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +22,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -61,21 +68,48 @@ internal fun AuthorNameWithLevel(
 }
 
 @Composable
-private fun OriginalPosterChip() {
+private fun OriginalPosterChip(compact: Boolean = false) {
     val chipColor = MaterialTheme.colorScheme.tertiaryContainer
     Text(
         text = "楼主",
-        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 10.sp),
+        style = originalPosterTextStyle(),
         color = MaterialTheme.colorScheme.onTertiaryContainer,
         textAlign = TextAlign.Center,
         modifier =
             Modifier
                 .clip(RoundedCornerShape(percent = 100))
                 .background(chipColor)
-                .padding(horizontal = 6.dp, vertical = 2.dp),
+                .padding(originalPosterPadding(compact)),
         maxLines = 1,
     )
 }
+
+@Composable
+internal fun originalPosterInlineContent(): InlineTextContent {
+    val textSize = rememberTextMeasurer().measure("楼主", style = originalPosterTextStyle()).size
+    val padding = originalPosterPadding(compact = true)
+    val layoutDirection = LocalLayoutDirection.current
+    val placeholder = with(LocalDensity.current) {
+        Placeholder(
+            width = (
+                textSize.width + padding.calculateLeftPadding(layoutDirection).toPx() +
+                    padding.calculateRightPadding(layoutDirection).toPx()
+            ).toSp(),
+            height = (
+                textSize.height + padding.calculateTopPadding().toPx() + padding.calculateBottomPadding().toPx()
+            ).toSp(),
+            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+        )
+    }
+    return InlineTextContent(placeholder) { OriginalPosterChip(compact = true) }
+}
+
+@Composable
+private fun originalPosterTextStyle(): TextStyle =
+    MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp)
+
+private fun originalPosterPadding(compact: Boolean): PaddingValues =
+    if (compact) PaddingValues(horizontal = 4.dp, vertical = 1.dp) else PaddingValues(horizontal = 6.dp, vertical = 2.dp)
 
 @Composable
 private fun LevelChip(level: Int) {

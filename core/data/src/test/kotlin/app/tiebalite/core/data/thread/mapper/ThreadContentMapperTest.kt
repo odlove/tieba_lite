@@ -10,6 +10,36 @@ class ThreadContentMapperTest {
     private val mapper = ThreadContentMapper()
 
     @Test
+    fun mapKeepsReplyTargetIdentityInPlainTextContent() {
+        val body = mapper.map(
+            listOf(
+                ThreadPbContentLite.newBuilder().setType(0).setText("回复 ").build(),
+                ThreadPbContentLite.newBuilder().setType(0).setText("target").setUid(42L).build(),
+                ThreadPbContentLite.newBuilder().setType(0).setText(" :hello").build(),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                RichTextPart.Text("回复 "),
+                RichTextPart.Mention(text = "target", uid = 42L),
+                RichTextPart.Text(" :hello"),
+            ),
+            body.inline,
+        )
+    }
+
+    @Test
+    fun mapDoesNotTurnPlainTextWithInvalidUserIdIntoMention() {
+        for (uid in listOf(0L, -1L)) {
+            val body = mapper.map(
+                listOf(ThreadPbContentLite.newBuilder().setType(0).setText("text").setUid(uid).build()),
+            )
+            assertEquals(listOf(RichTextPart.Text("text")), body.inline)
+        }
+    }
+
+    @Test
     fun mapKeepsEmoticonIdFromTextAndNameFromDescription() {
         val body =
             mapper.map(

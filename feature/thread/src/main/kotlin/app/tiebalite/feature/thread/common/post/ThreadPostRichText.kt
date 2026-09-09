@@ -1,6 +1,7 @@
 package app.tiebalite.feature.thread.common.post
 
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,11 +33,12 @@ internal fun ThreadPostRichText(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
     onClick: (() -> Unit)? = null,
+    inlineContent: Map<String, InlineTextContent> = emptyMap(),
 ) {
     val linkColor = MaterialTheme.colorScheme.primary
     val emoticonResolver = DefaultEmoticonResolver
     val content =
-        remember(inline, prefix, suffix, linkColor, emoticonResolver) {
+        remember(inline, prefix, suffix, linkColor, emoticonResolver, inlineContent) {
             buildRichInlineContent(
                 parts = inline,
                 linkColor = linkColor,
@@ -44,6 +46,7 @@ internal fun ThreadPostRichText(
                 prefix = prefix,
                 suffix = suffix,
                 urlAnnotationTag = UrlAnnotationTag,
+                additionalInlineContent = inlineContent,
             )
         }
     if (content.text.isEmpty()) {
