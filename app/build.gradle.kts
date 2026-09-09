@@ -23,7 +23,7 @@ android {
     defaultConfig {
         applicationId = "app.tiebalite"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 3
         versionName = "0.0.3"
 
