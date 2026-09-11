@@ -32,6 +32,7 @@ class ThemePreferencesTest {
     @Test
     fun updatesPersistAcrossInstances() {
         val preferences = ThemePreferences(context)
+        val state = preferences.settings
         preferences.setThemeMode(ThemeMode.Dark)
         preferences.setDynamicColor(false)
         preferences.setSeedColor(0xFF112233)
@@ -39,6 +40,7 @@ class ThemePreferencesTest {
         val reloaded = ThemePreferences(context)
         val settings = reloaded.settings.value
 
+        assertEquals(settings, state.value)
         assertEquals(ThemeMode.Dark, settings.themeMode)
         assertEquals(false, settings.useDynamicColor)
         assertEquals(0xFF112233, settings.seedColor)

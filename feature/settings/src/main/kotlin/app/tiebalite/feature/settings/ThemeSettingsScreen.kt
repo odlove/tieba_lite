@@ -37,21 +37,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.theme.ThemeMode
+import app.tiebalite.core.model.theme.ThemeSettings
 import app.tiebalite.core.ui.components.AppTopBar
 import java.util.Locale
 
 private val presetSeedColors =
     listOf(
-        "#0F6B5F",
-        "#2F6BFF",
-        "#FF8A3D",
-        "#5B6770",
+        0xFF0F6B5FL,
+        0xFF2F6BFFL,
+        0xFFFF8A3DL,
+        0xFF5B6770L,
     )
 
 @Composable
 fun ThemeSettingsScreen(
     paddingValues: PaddingValues,
-    state: ThemeSettingsState,
+    state: ThemeSettings,
     onEvent: (ThemeSettingsEvent) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -119,18 +120,18 @@ fun ThemeSettingsScreen(
             item {
                 ThemeSectionCard(
                     title = stringResource(R.string.settings_seed_color),
-                    subtitle = state.seedColorHex.uppercase(Locale.ROOT),
+                    subtitle = String.format(Locale.ROOT, "#%06X", state.seedColor and 0xFFFFFF),
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        presetSeedColors.forEach { colorHex ->
+                        presetSeedColors.forEach { seedColor ->
                             ThemeSeedSwatch(
                                 modifier = Modifier.weight(1f),
-                                hex = colorHex,
-                                selected = colorHex.equals(state.seedColorHex, ignoreCase = true),
-                                onClick = { onEvent(ThemeSettingsEvent.SetSeedColor(colorHex)) },
+                                color = Color(seedColor),
+                                selected = seedColor == state.seedColor,
+                                onClick = { onEvent(ThemeSettingsEvent.SetSeedColor(seedColor)) },
                             )
                         }
                     }
@@ -272,11 +273,10 @@ private fun ThemeModeButton(
 @Composable
 private fun ThemeSeedSwatch(
     modifier: Modifier = Modifier,
-    hex: String,
+    color: Color,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val swatchColor = hex.toThemeColorOrNull() ?: MaterialTheme.colorScheme.surfaceVariant
     val borderColor =
         if (selected) {
             MaterialTheme.colorScheme.primary
@@ -287,7 +287,7 @@ private fun ThemeSeedSwatch(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = swatchColor),
+        colors = CardDefaults.cardColors(containerColor = color),
         border = BorderStroke(if (selected) 2.dp else 1.dp, borderColor),
     ) {
         Box(
@@ -315,12 +315,4 @@ private fun ThemeSeedSwatch(
             }
         }
     }
-}
-
-private fun String.toThemeColorOrNull(): Color? {
-    val cleaned = trim().removePrefix("#")
-    if (cleaned.length != 6) {
-        return null
-    }
-    return cleaned.toLongOrNull(16)?.let { Color(0xFF000000 or it) }
 }

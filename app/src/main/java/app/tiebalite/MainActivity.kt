@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val themePreferences = ThemePreferences(this)
-        val themeState = ThemeState(themePreferences, lifecycleScope)
+        val themeState = ThemeState(themePreferences)
         applyEdgeToEdge(
             darkTheme = when (themeState.state.value.themeMode) {
                 ThemeMode.Dark -> true

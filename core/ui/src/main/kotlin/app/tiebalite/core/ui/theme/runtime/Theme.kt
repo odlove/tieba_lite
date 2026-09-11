@@ -17,7 +17,7 @@ import app.tiebalite.core.ui.theme.fonts.Typography
 fun TiebaliteTheme(
     themeMode: ThemeMode = ThemeMode.System,
     useDynamicColor: Boolean = true,
-    seedColorHex: String = String.format("#%06X", ThemeDefaults.settings.seedColor and 0xFFFFFF),
+    seedColor: Long = ThemeDefaults.settings.seedColor,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -31,17 +31,7 @@ fun TiebaliteTheme(
         useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        else -> {
-            val seedColor = run {
-                val cleaned = seedColorHex.trim().removePrefix("#")
-                if (cleaned.length != 6) {
-                    null
-                } else {
-                    cleaned.toLongOrNull(16)?.let { Color(0xFF000000 or it) }
-                }
-            } ?: Color(ThemeDefaults.settings.seedColor)
-            colorSchemeFromSeed(seedColor, isDark)
-        }
+        else -> colorSchemeFromSeed(Color(seedColor), isDark)
     }
 
     val animatedColors = animateColorScheme(colors, tween(420))

@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.tiebalite.theme.ThemeState
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
+import app.tiebalite.core.model.theme.ThemeSettings
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.feature.history.HistoryRoute
 import app.tiebalite.feature.history.HistoryRoutes
@@ -43,7 +44,6 @@ import app.tiebalite.feature.settings.account.login.CredentialLoginRoute
 import app.tiebalite.feature.settings.account.login.LoginRoute
 import app.tiebalite.feature.settings.ThemeSettingsEvent
 import app.tiebalite.feature.settings.ThemeSettingsScreen
-import app.tiebalite.feature.settings.ThemeSettingsState
 import app.tiebalite.feature.thread.ThreadRoute
 import app.tiebalite.feature.thread.ThreadSubPostsRoute
 import kotlinx.coroutines.delay
@@ -112,13 +112,10 @@ fun TiebaliteApp(
         }
     }
 
-    val appliedState = state
-    val seedColorHex = String.format("#%06X", appliedState.seedColor and 0xFFFFFF)
-
     TiebaliteTheme(
-        themeMode = appliedState.themeMode,
-        useDynamicColor = appliedState.useDynamicColor,
-        seedColorHex = seedColorHex
+        themeMode = state.themeMode,
+        useDynamicColor = state.useDynamicColor,
+        seedColor = state.seedColor
     ) {
         LaunchedEffect(isImageViewerVisible, imageViewerArgs) {
             if (!isImageViewerVisible && imageViewerArgs != null) {
@@ -157,11 +154,7 @@ fun TiebaliteApp(
                     settingsGraph(
                         navController = navController,
                         paddingValues = paddingValues,
-                        themeSettingsState = ThemeSettingsState(
-                            themeMode = state.themeMode,
-                            useDynamicColor = state.useDynamicColor,
-                            seedColorHex = seedColorHex
-                        ),
+                        themeSettingsState = state,
                         onThemeSettingsEvent = { event ->
                             when (event) {
                                 is ThemeSettingsEvent.SetThemeMode ->
@@ -169,14 +162,7 @@ fun TiebaliteApp(
                                 is ThemeSettingsEvent.SetDynamicColor ->
                                     themeState.setDynamicColor(event.enabled)
                                 is ThemeSettingsEvent.SetSeedColor ->
-                                    run {
-                                        val cleaned = event.value.trim().removePrefix("#")
-                                        if (cleaned.length != 6) {
-                                            null
-                                        } else {
-                                            cleaned.toLongOrNull(16)?.let { 0xFF000000 or it }
-                                        }
-                                    }?.let { themeState.setSeedColor(it) }
+                                    themeState.setSeedColor(event.value)
                             }
                         },
                     )
@@ -241,7 +227,7 @@ private fun NavGraphBuilder.mainGraph(
 private fun NavGraphBuilder.settingsGraph(
     navController: NavController,
     paddingValues: PaddingValues,
-    themeSettingsState: ThemeSettingsState,
+    themeSettingsState: ThemeSettings,
     onThemeSettingsEvent: (ThemeSettingsEvent) -> Unit,
 ) {
     composable(SettingsRoutes.Home) {
