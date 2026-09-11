@@ -27,7 +27,6 @@ import app.tiebalite.core.model.text.RichTextPart
 import app.tiebalite.core.ui.emoticon.DefaultEmoticonResolver
 import app.tiebalite.core.ui.emoticon.EmoticonAsset
 import app.tiebalite.core.ui.emoticon.EmoticonResolver
-import coil3.compose.AsyncImage
 
 @Composable
 fun RichText(
@@ -121,7 +120,7 @@ fun buildRichInlineContent(
                                 )
                         ) {
                             is EmoticonAsset.FallbackText -> append(asset.text)
-                            is EmoticonAsset.LocalRes, is EmoticonAsset.Remote -> {
+                            is EmoticonAsset.LocalRes -> {
                                 val key = "emoticon:$index:${part.id.orEmpty()}:${part.name}"
                                 appendInlineContent(
                                     id = key,
@@ -136,9 +135,11 @@ fun buildRichInlineContent(
                                                 placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
                                             ),
                                     ) {
-                                        RichTextEmoticonInline(
-                                            asset = asset,
+                                        Image(
+                                            painter = painterResource(id = asset.resId),
                                             contentDescription = part.name.takeIf { it.isNotBlank() },
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit,
                                         )
                                     }
                             }
@@ -160,40 +161,6 @@ data class RichInlineContent(
     val text: AnnotatedString,
     val inlineContent: Map<String, InlineTextContent>,
 )
-
-@Composable
-private fun RichTextEmoticonInline(
-    asset: EmoticonAsset,
-    contentDescription: String?,
-) {
-    when (asset) {
-        is EmoticonAsset.LocalRes -> {
-            Image(
-                painter = painterResource(id = asset.resId),
-                contentDescription = contentDescription,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
-
-        is EmoticonAsset.Remote -> {
-            AsyncImage(
-                model = asset.url,
-                contentDescription = contentDescription,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
-
-        is EmoticonAsset.FallbackText -> {
-            Text(
-                text = asset.text,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
 
 private const val LinkPrefix = "🔗"
 private val EmoticonSize: TextUnit = 18.sp

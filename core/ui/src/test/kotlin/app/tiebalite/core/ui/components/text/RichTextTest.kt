@@ -31,7 +31,7 @@ class RichTextTest {
                 RichTextPart.Link("link", "https://example.com"),
             ),
             linkColor = Color.Blue,
-            emoticonResolver = EmoticonResolver { _, _ -> EmoticonAsset.Remote("https://example.com/emoticon.png") },
+            emoticonResolver = EmoticonResolver { _, _ -> EmoticonAsset.LocalRes(1) },
             prefix = buildAnnotatedString {
                 withStyle(SpanStyle(color = Color.Blue)) { append("author") }
                 append(" ")
@@ -55,5 +55,17 @@ class RichTextTest {
             "https://example.com",
             content.text.getStringAnnotations("url", 0, content.text.length).single().item,
         )
+    }
+
+    @Test
+    fun missingEmoticonUsesTextWithoutAnImagePlaceholder() {
+        val content = buildRichInlineContent(
+            parts = listOf(RichTextPart.Emoticon(id = "missing", name = "unknown")),
+            linkColor = Color.Blue,
+            emoticonResolver = EmoticonResolver { _, _ -> EmoticonAsset.FallbackText("#(unknown)") },
+        )
+
+        assertEquals("#(unknown)", content.text.text)
+        assertTrue(content.inlineContent.isEmpty())
     }
 }

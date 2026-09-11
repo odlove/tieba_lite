@@ -1,15 +1,13 @@
 package app.tiebalite.core.ui.emoticon
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import app.tiebalite.core.ui.R
+import java.util.concurrent.ConcurrentHashMap
 
 sealed interface EmoticonAsset {
     data class LocalRes(
         @param:DrawableRes val resId: Int,
-    ) : EmoticonAsset
-
-    data class Remote(
-        val url: String,
     ) : EmoticonAsset
 
     data class FallbackText(
@@ -29,6 +27,7 @@ object DefaultEmoticonResolver : EmoticonResolver {
         id: String?,
         name: String,
     ): EmoticonAsset {
+        val normalizedName = normalizeEmoticonName(name)
         val normalizedId =
             id
                 ?.trim()
@@ -39,23 +38,20 @@ object DefaultEmoticonResolver : EmoticonResolver {
             if (localRes != null) {
                 return EmoticonAsset.LocalRes(localRes)
             }
-            return EmoticonAsset.Remote(url = buildEmoticonUrl(normalizedId))
+            warnMissing(normalizedId, normalizedName)
         }
 
-        val normalizedName = normalizeEmoticonName(name)
         val fallbackId = fallbackIdByName[normalizedName]
         if (fallbackId != null) {
             val localRes = localResById[fallbackId]
             if (localRes != null) {
                 return EmoticonAsset.LocalRes(localRes)
             }
-            return EmoticonAsset.Remote(url = buildEmoticonUrl(fallbackId))
         }
 
+        warnMissing(fallbackId ?: normalizedId, normalizedName)
         return EmoticonAsset.FallbackText(text = fallbackText(normalizedName))
     }
-
-    private fun buildEmoticonUrl(id: String): String = "$EmoticonBaseUrl/$id.png"
 
     private fun normalizeEmoticonId(rawId: String): String = if (rawId == "image_emoticon") "image_emoticon1" else rawId
 
@@ -66,12 +62,16 @@ object DefaultEmoticonResolver : EmoticonResolver {
             .ifBlank { name }
     }
 
-    @DrawableRes
-    private fun localResId(id: String): Int? = localResById[id]
-
     private fun fallbackText(name: String): String = "#(${name.ifBlank { "表情" }})"
 
-    private const val EmoticonBaseUrl = "https://static.tieba.baidu.com/tb/editor/images/client"
+    private fun warnMissing(id: String?, name: String) {
+        if (missingEmoticons.add(id ?: fallbackText(name))) {
+            Log.w("EmoticonResolver", "Missing local emoticon: id=$id, name=$name")
+        }
+    }
+
+    // ponytail: missing keys live for this process; cap the set if unknown IDs become high-volume.
+    private val missingEmoticons = ConcurrentHashMap.newKeySet<String>()
 
     private val localResById =
         R.drawable::class.java.fields
