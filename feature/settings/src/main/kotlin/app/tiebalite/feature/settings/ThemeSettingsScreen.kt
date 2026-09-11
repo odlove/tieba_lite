@@ -1,53 +1,58 @@
 package app.tiebalite.feature.settings
 
-import androidx.compose.foundation.BorderStroke
+import android.os.Build
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.tiebalite.core.model.theme.ThemeMode
 import app.tiebalite.core.model.theme.ThemeSettings
 import app.tiebalite.core.ui.components.AppTopBar
-import java.util.Locale
 
-private val presetSeedColors =
-    listOf(
-        0xFF0F6B5FL,
-        0xFF2F6BFFL,
-        0xFFFF8A3DL,
-        0xFF5B6770L,
-    )
+private val presetSeedColors = listOf(
+    0xFF0F6B5FL to R.string.settings_seed_teal,
+    0xFF2F6BFFL to R.string.settings_seed_blue,
+    0xFFFF8A3DL to R.string.settings_seed_orange,
+    0xFF5B6770L to R.string.settings_seed_gray,
+)
 
 @Composable
 fun ThemeSettingsScreen(
@@ -57,13 +62,7 @@ fun ThemeSettingsScreen(
     onBack: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
-    val contentPadding =
-        PaddingValues(
-            start = paddingValues.calculateStartPadding(layoutDirection),
-            end = paddingValues.calculateEndPadding(layoutDirection),
-            top = 12.dp,
-            bottom = paddingValues.calculateBottomPadding() + 24.dp,
-        )
+    val supportsDynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppTopBar(
@@ -73,66 +72,57 @@ fun ThemeSettingsScreen(
         )
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = contentPadding,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            contentPadding = PaddingValues(
+                start = paddingValues.calculateStartPadding(layoutDirection),
+                end = paddingValues.calculateEndPadding(layoutDirection),
+                top = 12.dp,
+                bottom = paddingValues.calculateBottomPadding() + 24.dp,
+            ),
         ) {
             item {
-                ThemeSectionCard(
+                ThemeSection(
                     title = stringResource(R.string.settings_theme_mode),
-                    subtitle = stringResource(R.string.settings_theme_subtitle),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        ThemeModeButton(
-                            modifier = Modifier.weight(1f),
-                            label = stringResource(R.string.settings_system),
-                            selected = state.themeMode == ThemeMode.System,
-                            onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.System)) },
+                    choices = {
+                        ThemeTextChoices(
+                            labels = ThemeMode.entries.map { stringResource(themeModeLabel(it)) },
+                            selectedIndex = state.themeMode.ordinal,
+                            onSelect = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.entries[it])) },
                         )
-                        ThemeModeButton(
-                            modifier = Modifier.weight(1f),
-                            label = stringResource(R.string.settings_light),
-                            selected = state.themeMode == ThemeMode.Light,
-                            onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.Light)) },
-                        )
-                        ThemeModeButton(
-                            modifier = Modifier.weight(1f),
-                            label = stringResource(R.string.settings_dark),
-                            selected = state.themeMode == ThemeMode.Dark,
-                            onClick = { onEvent(ThemeSettingsEvent.SetThemeMode(ThemeMode.Dark)) },
-                        )
-                    }
-                }
-            }
-
-            item {
-                ThemeToggleCard(
-                    title = stringResource(R.string.settings_dynamic_color),
-                    subtitle = stringResource(R.string.settings_dynamic_color_desc),
-                    checked = state.useDynamicColor,
-                    onCheckedChange = { onEvent(ThemeSettingsEvent.SetDynamicColor(it)) },
+                    },
                 )
             }
 
             item {
-                ThemeSectionCard(
-                    title = stringResource(R.string.settings_seed_color),
-                    subtitle = String.format(Locale.ROOT, "#%06X", state.seedColor and 0xFFFFFF),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        presetSeedColors.forEach { seedColor ->
-                            ThemeSeedSwatch(
-                                modifier = Modifier.weight(1f),
-                                color = Color(seedColor),
-                                selected = seedColor == state.seedColor,
-                                onClick = { onEvent(ThemeSettingsEvent.SetSeedColor(seedColor)) },
+                ThemeSection(
+                    title = stringResource(R.string.settings_color_source),
+                    choices = {
+                        if (supportsDynamicColor) {
+                            ThemeTextChoices(
+                                labels = listOf(
+                                    stringResource(R.string.settings_dynamic_color),
+                                    stringResource(R.string.settings_custom_color),
+                                ),
+                                selectedIndex = if (state.useDynamicColor) 0 else 1,
+                                onSelect = { onEvent(ThemeSettingsEvent.SetDynamicColor(it == 0)) },
                             )
+                        }
+                    },
+                ) {
+                    if (!supportsDynamicColor || !state.useDynamicColor) {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth().selectableGroup(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            presetSeedColors.forEach { (seedColor, labelRes) ->
+                                ThemeSeedSwatch(
+                                    color = Color(seedColor),
+                                    label = stringResource(labelRes),
+                                    selected = seedColor == state.seedColor,
+                                    onClick = { onEvent(ThemeSettingsEvent.SetSeedColor(seedColor)) },
+                                )
+                            }
                         }
                     }
                 }
@@ -142,175 +132,110 @@ fun ThemeSettingsScreen(
 }
 
 @Composable
-private fun ThemeSectionCard(
+private fun ThemeSection(
     title: String,
-    subtitle: String,
-    content: @Composable () -> Unit,
+    choices: @Composable () -> Unit,
+    content: @Composable () -> Unit = {},
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            content()
-        }
-    }
-}
-
-@Composable
-private fun ThemeToggleCard(
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable { onCheckedChange(!checked) }
-                    .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ThemeModeButton(
-    modifier: Modifier = Modifier,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    val borderColor =
-        if (selected) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-        } else {
-            MaterialTheme.colorScheme.outlineVariant
-        }
-    val containerColor =
-        if (selected) {
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
-        } else {
-            Color.Transparent
-        }
-    val textColor =
-        if (selected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
-
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        border = BorderStroke(1.dp, borderColor),
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-                    .clickable(onClick = onClick),
-            contentAlignment = Alignment.Center,
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                color = textColor,
-                textAlign = TextAlign.Center,
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(end = 16.dp).semantics { heading() },
             )
+            Spacer(modifier = Modifier.weight(1f))
+            choices()
+        }
+        content()
+    }
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outlineVariant,
+    )
+}
+
+@Composable
+private fun ThemeTextChoices(labels: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit) {
+    FlowRow(
+        modifier = Modifier.selectableGroup(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        labels.forEachIndexed { index, label ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .selectable(
+                            selected = index == selectedIndex,
+                            interactionSource = null,
+                            indication = ripple(bounded = false),
+                            role = Role.RadioButton,
+                            onClick = { onSelect(index) },
+                        )
+                        .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                        .padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (index == selectedIndex) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (index == selectedIndex) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
+                if (index < labels.lastIndex) {
+                    Text(
+                        text = "/",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
+}
+
+private fun themeModeLabel(mode: ThemeMode): Int = when (mode) {
+    ThemeMode.System -> R.string.settings_system
+    ThemeMode.Light -> R.string.settings_light
+    ThemeMode.Dark -> R.string.settings_dark
 }
 
 @Composable
 private fun ThemeSeedSwatch(
-    modifier: Modifier = Modifier,
     color: Color,
+    label: String,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val borderColor =
-        if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.outlineVariant
-        }
-
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = color),
-        border = BorderStroke(if (selected) 2.dp else 1.dp, borderColor),
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .clickable(onClick = onClick)
-                    .padding(10.dp),
-            contentAlignment = Alignment.BottomEnd,
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(color),
+            contentAlignment = Alignment.Center,
         ) {
             if (selected) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.96f))
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                shape = CircleShape,
-                            ),
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = if (color.luminance() > 0.179f) Color.Black else Color.White,
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }

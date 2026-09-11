@@ -30,7 +30,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.tiebalite.theme.ThemeState
 import app.tiebalite.core.model.imageviewer.ImageViewerArgs
-import app.tiebalite.core.model.theme.ThemeSettings
 import app.tiebalite.core.ui.theme.runtime.TiebaliteTheme
 import app.tiebalite.feature.history.HistoryRoute
 import app.tiebalite.feature.history.HistoryRoutes
@@ -154,7 +153,7 @@ fun TiebaliteApp(
                     settingsGraph(
                         navController = navController,
                         paddingValues = paddingValues,
-                        themeSettingsState = state,
+                        themeState = themeState,
                         onThemeSettingsEvent = { event ->
                             when (event) {
                                 is ThemeSettingsEvent.SetThemeMode ->
@@ -227,7 +226,7 @@ private fun NavGraphBuilder.mainGraph(
 private fun NavGraphBuilder.settingsGraph(
     navController: NavController,
     paddingValues: PaddingValues,
-    themeSettingsState: ThemeSettings,
+    themeState: ThemeState,
     onThemeSettingsEvent: (ThemeSettingsEvent) -> Unit,
 ) {
     composable(SettingsRoutes.Home) {
@@ -281,9 +280,10 @@ private fun NavGraphBuilder.settingsGraph(
         )
     }
     composable(SettingsRoutes.Theme) {
+        val settings by themeState.state.collectAsState()
         ThemeSettingsScreen(
             paddingValues = paddingValues,
-            state = themeSettingsState,
+            state = settings,
             onEvent = onThemeSettingsEvent,
             onBack = { navController.popBackStack() }
         )

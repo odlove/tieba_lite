@@ -49,13 +49,15 @@
     <string name="settings_credential_login_submit">保存并登录</string>
     <string name="settings_credential_login_invalid">请输入完整的 BDUSS 与 STOKEN</string>
     <string name="settings_theme_title">主题设置</string>
-    <string name="settings_theme_subtitle">选择浅色或深色主题</string>
-    <string name="settings_theme_mode">主题模式</string>
+    <string name="settings_theme_mode">外观</string>
     <string name="settings_system">跟随系统</string>
     <string name="settings_light">浅色</string>
     <string name="settings_dark">深色</string>
-    <string name="settings_dynamic_color">动态配色</string>
-    <string name="settings_dynamic_color_desc">使用系统动态颜色</string>
-    <string name="settings_seed_color">主题颜色</string>
-    <string name="settings_seed_hint">输入 Hex 颜色</string>
+    <string name="settings_color_source">配色</string>
+    <string name="settings_dynamic_color">动态取色</string>
+    <string name="settings_custom_color">自定义</string>
+    <string name="settings_seed_teal">青绿</string>
+    <string name="settings_seed_blue">蓝色</string>
+    <string name="settings_seed_orange">橙色</string>
+    <string name="settings_seed_gray">灰色</string>
 </resources>
